@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThirdwebProvider } from "thirdweb/react";
 
-const inter = Inter({ subsets: ["latin"] });
-
 export const metadata: Metadata = {
-  title: "thirdweb SDK + Next starter",
-  description:
-    "Starter template for using thirdweb SDK with Next.js App router",
+  title: "$AMY - Berachain Ecosystem Token",
+  description: "$AMY is a next-generation token designed to empower users within the Berachain ecosystem. It fuels engagement, rewards participation, and enables access to unique features across DeFi and social platforms.",
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/pro.jpg',
+  },
 };
 
 export default function RootLayout({
@@ -18,7 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <head>
+        <link rel="preload" as="image" href="/image.png" />
+      </head>
+      <body className="min-h-screen text-white relative">
         <ThirdwebProvider>{children}</ThirdwebProvider>
       </body>
     </html>
