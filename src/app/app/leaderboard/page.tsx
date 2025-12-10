@@ -21,7 +21,7 @@ export default function LeaderboardPage() {
 
   const fetchLeaderboard = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/leaderboard`);
+      const response = await fetch(`${API_BASE_URL}/api/leaderboard`);
       const data = await response.json();
 
       if (data.entries) {

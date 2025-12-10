@@ -22,12 +22,13 @@ export default function ProfilePage() {
     if (!walletAddress) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/check-x-status?wallet=${walletAddress}`);
+      // Check user verification status from backend
+      const response = await fetch(`${API_BASE_URL}/api/status/${walletAddress}`);
       const data = await response.json();
 
-      if (data.connected) {
+      if (data.verified && data.data) {
         setXConnected(true);
-        setXUsername(data.username || '');
+        setXUsername(data.data.xUsername || '');
       }
     } catch (error) {
       console.error('Error checking X status:', error);
@@ -38,17 +39,20 @@ export default function ProfilePage() {
     if (!walletAddress) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/user-data?wallet=${walletAddress}`);
+      // Fetch referral data from backend
+      const response = await fetch(`${API_BASE_URL}/api/referral/${walletAddress}`);
       const data = await response.json();
 
-      if (data.referralCode) {
-        setUserReferralCode(data.referralCode);
-      }
-      if (data.usedReferralCode) {
-        setUsedReferralCode(data.usedReferralCode);
-      }
-      if (data.referralCount !== undefined) {
-        setReferralCount(data.referralCount);
+      if (data.success && data.data) {
+        if (data.data.referralCode) {
+          setUserReferralCode(data.data.referralCode);
+        }
+        if (data.data.referredBy) {
+          setUsedReferralCode(data.data.referredBy);
+        }
+        if (data.data.referralCount !== undefined) {
+          setReferralCount(data.data.referralCount);
+        }
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -70,7 +74,7 @@ export default function ProfilePage() {
     }
 
     // Redirect to X OAuth
-    window.location.href = `${API_BASE_URL}/auth/twitter?wallet=${walletAddress}`;
+    window.location.href = `${API_BASE_URL}/auth/x?wallet=${walletAddress}`;
   };
 
   const generateReferralCode = async () => {
@@ -78,15 +82,17 @@ export default function ProfilePage() {
 
     setIsGeneratingCode(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/generate-referral-code`, {
+      const response = await fetch(`${API_BASE_URL}/api/referral/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet: walletAddress }),
+        body: JSON.stringify({ wallet: walletAddress, xUsername, amyBalance: balance }),
       });
       const data = await response.json();
 
-      if (data.code) {
-        setUserReferralCode(data.code);
+      if (data.success && data.referralCode) {
+        setUserReferralCode(data.referralCode);
+      } else {
+        alert(data.error || 'Failed to generate referral code');
       }
     } catch (error) {
       console.error('Error generating referral code:', error);
@@ -99,10 +105,10 @@ export default function ProfilePage() {
     if (!walletAddress || !referralCode.trim()) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/use-referral-code`, {
+      const response = await fetch(`${API_BASE_URL}/api/referral/use`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet: walletAddress, code: referralCode.toUpperCase() }),
+        body: JSON.stringify({ wallet: walletAddress, referralCode: referralCode.toUpperCase() }),
       });
       const data = await response.json();
 
@@ -110,7 +116,7 @@ export default function ProfilePage() {
         setUsedReferralCode(referralCode.toUpperCase());
         setReferralInputStatus('Referral code applied successfully!');
       } else {
-        setReferralInputStatus(data.message || 'Failed to apply referral code');
+        setReferralInputStatus(data.error || 'Failed to apply referral code');
       }
     } catch (error) {
       console.error('Error using referral code:', error);
