@@ -481,9 +481,12 @@
 
 @media (max-width: 768px) {
   .glass-card { border-radius: 16px; }
+  .glass-card:hover { transform: none; }
   .icon-badge { width: 48px; height: 48px; font-size: 24px; }
   .icon-badge-small { width: 36px; height: 36px; font-size: 18px; }
   .wallet-chip { padding: 0.4rem 0.8rem; font-size: 0.75rem; }
   .position-badge { width: 36px; height: 36px; font-size: 16px; }
   .position-1 { font-size: 18px; }
+  .leaderboard-row:hover { transform: none; }
+  .leaderboard-row { padding: 0.75rem; margin-bottom: 0.75rem; }
 }

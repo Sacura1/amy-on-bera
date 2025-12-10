@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useActiveAccount } from 'thirdweb/react';
 import { useAmyBalance } from '@/hooks';
-import { API_BASE_URL, MINIMUM_AMY_BALANCE } from '@/lib/constants';
+import { API_BASE_URL, MINIMUM_AMY_BALANCE, ADMIN_WALLETS } from '@/lib/constants';
 
 export default function ProfilePage() {
   const account = useActiveAccount();
@@ -17,6 +17,14 @@ export default function ProfilePage() {
   const [referralCount, setReferralCount] = useState(0);
   const [referralInputStatus, setReferralInputStatus] = useState('');
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
+
+  // Admin state
+  const [leaderboardInput, setLeaderboardInput] = useState('');
+  const [isUploadingLeaderboard, setIsUploadingLeaderboard] = useState(false);
+  const [leaderboardStatus, setLeaderboardStatus] = useState('');
+
+  // Check if current wallet is admin
+  const isAdmin = walletAddress ? ADMIN_WALLETS.includes(walletAddress.toLowerCase()) : false;
 
   const checkXStatus = useCallback(async () => {
     if (!walletAddress) return;
@@ -133,6 +141,54 @@ export default function ProfilePage() {
     const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/app/profile?ref=${userReferralCode}`;
     navigator.clipboard.writeText(link);
     alert('Referral link copied!');
+  };
+
+  // Admin: Upload leaderboard data
+  const uploadLeaderboard = async () => {
+    if (!walletAddress || !isAdmin) return;
+
+    const lines = leaderboardInput.trim().split('\n').filter(line => line.trim());
+    if (lines.length === 0) {
+      setLeaderboardStatus('Please enter at least one X username');
+      return;
+    }
+
+    setIsUploadingLeaderboard(true);
+    setLeaderboardStatus('');
+
+    try {
+      // Parse usernames and create entries with positions
+      const entries = lines.map((line, index) => {
+        // Remove @ symbol if present and trim whitespace
+        const username = line.trim().replace(/^@/, '');
+        return {
+          position: index + 1,
+          xUsername: username
+        };
+      });
+
+      const response = await fetch(`${API_BASE_URL}/api/leaderboard/bulk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wallet: walletAddress,
+          entries
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setLeaderboardStatus(`Successfully uploaded ${entries.length} entries!`);
+        setLeaderboardInput('');
+      } else {
+        setLeaderboardStatus(data.error || 'Failed to upload leaderboard');
+      }
+    } catch (error) {
+      console.error('Error uploading leaderboard:', error);
+      setLeaderboardStatus('Error uploading leaderboard');
+    } finally {
+      setIsUploadingLeaderboard(false);
+    }
   };
 
   return (
@@ -332,6 +388,58 @@ export default function ProfilePage() {
                   wallet and X to the Amy website.
                 </p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Admin Section - Leaderboard Management */}
+        {account && isAdmin && (
+          <div className="glass-card mt-6 overflow-hidden">
+            <div className="bg-gradient-to-r from-red-900/40 to-orange-900/40 p-4 md:p-5 border-b-2 border-red-400/30">
+              <div className="flex items-center gap-3">
+                <div className="icon-badge-small">🔐</div>
+                <h3 className="text-lg md:text-xl font-black text-red-400">Admin Panel</h3>
+              </div>
+            </div>
+
+            <div className="p-4 md:p-6">
+              <div className="mb-4">
+                <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-2">
+                  Upload Leaderboard Data
+                </h4>
+                <p className="text-xs md:text-sm text-gray-300 mb-4">
+                  Paste X usernames (one per line). This will replace the current leaderboard.
+                </p>
+              </div>
+
+              <textarea
+                value={leaderboardInput}
+                onChange={(e) => setLeaderboardInput(e.target.value)}
+                placeholder="@username1&#10;@username2&#10;@username3"
+                rows={8}
+                className="w-full px-4 py-3 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm font-mono focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 resize-none"
+              />
+
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                <div className="text-xs text-gray-400">
+                  {leaderboardInput.trim()
+                    ? `${leaderboardInput.trim().split('\n').filter(l => l.trim()).length} usernames entered`
+                    : 'No usernames entered'}
+                </div>
+                <button
+                  onClick={uploadLeaderboard}
+                  disabled={isUploadingLeaderboard || !leaderboardInput.trim()}
+                  className="btn-samy btn-samy-enhanced text-white px-6 py-3 rounded-full text-base font-bold uppercase disabled:opacity-50"
+                >
+                  {isUploadingLeaderboard ? 'UPLOADING...' : 'UPLOAD LEADERBOARD'}
+                </button>
+              </div>
+
+              {leaderboardStatus && (
+                <p className={`text-sm mt-3 ${leaderboardStatus.includes('Successfully') ? 'text-green-400' : 'text-red-400'}`}>
+                  {leaderboardStatus}
+                </p>
+              )}
             </div>
           </div>
         )}

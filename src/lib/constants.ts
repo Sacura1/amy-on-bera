@@ -60,3 +60,9 @@ export const NAV_LINKS = [
   { href: '/app/points', label: 'AMY POINTS' },
   { href: '/app/contact', label: 'PARTNERS & INVESTORS' },
 ];
+
+// Admin Wallets (lowercase for comparison)
+export const ADMIN_WALLETS = (process.env.NEXT_PUBLIC_ADMIN_WALLETS || '')
+  .split(',')
+  .map(w => w.trim().toLowerCase())
+  .filter(w => w.length > 0);
