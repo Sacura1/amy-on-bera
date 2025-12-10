@@ -18,7 +18,7 @@ export default function Home() {
 
         {/* Hero Section */}
         <section className="container mx-auto px-4 py-8 md:py-24 text-center">
-          <div className="mb-6 md:mb-8">
+          <div className="mb-4 md:mb-6">
             <div className="w-32 h-32 md:w-48 md:h-48 mx-auto mb-4 md:mb-6 rounded-full overflow-hidden border-4 md:border-8 border-yellow-400 shadow-2xl">
               <Image
                 src="/pro.jpg"
@@ -30,21 +30,26 @@ export default function Home() {
               />
             </div>
           </div>
-          <h1
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 md:mb-6 text-shadow-strong"
-            style={{ color: '#FF1493' }}
-          >
-            Amy – the new home for your money life.
+
+          {/* $AMY Title */}
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-3 md:mb-4 text-shadow-strong" style={{ color: '#FFB07C' }}>
+            $AMY
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-yellow-300 font-medium mb-6 md:mb-8">
-            A powerful, advanced money app built on Berachain
+
+          {/* Subtitle */}
+          <p className="text-xl sm:text-2xl md:text-3xl font-medium mb-8 md:mb-12" style={{ color: '#FFE4C4' }}>
+            The new home for your money life.
           </p>
 
+          {/* Info Box with combined content */}
           <div className="max-w-4xl mx-auto info-box p-6 md:p-12 mb-8 md:mb-12">
+            <p className="text-lg sm:text-xl md:text-2xl text-yellow-300 font-semibold mb-4 md:mb-6">
+              A powerful, advanced money app built on Berachain
+            </p>
             <p className="text-base sm:text-lg md:text-xl text-gray-200 leading-relaxed mb-4 md:mb-6">
               Today it powers a community of &quot;Angels&quot; testing products, earning Amy Points and tracking their activity. Over time, Amy is designed to feel like the place you pay friends, plug into simple earn options, and actually understand where your money is going.
             </p>
-            <p className="text-base sm:text-lg md:text-xl text-yellow-300 leading-relaxed font-semibold mb-4 md:mb-6">
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed mb-4 md:mb-6">
               $AMY is the token that unlocks deeper tiers, perks and influence inside that ecosystem.
             </p>
             <p className="text-lg sm:text-xl md:text-2xl text-white font-bold">
