@@ -6,7 +6,7 @@ import { ConnectButton } from 'thirdweb/react';
 import { darkTheme } from 'thirdweb/react';
 import { client } from '@/app/client';
 import { berachain } from '@/lib/chain';
-import { NAV_LINKS, BUY_LINK } from '@/lib/constants';
+import { NAV_LINKS, BUY_LINK, AMY_TOKEN_ADDRESS } from '@/lib/constants';
 
 // Custom theme matching Amy's pink/gold design
 const amyTheme = darkTheme({
@@ -137,6 +137,16 @@ export default function AppHeader() {
               fontWeight: 'bold',
               boxShadow: '0 4px 0 #8B008B, 0 6px 10px rgba(0, 0, 0, 0.4)',
             },
+          }}
+          supportedTokens={{
+            [berachain.id]: [
+              {
+                address: AMY_TOKEN_ADDRESS,
+                name: 'AMY',
+                symbol: 'AMY',
+                icon: '/pro.jpg',
+              },
+            ],
           }}
           theme={amyTheme}
         />
