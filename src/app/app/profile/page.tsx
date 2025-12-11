@@ -157,15 +157,33 @@ export default function ProfilePage() {
     setLeaderboardStatus('');
 
     try {
-      // Parse usernames and create entries with positions
-      const entries = lines.map((line, index) => {
-        // Remove @ symbol if present and trim whitespace
-        const username = line.trim().replace(/^@/, '');
-        return {
-          position: index + 1,
-          xUsername: username
-        };
-      });
+      // Parse usernames from various formats:
+      // - "1 JoeDark - @Joedark01"
+      // - "@username"
+      // - "username"
+      // Assign sequential positions based on order in the pasted data
+      const entries: { position: number; xUsername: string }[] = [];
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        // Try to match @username pattern first (handles "Name - @username" format)
+        const atMatch = line.match(/@([a-zA-Z0-9_]+)/);
+        if (atMatch) {
+          entries.push({
+            position: entries.length + 1,
+            xUsername: atMatch[1].trim()
+          });
+        } else {
+          // Fallback: treat whole line as username (after removing numbers and trimming)
+          const cleaned = line.replace(/^\d+\s*/, '').trim();
+          if (cleaned.length > 0) {
+            entries.push({
+              position: entries.length + 1,
+              xUsername: cleaned
+            });
+          }
+        }
+      }
 
       const response = await fetch(`${API_BASE_URL}/api/leaderboard/bulk`, {
         method: 'POST',
@@ -178,7 +196,7 @@ export default function ProfilePage() {
       const data = await response.json();
 
       if (data.success) {
-        setLeaderboardStatus(`Successfully uploaded ${entries.length} entries!`);
+        setLeaderboardStatus(`Successfully uploaded ${entries.length} X usernames!`);
         setLeaderboardInput('');
       } else {
         setLeaderboardStatus(data.error || 'Failed to upload leaderboard');
@@ -407,24 +425,27 @@ export default function ProfilePage() {
                 <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-2">
                   Upload Leaderboard Data
                 </h4>
-                <p className="text-xs md:text-sm text-gray-300 mb-4">
-                  Paste X usernames (one per line). This will replace the current leaderboard.
+                <p className="text-xs md:text-sm text-gray-300 mb-2">
+                  Paste the leaderboard data below. Supports formats like:
+                </p>
+                <p className="text-xs text-gray-500 mb-4 font-mono">
+                  &quot;1 JoeDark - @Joedark01&quot; or &quot;@username&quot; or just &quot;username&quot;
                 </p>
               </div>
 
               <textarea
                 value={leaderboardInput}
                 onChange={(e) => setLeaderboardInput(e.target.value)}
-                placeholder="@username1&#10;@username2&#10;@username3"
-                rows={8}
+                placeholder={"1 JoeDark - @Joedark01\n2 JUJAKÏ - @Jujaki_01\n3 doru - @doruOlt\n@username\nusername"}
+                rows={10}
                 className="w-full px-4 py-3 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm font-mono focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 resize-none"
               />
 
               <div className="mt-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                 <div className="text-xs text-gray-400">
                   {leaderboardInput.trim()
-                    ? `${leaderboardInput.trim().split('\n').filter(l => l.trim()).length} usernames entered`
-                    : 'No usernames entered'}
+                    ? `${leaderboardInput.trim().split('\n').filter((l: string) => l.trim() && l.match(/@[a-zA-Z0-9_]+/)).length} X usernames detected`
+                    : 'Paste leaderboard data above'}
                 </div>
                 <button
                   onClick={uploadLeaderboard}
