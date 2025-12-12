@@ -146,6 +146,12 @@ export default function AppHeader() {
                 symbol: 'AMY',
                 icon: '/pro.jpg',
               },
+              {
+                address: '0xfcbd14dc51f0a4d49d5e53c2e0950e0bc26d0dce',
+                name: 'HONEY',
+                symbol: 'HONEY',
+                icon: '/honey.jpg',
+              },
             ],
           }}
           theme={amyTheme}
