@@ -14,7 +14,7 @@ export const MINIMUM_AMY_BALANCE = Number(process.env.NEXT_PUBLIC_MIN_AMY_BALANC
 export const SOCIAL_LINKS = {
   twitter: 'https://x.com/amy_on_bera',
   telegram: 'https://t.me/amy_on_bera',
-  discord: 'https://discord.gg/hpNB4AgX',
+  discord: 'https://discord.gg/9Y3UzP93r3',
 };
 
 // Buy Link
