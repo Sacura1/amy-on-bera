@@ -22,6 +22,7 @@ export default function ProfilePage() {
   const [leaderboardInput, setLeaderboardInput] = useState('');
   const [isUploadingLeaderboard, setIsUploadingLeaderboard] = useState(false);
   const [leaderboardStatus, setLeaderboardStatus] = useState('');
+  const [isDownloadingUsers, setIsDownloadingUsers] = useState(false);
 
   // Check if current wallet is admin
   const isAdmin = walletAddress ? ADMIN_WALLETS.includes(walletAddress.toLowerCase()) : false;
@@ -141,6 +142,51 @@ export default function ProfilePage() {
     const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/app/profile?ref=${userReferralCode}`;
     navigator.clipboard.writeText(link);
     alert('Referral link copied!');
+  };
+
+  // Admin: Download all holders (X + wallet connected with 300+ AMY)
+  const downloadUsersList = async () => {
+    if (!walletAddress || !isAdmin) return;
+
+    setIsDownloadingUsers(true);
+    try {
+      // Get all holders (anyone with X + wallet + 300+ AMY) - admin endpoint includes all
+      const response = await fetch(`${API_BASE_URL}/api/holders/all?wallet=${walletAddress}`);
+      const data = await response.json();
+
+      if (data.success && data.holders) {
+        // Format as CSV
+        const headers = ['X Username', 'Wallet Address', 'AMY Balance', 'First Recorded', 'Last Updated'];
+        const rows = data.holders.map((holder: { xUsername: string; wallet: string; amyBalance: number; firstRecordedAt: string; lastUpdatedAt: string }) => [
+          `@${holder.xUsername}`,
+          holder.wallet,
+          holder.amyBalance,
+          new Date(holder.firstRecordedAt).toLocaleString(),
+          new Date(holder.lastUpdatedAt).toLocaleString()
+        ]);
+
+        const csvContent = [
+          headers.join(','),
+          ...rows.map((row: string[]) => row.join(','))
+        ].join('\n');
+
+        // Download as CSV file
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `amy-holders-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error downloading holders:', error);
+      alert('Failed to download holders list');
+    } finally {
+      setIsDownloadingUsers(false);
+    }
   };
 
   // Admin: Upload leaderboard data
@@ -417,6 +463,37 @@ export default function ProfilePage() {
               <div className="flex items-center gap-3">
                 <div className="icon-badge-small">🔐</div>
                 <h3 className="text-lg md:text-xl font-black text-red-400">Admin Panel</h3>
+              </div>
+            </div>
+
+            {/* Download Holders Button */}
+            <div className="p-4 md:p-6 border-b border-red-400/20">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1">
+                    Download All Holders
+                  </h4>
+                  <p className="text-xs text-gray-400">
+                    Export all users with X + wallet connected and 300+ $AMY
+                  </p>
+                </div>
+                <button
+                  onClick={downloadUsersList}
+                  disabled={isDownloadingUsers}
+                  className="bg-green-600 hover:bg-green-500 text-white px-5 py-2.5 rounded-full text-sm font-bold uppercase disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isDownloadingUsers ? (
+                    <>
+                      <span className="loading-spinner w-4 h-4" />
+                      <span>DOWNLOADING...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📥</span>
+                      <span>DOWNLOAD CSV</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
 
