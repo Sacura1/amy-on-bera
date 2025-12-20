@@ -195,13 +195,6 @@ export default function AppHeader() {
             >
               GET $AMY
             </a>
-            <Link
-              href="/app/trade"
-              onClick={() => setIsMenuOpen(false)}
-              className="block btn-samy btn-samy-enhanced text-white px-12 py-4 rounded-full text-xl font-bold uppercase text-center cursor-pointer"
-            >
-              TRADE
-            </Link>
           </div>
         </div>
       )}
