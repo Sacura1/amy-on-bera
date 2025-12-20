@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:portal.thirdweb.com)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "WebSearch",
+      "WebFetch(domain:playground.thirdweb.com)"
     ]
   }
 }
