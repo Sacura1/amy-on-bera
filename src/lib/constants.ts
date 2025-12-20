@@ -58,6 +58,7 @@ export const NAV_LINKS = [
   { href: '/app/leaderboard', label: 'LEADERBOARD' },
   { href: '/app/earn', label: 'EARN WITH AMY' },
   { href: '/app/points', label: 'AMY POINTS' },
+  { href: '/app/trade', label: 'TRADE' },
   { href: '/app/contact', label: 'PARTNERS & INVESTORS' },
 ];
 

@@ -86,14 +86,12 @@ export default function AppHeader() {
           >
             GET $AMY
           </a>
-          <a
-            href="https://thirdweb.com/berachain"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/app/trade"
             className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase"
           >
             TRADE
-          </a>
+          </Link>
           <button
             onClick={toggleMenu}
             className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase"
@@ -197,15 +195,13 @@ export default function AppHeader() {
             >
               GET $AMY
             </a>
-            <a
-              href="https://thirdweb.com/berachain"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/app/trade"
               onClick={() => setIsMenuOpen(false)}
               className="block btn-samy btn-samy-enhanced text-white px-12 py-4 rounded-full text-xl font-bold uppercase text-center cursor-pointer"
             >
               TRADE
-            </a>
+            </Link>
           </div>
         </div>
       )}
