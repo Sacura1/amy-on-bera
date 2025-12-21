@@ -31,6 +31,104 @@ const TIERS: Record<string, TierInfo> = {
   none: { minBalance: 0, pointsPerHour: 0, name: 'None', emoji: '⚪' }
 };
 
+// Bulla Logo Component
+const BullaLogo = ({ isActive }: { isActive: boolean }) => (
+  <svg viewBox="0 0 100 80" className={`w-16 h-12 md:w-20 md:h-16 ${isActive ? 'text-green-500' : 'text-green-800'}`} fill="currentColor">
+    <path d="M50 35 C50 35 20 10 10 40 C5 55 15 65 25 60 C30 57 35 50 40 45 L50 55 L60 45 C65 50 70 57 75 60 C85 65 95 55 90 40 C80 10 50 35 50 35 Z" />
+    <circle cx="50" cy="60" r="10" />
+  </svg>
+);
+
+// Multiplier Badge Component
+interface MultiplierTier {
+  requirement: string;
+  multiplier: string;
+}
+
+interface BadgeProps {
+  name: string;
+  strategy: string;
+  description?: string;
+  multipliers?: MultiplierTier[];
+  currentMultiplier?: string;
+  isActive: boolean;
+  isPlaceholder?: boolean;
+}
+
+const MultiplierBadge = ({ name, strategy, description, multipliers, currentMultiplier, isActive, isPlaceholder }: BadgeProps) => {
+  // Placeholder badge (compact)
+  if (isPlaceholder) {
+    return (
+      <div className="rounded-xl border border-gray-700/50 overflow-hidden">
+        {/* Placeholder image area */}
+        <div className="p-2 flex justify-center">
+          <div className="w-16 h-10 rounded-md bg-gray-800/80 flex items-center justify-center">
+            <div className="w-8 h-6 rounded bg-gray-700/50" />
+          </div>
+        </div>
+        {/* Coming Soon text */}
+        <div className="bg-gray-900/50 px-2 py-1.5">
+          <p className="text-[10px] font-medium text-yellow-500/70 text-center">Coming Soon</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Main badge card
+  return (
+    <div className={`relative rounded-2xl overflow-hidden border ${isActive ? 'border-yellow-500' : 'border-gray-700'}`}>
+      {/* Corner ribbon */}
+      <div className="absolute top-0 right-0 w-10 h-10 overflow-hidden z-10">
+        <div className={`absolute top-1.5 -right-5 w-16 text-center transform rotate-45 text-[10px] font-bold py-0.5 ${isActive ? 'bg-amber-700 text-white' : 'bg-gray-700 text-gray-400'}`}>
+          {isActive && currentMultiplier ? currentMultiplier : ''}
+        </div>
+      </div>
+
+      {/* Logo area */}
+      <div className="p-3 pb-1 flex justify-center">
+        <div className={`rounded-lg p-2 ${isActive ? 'bg-white' : 'bg-gray-700/50'}`}>
+          <BullaLogo isActive={isActive} />
+        </div>
+      </div>
+
+      {/* Content area */}
+      <div className="bg-gray-900/80 p-3 pt-2">
+        {/* Title */}
+        <h3 className={`text-xs font-bold mb-1 ${isActive ? 'text-yellow-400' : 'text-gray-300'}`}>
+          <span className="font-black">{name}</span> – {strategy}
+        </h3>
+
+        {/* Description */}
+        {description && (
+          <p className="text-[10px] text-gray-400 mb-2 leading-tight">{description}</p>
+        )}
+
+        {/* Multipliers list */}
+        {multipliers && multipliers.length > 0 && (
+          <div className="mb-2">
+            <div className="text-[10px] text-gray-500 mb-1">Multipliers:</div>
+            <div className="space-y-0.5">
+              {multipliers.map((tier, index) => (
+                <div key={index} className="flex items-center gap-1.5 text-[10px]">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-600'}`} />
+                  <span className={isActive ? 'text-gray-200' : 'text-gray-500'}>
+                    {tier.requirement} → <span className={isActive ? 'text-yellow-400 font-semibold' : 'text-gray-500'}>{tier.multiplier}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Footer note */}
+        <p className="text-[9px] text-gray-500 italic">
+          Only the highest unlocked multiplier applies.
+        </p>
+      </div>
+    </div>
+  );
+};
+
 // Tier Icon Component
 const TierIcon = ({ tier }: { tier: string }) => {
   const iconStyles: Record<string, { bg: string; border: string; icon: React.ReactNode }> = {
@@ -121,7 +219,21 @@ export default function PointsPage() {
 
       if (data.success && data.data) {
         setPointsData(data.data);
-        setDisplayPoints(parseFloat(data.data.totalPoints) || 0);
+
+        // Calculate elapsed time since last points update and add simulated points
+        const basePoints = parseFloat(data.data.totalPoints) || 0;
+        let initialDisplayPoints = basePoints;
+
+        if (data.data.lastPointsUpdate && data.data.pointsPerHour > 0) {
+          const lastUpdate = new Date(data.data.lastPointsUpdate).getTime();
+          const now = Date.now();
+          const elapsedSeconds = (now - lastUpdate) / 1000;
+          const pointsPerSecond = data.data.pointsPerHour / 3600;
+          const simulatedPoints = elapsedSeconds * pointsPerSecond;
+          initialDisplayPoints = basePoints + simulatedPoints;
+        }
+
+        setDisplayPoints(initialDisplayPoints);
       }
     } catch (error) {
       console.error('Error fetching points:', error);
@@ -223,38 +335,59 @@ export default function PointsPage() {
           </p>
         </div>
 
-        {/* How to Earn */}
+        {/* Amy Multiplier Badges */}
         <div className="info-box p-4 md:p-10 mb-6 md:mb-8">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-            <div className="text-3xl md:text-5xl">🎯</div>
+            <div className="text-3xl md:text-5xl">🏅</div>
             <h2 className="text-xl md:text-3xl font-black text-yellow-400">
-              How to Earn Points
+              Amy Multiplier Badges
             </h2>
           </div>
 
-          <p className="text-gray-300 text-sm md:text-base mb-4 md:mb-6">You&apos;ll earn Amy Points for things like:</p>
+          <div className="bg-black/30 rounded-xl p-4 md:p-6 mb-6 max-w-2xl mx-auto">
+            <p className="text-gray-200 text-sm md:text-base leading-relaxed mb-3">
+              Multiplier Badges boost your Amy Points when you actively use partner strategies.
+            </p>
+            <ul className="text-gray-400 text-sm md:text-base space-y-1.5 mb-3 list-disc list-inside">
+              <li>Each badge represents a specific action (like LPing or vaults)</li>
+              <li>Only your highest unlocked badge per strategy applies</li>
+            </ul>
+            <p className="text-gray-400 text-sm md:text-base">
+              Access these strategies from the{' '}
+              <Link href="/app/earn" className="text-yellow-400 hover:text-yellow-300 font-semibold">
+                Earn
+              </Link>{' '}
+              page.
+            </p>
+          </div>
 
-          <div className="space-y-2 md:space-y-3">
-            <div className="flex items-start gap-3 md:gap-4 bg-black/40 p-3 md:p-4 rounded-lg md:rounded-xl border border-yellow-400/20">
-              <span className="text-xl md:text-2xl">💎</span>
-              <span className="text-gray-300 text-sm md:text-base"><strong className="text-yellow-400">Holding $AMY</strong> – earn points every hour based on your tier,</span>
-            </div>
-            <div className="flex items-start gap-3 md:gap-4 bg-black/40 p-3 md:p-4 rounded-lg md:rounded-xl border border-yellow-400/20">
-              <span className="text-xl md:text-2xl">📅</span>
-              <span className="text-gray-300 text-sm md:text-base">showing up regularly and using the app,</span>
-            </div>
-            <div className="flex items-start gap-3 md:gap-4 bg-black/40 p-3 md:p-4 rounded-lg md:rounded-xl border border-yellow-400/20">
-              <span className="text-xl md:text-2xl">🎪</span>
-              <span className="text-gray-300 text-sm md:text-base">taking part in Weekly Focus campaigns,</span>
-            </div>
-            <div className="flex items-start gap-3 md:gap-4 bg-black/40 p-3 md:p-4 rounded-lg md:rounded-xl border border-yellow-400/20">
-              <span className="text-xl md:text-2xl">🤝</span>
-              <span className="text-gray-300 text-sm md:text-base">trying partner products through Amy,</span>
-            </div>
-            <div className="flex items-start gap-3 md:gap-4 bg-black/40 p-3 md:p-4 rounded-lg md:rounded-xl border border-yellow-400/20">
-              <span className="text-xl md:text-2xl">📚</span>
-              <span className="text-gray-300 text-sm md:text-base">completing short &quot;learn & earn&quot; tasks around APR/APY, risk and good money habits.</span>
-            </div>
+          {/* Main Strategy Badge - full width on mobile */}
+          <div className="max-w-xs mb-3 md:mb-4">
+            <MultiplierBadge
+              name="Bulla"
+              strategy="AMY / HONEY LP"
+              description="Provide liquidity to the AMY / HONEY pool on Bulla Exchange."
+              multipliers={[
+                { requirement: '$10+ LP', multiplier: 'x3' },
+                { requirement: '$100+ LP', multiplier: 'x10' },
+                { requirement: '$500+ LP', multiplier: 'x100' },
+              ]}
+              currentMultiplier="x3"
+              isActive={true}
+            />
+          </div>
+
+          {/* Placeholder badges - separate grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+            {Array.from({ length: 19 }).map((_, index) => (
+              <MultiplierBadge
+                key={index}
+                name=""
+                strategy=""
+                isActive={false}
+                isPlaceholder={true}
+              />
+            ))}
           </div>
         </div>
 
