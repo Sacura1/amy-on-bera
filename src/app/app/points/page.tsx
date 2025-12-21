@@ -31,14 +31,6 @@ const TIERS: Record<string, TierInfo> = {
   none: { minBalance: 0, pointsPerHour: 0, name: 'None', emoji: '⚪' }
 };
 
-// Bulla Logo Component
-const BullaLogo = ({ isActive }: { isActive: boolean }) => (
-  <svg viewBox="0 0 100 80" className={`w-16 h-12 md:w-20 md:h-16 ${isActive ? 'text-green-500' : 'text-green-800'}`} fill="currentColor">
-    <path d="M50 35 C50 35 20 10 10 40 C5 55 15 65 25 60 C30 57 35 50 40 45 L50 55 L60 45 C65 50 70 57 75 60 C85 65 95 55 90 40 C80 10 50 35 50 35 Z" />
-    <circle cx="50" cy="60" r="10" />
-  </svg>
-);
-
 // Multiplier Badge Component
 interface MultiplierTier {
   requirement: string;
@@ -47,7 +39,8 @@ interface MultiplierTier {
 
 interface BadgeProps {
   name: string;
-  strategy: string;
+  title: string;
+  image?: string;
   description?: string;
   multipliers?: MultiplierTier[];
   currentMultiplier?: string;
@@ -55,76 +48,194 @@ interface BadgeProps {
   isPlaceholder?: boolean;
 }
 
-const MultiplierBadge = ({ name, strategy, description, multipliers, currentMultiplier, isActive, isPlaceholder }: BadgeProps) => {
-  // Placeholder badge (compact)
+const MultiplierBadge = ({ name, title, image, description, multipliers, currentMultiplier, isActive, isPlaceholder }: BadgeProps) => {
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupPosition, setPopupPosition] = useState<'bottom' | 'top'>('bottom');
+  const cardRef = React.useRef<HTMLDivElement>(null);
+
+  // Calculate popup position based on available space
+  const updatePopupPosition = useCallback(() => {
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const popupHeight = 350; // Approximate popup height
+
+      if (spaceBelow < popupHeight && rect.top > popupHeight) {
+        setPopupPosition('top');
+      } else {
+        setPopupPosition('bottom');
+      }
+    }
+  }, []);
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        setShowPopup(false);
+      }
+    };
+
+    if (showPopup) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showPopup]);
+
+  // Placeholder badge (Coming Soon)
   if (isPlaceholder) {
     return (
-      <div className="rounded-xl border border-gray-700/50 overflow-hidden">
-        {/* Placeholder image area */}
-        <div className="p-2 flex justify-center">
-          <div className="w-16 h-10 rounded-md bg-gray-800/80 flex items-center justify-center">
-            <div className="w-8 h-6 rounded bg-gray-700/50" />
+      <div className="rounded-xl border border-gray-700/30 overflow-hidden bg-black/20">
+        <div className="p-3 flex justify-center">
+          <div className="w-14 h-12 rounded-lg bg-gray-800/60 flex items-center justify-center">
+            <div className="w-8 h-6 rounded bg-gray-700/40" />
           </div>
         </div>
-        {/* Coming Soon text */}
-        <div className="bg-gray-900/50 px-2 py-1.5">
-          <p className="text-[10px] font-medium text-yellow-500/70 text-center">Coming Soon</p>
+        <div className="px-2 pb-2">
+          <p className="text-[10px] text-yellow-600/60 text-center">Coming Soon</p>
         </div>
       </div>
     );
   }
 
-  // Main badge card
+  // Named badge with popup details
   return (
-    <div className={`relative rounded-2xl overflow-hidden border ${isActive ? 'border-yellow-500' : 'border-gray-700'}`}>
-      {/* Corner ribbon */}
-      <div className="absolute top-0 right-0 w-10 h-10 overflow-hidden z-10">
-        <div className={`absolute top-1.5 -right-5 w-16 text-center transform rotate-45 text-[10px] font-bold py-0.5 ${isActive ? 'bg-amber-700 text-white' : 'bg-gray-700 text-gray-400'}`}>
-          {isActive && currentMultiplier ? currentMultiplier : ''}
-        </div>
-      </div>
-
-      {/* Logo area */}
-      <div className="p-3 pb-1 flex justify-center">
-        <div className={`rounded-lg p-2 ${isActive ? 'bg-white' : 'bg-gray-700/50'}`}>
-          <BullaLogo isActive={isActive} />
-        </div>
-      </div>
-
-      {/* Content area */}
-      <div className="bg-gray-900/80 p-3 pt-2">
-        {/* Title */}
-        <h3 className={`text-xs font-bold mb-1 ${isActive ? 'text-yellow-400' : 'text-gray-300'}`}>
-          <span className="font-black">{name}</span> – {strategy}
-        </h3>
-
-        {/* Description */}
+    <div
+      ref={cardRef}
+      className="relative"
+      onMouseEnter={() => {
+        updatePopupPosition();
+        setShowPopup(true);
+      }}
+      onMouseLeave={() => setShowPopup(false)}
+    >
+      {/* Compact card - always visible */}
+      <div className={`rounded-xl border overflow-hidden bg-black/20 cursor-pointer transition-all hover:border-yellow-500/50 ${
+        isActive ? 'border-yellow-500/50' : 'border-gray-700/30'
+      }`}>
+        {/* Info button for mobile */}
         {description && (
-          <p className="text-[10px] text-gray-400 mb-2 leading-tight">{description}</p>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              updatePopupPosition();
+              setShowPopup(!showPopup);
+            }}
+            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-gray-700/80 hover:bg-gray-600 flex items-center justify-center z-10 transition-colors"
+          >
+            <span className="text-[10px] font-bold text-gray-300">i</span>
+          </button>
         )}
 
-        {/* Multipliers list */}
-        {multipliers && multipliers.length > 0 && (
-          <div className="mb-2">
-            <div className="text-[10px] text-gray-500 mb-1">Multipliers:</div>
-            <div className="space-y-0.5">
-              {multipliers.map((tier, index) => (
-                <div key={index} className="flex items-center gap-1.5 text-[10px]">
-                  <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-600'}`} />
-                  <span className={isActive ? 'text-gray-200' : 'text-gray-500'}>
-                    {tier.requirement} → <span className={isActive ? 'text-yellow-400 font-semibold' : 'text-gray-500'}>{tier.multiplier}</span>
-                  </span>
-                </div>
-              ))}
-            </div>
+        {/* Multiplier badge corner */}
+        {isActive && currentMultiplier && (
+          <div className="absolute -top-1 -left-1 bg-amber-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md z-10">
+            {currentMultiplier}
           </div>
         )}
 
-        {/* Footer note */}
-        <p className="text-[9px] text-gray-500 italic">
-          Only the highest unlocked multiplier applies.
-        </p>
+        {/* Icon */}
+        <div className="p-3 flex justify-center">
+          <div className={`w-14 h-12 rounded-lg flex items-center justify-center overflow-hidden relative ${
+            isActive ? 'bg-white' : 'bg-gray-800/60'
+          }`}>
+            {image ? (
+              <>
+                <img src={image} alt={name} className={`w-10 h-10 object-contain ${!isActive && 'opacity-60'}`} />
+                {/* Subtle overlay for inactive state */}
+                {!isActive && <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" />}
+              </>
+            ) : (
+              <div className="w-8 h-6 rounded bg-green-500" />
+            )}
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="px-1 pb-2">
+          <p className={`text-[9px] text-center leading-tight ${
+            isActive ? 'text-yellow-400' : 'text-yellow-600/50'
+          }`}>
+            {name} - {title}
+          </p>
+        </div>
       </div>
+
+      {/* Popup - shows details */}
+      {showPopup && description && (
+        <div
+          className={`absolute left-0 z-50 w-72 ${
+            popupPosition === 'bottom' ? 'top-full mt-2' : 'bottom-full mb-2'
+          }`}
+        >
+          {/* Arrow pointer */}
+          <div
+            className={`absolute left-6 w-4 h-4 bg-gray-800 border-yellow-500/50 transform rotate-45 ${
+              popupPosition === 'bottom'
+                ? '-top-2 border-l border-t'
+                : '-bottom-2 border-r border-b'
+            }`}
+          />
+
+          <div className="rounded-2xl border border-yellow-500/50 overflow-hidden shadow-2xl shadow-black/50 bg-gray-800">
+            {/* Close button for mobile */}
+            <button
+              onClick={() => setShowPopup(false)}
+              className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center z-10 md:hidden"
+            >
+              <span className="text-gray-300 text-sm">×</span>
+            </button>
+
+            {/* Header with logo */}
+            <div className="bg-gradient-to-b from-gray-700/50 to-gray-800 p-4 flex justify-center">
+              <div className="w-24 h-20 rounded-xl flex items-center justify-center overflow-hidden bg-white shadow-lg">
+                {image ? (
+                  <img src={image} alt={name} className="w-16 h-16 object-contain" />
+                ) : (
+                  <div className="w-12 h-10 rounded bg-green-500" />
+                )}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-4">
+              {/* Title */}
+              <h3 className="text-base font-bold text-yellow-400 mb-2">
+                {name} – {title}
+              </h3>
+
+              {/* Description */}
+              <p className="text-sm text-gray-300 mb-4">{description}</p>
+
+              {/* Multipliers */}
+              {multipliers && multipliers.length > 0 && (
+                <div className="mb-4">
+                  <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Multipliers:</div>
+                  <div className="space-y-2">
+                    {multipliers.map((tier, index) => (
+                      <div key={index} className="flex items-center gap-3 text-sm">
+                        <span className="w-2 h-2 rounded-full bg-green-500" />
+                        <span className="text-gray-300">
+                          {tier.requirement}
+                        </span>
+                        <span className="text-gray-500">→</span>
+                        <span className="text-yellow-400 font-bold">{tier.multiplier}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Footer note */}
+              <div className="pt-3 border-t border-gray-700">
+                <p className="text-xs text-gray-500 italic">
+                  Only the highest unlocked multiplier applies.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -361,29 +472,28 @@ export default function PointsPage() {
             </p>
           </div>
 
-          {/* Main Strategy Badge - full width on mobile */}
-          <div className="max-w-xs mb-3 md:mb-4">
+          {/* Badge Grid */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
+            {/* Bulla Exchange - AMY/HONEY */}
             <MultiplierBadge
-              name="Bulla"
-              strategy="AMY / HONEY LP"
+              name="Bulla Exchange"
+              title="AMY/HONEY"
+              image="/bulla.jpg"
               description="Provide liquidity to the AMY / HONEY pool on Bulla Exchange."
               multipliers={[
                 { requirement: '$10+ LP', multiplier: 'x3' },
                 { requirement: '$100+ LP', multiplier: 'x10' },
                 { requirement: '$500+ LP', multiplier: 'x100' },
               ]}
-              currentMultiplier="x3"
-              isActive={true}
+              isActive={false}
             />
-          </div>
 
-          {/* Placeholder badges - separate grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
-            {Array.from({ length: 19 }).map((_, index) => (
+            {/* All other badges - Coming Soon */}
+            {Array.from({ length: 23 }).map((_, index) => (
               <MultiplierBadge
                 key={index}
                 name=""
-                strategy=""
+                title=""
                 isActive={false}
                 isPlaceholder={true}
               />
