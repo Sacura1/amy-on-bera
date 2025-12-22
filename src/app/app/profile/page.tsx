@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useActiveAccount } from 'thirdweb/react';
 import { useSearchParams } from 'next/navigation';
 import { useAmyBalance } from '@/hooks';
 import { API_BASE_URL, MINIMUM_AMY_BALANCE, ADMIN_WALLETS } from '@/lib/constants';
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const searchParams = useSearchParams();
   const account = useActiveAccount();
   const { balance, isLoading: balanceLoading, isEligible, walletAddress } = useAmyBalance();
@@ -597,5 +597,22 @@ export default function ProfilePage() {
         )}
       </div>
     </div>
+  );
+}
+
+// Wrap with Suspense for useSearchParams
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-12 md:py-24">
+        <div className="max-w-2xl mx-auto">
+          <div className="glass-card p-6 flex justify-center">
+            <div className="loading-spinner w-12 h-12" />
+          </div>
+        </div>
+      </div>
+    }>
+      <ProfilePageContent />
+    </Suspense>
   );
 }
