@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useActiveAccount } from 'thirdweb/react';
+import { useSearchParams } from 'next/navigation';
 import { useAmyBalance } from '@/hooks';
 import { API_BASE_URL, MINIMUM_AMY_BALANCE, ADMIN_WALLETS } from '@/lib/constants';
 
 export default function ProfilePage() {
+  const searchParams = useSearchParams();
   const account = useActiveAccount();
   const { balance, isLoading: balanceLoading, isEligible, walletAddress } = useAmyBalance();
 
@@ -75,6 +77,58 @@ export default function ProfilePage() {
       fetchUserData();
     }
   }, [walletAddress, checkXStatus, fetchUserData]);
+
+  // Handle OAuth callback - read URL params and save to backend
+  useEffect(() => {
+    const xConnectedParam = searchParams.get('x_connected');
+    const usernameParam = searchParams.get('username');
+    const walletParam = searchParams.get('wallet');
+    const errorParam = searchParams.get('error');
+
+    // Handle error cases
+    if (errorParam) {
+      console.error('OAuth error:', errorParam, searchParams.get('reason'), searchParams.get('details'));
+      return;
+    }
+
+    // Handle successful OAuth callback
+    if (xConnectedParam === 'true' && usernameParam && walletParam) {
+      console.log('OAuth success - saving user:', usernameParam, walletParam);
+
+      // Update UI immediately
+      setXConnected(true);
+      setXUsername(usernameParam);
+
+      // Save to backend (single endpoint handles all tables)
+      const saveOAuthUser = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/oauth/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              wallet: walletParam,
+              xUsername: usernameParam,
+              amyBalance: balance || 0
+            }),
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            console.log('OAuth user saved successfully');
+          } else {
+            console.error('Failed to save OAuth user:', data.error);
+          }
+
+          // Clean up URL params
+          window.history.replaceState({}, '', '/app/profile');
+        } catch (error) {
+          console.error('Error saving OAuth user:', error);
+        }
+      };
+
+      saveOAuthUser();
+    }
+  }, [searchParams, balance]);
 
   const connectX = () => {
     if (!walletAddress) {
