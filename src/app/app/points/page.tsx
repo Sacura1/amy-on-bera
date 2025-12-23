@@ -608,8 +608,22 @@ export default function PointsPage() {
               isActive={false}
             />
 
+            {/* Amy Onchain Conviction */}
+            <MultiplierBadge
+              name="Amy Onchain"
+              title="Conviction"
+              image="/convic.jpg"
+              description="Rewarding users who actively deploy capital on Berachain. This badge reflects ongoing onchain activity and may change over time."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'x3' },
+                { requirement: 'Level 2', multiplier: 'x5' },
+                { requirement: 'Level 3', multiplier: 'x10' },
+              ]}
+              isActive={true}
+            />
+
             {/* All other badges - Coming Soon */}
-            {Array.from({ length: 21 }).map((_, index) => (
+            {Array.from({ length: 20 }).map((_, index) => (
               <MultiplierBadge
                 key={index}
                 name=""
