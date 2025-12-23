@@ -21,6 +21,18 @@ interface PointsData {
   pointsPerHour: number;
   lastAmyBalance: number;
   lastPointsUpdate?: string;
+  lpValueUsd?: number;
+  lpMultiplier?: number;
+}
+
+interface LpData {
+  lpValueUsd: number;
+  totalLpValueUsd: number;
+  lpMultiplier: number;
+  positionsFound: number;
+  inRangePositions: number;
+  isInRange: boolean;
+  amyPriceUsd: number;
 }
 
 const TIERS: Record<string, TierInfo> = {
@@ -46,9 +58,11 @@ interface BadgeProps {
   currentMultiplier?: string;
   isActive: boolean;
   isPlaceholder?: boolean;
+  actionUrl?: string;
+  actionLabel?: string;
 }
 
-const MultiplierBadge = ({ name, title, image, description, multipliers, currentMultiplier, isActive, isPlaceholder }: BadgeProps) => {
+const MultiplierBadge = ({ name, title, image, description, multipliers, currentMultiplier, isActive, isPlaceholder, actionUrl, actionLabel }: BadgeProps) => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupPosition, setPopupPosition] = useState<'bottom' | 'top'>('bottom');
   const cardRef = React.useRef<HTMLDivElement>(null);
@@ -128,11 +142,21 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
         )}
 
         {/* Multiplier badge corner */}
-        {isActive && currentMultiplier && (
-          <div className="absolute -top-1 -left-1 bg-amber-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md z-10">
-            {currentMultiplier}
-          </div>
-        )}
+        {isActive && currentMultiplier && (() => {
+          // Color based on multiplier tier
+          let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // x3 - Bronze
+          if (currentMultiplier.includes('100')) {
+            badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300'; // x100 - Gold
+          } else if (currentMultiplier.includes('10')) {
+            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200'; // x10 - Silver
+          }
+
+          return (
+            <div className={`absolute -top-2 -left-2 text-xs font-black px-2 py-1 rounded-md z-10 shadow-lg border-2 ${badgeColors}`}>
+              {currentMultiplier}
+            </div>
+          );
+        })()}
 
         {/* Icon */}
         <div className="p-3 flex justify-center">
@@ -226,11 +250,21 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
                 </div>
               )}
 
-              {/* Footer note */}
+              {/* Footer */}
               <div className="pt-3 border-t border-gray-700">
-                <p className="text-xs text-gray-500 italic">
+                <p className="text-xs text-gray-500 italic mb-3">
                   Only the highest unlocked multiplier applies.
                 </p>
+                {actionUrl && (
+                  <a
+                    href={actionUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-bold text-sm py-2.5 px-4 rounded-xl text-center transition-all shadow-lg hover:shadow-yellow-500/25"
+                  >
+                    {actionLabel || 'Add Liquidity'} →
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -304,7 +338,9 @@ export default function PointsPage() {
   const { balance, walletAddress } = useAmyBalance();
 
   const [pointsData, setPointsData] = useState<PointsData | null>(null);
+  const [lpData, setLpData] = useState<LpData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingLp, setIsLoadingLp] = useState(false);
   const [displayPoints, setDisplayPoints] = useState(0);
 
   // Fetch points data
@@ -353,12 +389,32 @@ export default function PointsPage() {
     }
   }, [walletAddress, balance]);
 
-  // Fetch points when wallet connects
+  // Fetch LP data
+  const fetchLpData = useCallback(async () => {
+    if (!walletAddress) return;
+
+    setIsLoadingLp(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/lp/${walletAddress}`);
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        setLpData(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching LP data:', error);
+    } finally {
+      setIsLoadingLp(false);
+    }
+  }, [walletAddress]);
+
+  // Fetch points and LP data when wallet connects
   useEffect(() => {
     if (walletAddress) {
       fetchPointsData();
+      fetchLpData();
     }
-  }, [walletAddress, fetchPointsData]);
+  }, [walletAddress, fetchPointsData, fetchLpData]);
 
   // Animate points counter (increment based on points per hour)
   useEffect(() => {
@@ -408,9 +464,42 @@ export default function PointsPage() {
                 {/* Points Balance */}
                 <div className="text-center mb-6">
                   <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Your Points Balance</div>
-                  <div className="text-5xl md:text-7xl font-black hero-text">
-                    {displayPoints.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="text-5xl md:text-7xl font-black hero-text">
+                      {displayPoints.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    {lpData && lpData.lpMultiplier > 1 && (() => {
+                      // Color based on multiplier tier
+                      let badgeColors = 'from-amber-700 to-amber-600 text-amber-200 border-amber-500'; // 3x - Bronze
+                      if (lpData.lpMultiplier >= 100) {
+                        badgeColors = 'from-yellow-400 to-yellow-500 text-yellow-950 border-yellow-300'; // 100x - Gold
+                      } else if (lpData.lpMultiplier >= 10) {
+                        badgeColors = 'from-slate-400 to-slate-500 text-slate-900 border-slate-200'; // 10x - Silver
+                      }
+                      return (
+                        <div className={`bg-gradient-to-r ${badgeColors} text-sm md:text-base font-black px-2 md:px-3 py-1 rounded-lg shadow-md border`}>
+                          {lpData.lpMultiplier}x
+                        </div>
+                      );
+                    })()}
                   </div>
+                  {lpData && lpData.lpMultiplier > 1 && (
+                    <div className="flex flex-col items-center gap-2 mt-3">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/30">
+                        <span className={`w-1.5 h-1.5 rounded-full ${lpData.isInRange ? 'bg-green-400' : 'bg-red-400'} animate-pulse`}></span>
+                        <span className="text-xs text-gray-300">Your LP</span>
+                        <span className="text-xs text-yellow-400 font-bold">${lpData.lpValueUsd.toFixed(0)}</span>
+                        <span className={`text-[10px] font-medium ${lpData.isInRange ? 'text-green-400' : 'text-red-400'}`}>
+                          • {lpData.isInRange ? 'In Range' : 'Out of Range'}
+                        </span>
+                      </div>
+                      {balance < 300 && (
+                        <div className="text-xs text-amber-400/80 bg-amber-900/20 px-3 py-1 rounded-full border border-amber-500/20">
+                          Hold 300 $AMY to activate your {lpData.lpMultiplier}x multiplier
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Current Tier Display */}
@@ -485,11 +574,42 @@ export default function PointsPage() {
                 { requirement: '$100+ LP', multiplier: 'x10' },
                 { requirement: '$500+ LP', multiplier: 'x100' },
               ]}
+              isActive={lpData ? lpData.lpMultiplier > 1 : false}
+              currentMultiplier={lpData && lpData.lpMultiplier > 1 ? `${lpData.lpMultiplier}x` : undefined}
+              actionUrl="https://www.bulla.exchange/pools/0xff716930eefb37b5b4ac55b1901dc5704b098d84"
+              actionLabel="Add Liquidity"
+            />
+
+            {/* Amy × Kodiak Perps */}
+            <MultiplierBadge
+              name="Amy × Kodiak"
+              title="Perps"
+              image="/kodiak.jpg"
+              description="Trade perpetuals on Kodiak through Amy in December 2025."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'TBC' },
+                { requirement: 'Level 2', multiplier: 'TBC' },
+                { requirement: 'Level 3', multiplier: 'TBC' },
+              ]}
+              isActive={false}
+            />
+
+            {/* Dawn Referral Season */}
+            <MultiplierBadge
+              name="Dawn Referral"
+              title="Season"
+              image="/ref.jpg"
+              description="Invite new users to Amy during the Dawn referral season. Ends 12 January 2025."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'TBC' },
+                { requirement: 'Level 2', multiplier: 'TBC' },
+                { requirement: 'Level 3', multiplier: 'TBC' },
+              ]}
               isActive={false}
             />
 
             {/* All other badges - Coming Soon */}
-            {Array.from({ length: 23 }).map((_, index) => (
+            {Array.from({ length: 21 }).map((_, index) => (
               <MultiplierBadge
                 key={index}
                 name=""

@@ -4,7 +4,11 @@
       "WebFetch(domain:portal.thirdweb.com)",
       "Bash(cat:*)",
       "WebSearch",
-      "WebFetch(domain:playground.thirdweb.com)"
+      "WebFetch(domain:playground.thirdweb.com)",
+      "WebFetch(domain:www.bulla.exchange)",
+      "WebFetch(domain:rpc.berachain.com)",
+      "WebFetch(domain:docs.bulla.exchange)",
+      "Bash(node:*)"
     ]
   }
 }
