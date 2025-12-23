@@ -619,7 +619,7 @@ export default function PointsPage() {
                 { requirement: 'Level 2', multiplier: 'x5' },
                 { requirement: 'Level 3', multiplier: 'x10' },
               ]}
-              isActive={true}
+              isActive={false}
             />
 
             {/* All other badges - Coming Soon */}
