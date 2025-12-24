@@ -64,21 +64,48 @@ interface BadgeProps {
 
 const MultiplierBadge = ({ name, title, image, description, multipliers, currentMultiplier, isActive, isPlaceholder, actionUrl, actionLabel }: BadgeProps) => {
   const [showPopup, setShowPopup] = useState(false);
-  const [popupPosition, setPopupPosition] = useState<'bottom' | 'top'>('bottom');
+  const [popupStyle, setPopupStyle] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const cardRef = React.useRef<HTMLDivElement>(null);
+  const popupRef = React.useRef<HTMLDivElement>(null);
 
-  // Calculate popup position based on available space
+  // Calculate popup position to keep it fully visible in viewport
   const updatePopupPosition = useCallback(() => {
     if (cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const popupHeight = 350; // Approximate popup height
+      const popupWidth = 288; // w-72 = 18rem = 288px
+      const popupHeight = 400; // Approximate max popup height
+      const padding = 16; // Padding from viewport edges
 
-      if (spaceBelow < popupHeight && rect.top > popupHeight) {
-        setPopupPosition('top');
-      } else {
-        setPopupPosition('bottom');
+      // Calculate initial position (centered below the card)
+      let top = rect.bottom + 8;
+      let left = rect.left + (rect.width / 2) - (popupWidth / 2);
+
+      // Adjust horizontal position to stay within viewport
+      if (left < padding) {
+        left = padding;
+      } else if (left + popupWidth > window.innerWidth - padding) {
+        left = window.innerWidth - popupWidth - padding;
       }
+
+      // Adjust vertical position - prefer below, but show above if not enough space
+      const spaceBelow = window.innerHeight - rect.bottom - padding;
+      const spaceAbove = rect.top - padding;
+
+      if (spaceBelow < popupHeight && spaceAbove > spaceBelow) {
+        // Show above the card
+        top = rect.top - popupHeight - 8;
+        // Make sure it doesn't go above the viewport
+        if (top < padding) {
+          top = padding;
+        }
+      } else {
+        // Show below - make sure it doesn't go below viewport
+        if (top + popupHeight > window.innerHeight - padding) {
+          top = window.innerHeight - popupHeight - padding;
+        }
+      }
+
+      setPopupStyle({ top, left });
     }
   }, []);
 
@@ -188,20 +215,13 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
       {/* Popup - shows details */}
       {showPopup && description && (
         <div
-          className={`absolute left-0 z-50 w-72 ${
-            popupPosition === 'bottom' ? 'top-full mt-2' : 'bottom-full mb-2'
-          }`}
+          ref={popupRef}
+          className="fixed z-[9999] w-72 rounded-2xl border border-yellow-500/50 overflow-hidden shadow-2xl shadow-black/50 bg-gray-800"
+          style={{ top: popupStyle.top, left: popupStyle.left }}
+          onMouseEnter={() => setShowPopup(true)}
+          onMouseLeave={() => setShowPopup(false)}
         >
-          {/* Arrow pointer */}
-          <div
-            className={`absolute left-6 w-4 h-4 bg-gray-800 border-yellow-500/50 transform rotate-45 ${
-              popupPosition === 'bottom'
-                ? '-top-2 border-l border-t'
-                : '-bottom-2 border-r border-b'
-            }`}
-          />
-
-          <div className="rounded-2xl border border-yellow-500/50 overflow-hidden shadow-2xl shadow-black/50 bg-gray-800">
+          <div className="bg-gray-800">
             {/* Close button for mobile */}
             <button
               onClick={() => setShowPopup(false)}
@@ -525,13 +545,73 @@ export default function PointsPage() {
           </div>
         )}
 
-        {/* Main Intro */}
+        {/* How You Earn Amy Points */}
         <div className="info-box p-4 md:p-10 mb-6 md:mb-8">
+          <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+            <div className="text-3xl md:text-5xl">📈</div>
+            <h2 className="text-xl md:text-3xl font-black text-yellow-400">
+              How You Earn Amy Points
+            </h2>
+          </div>
+
           <p className="text-sm md:text-xl text-yellow-300 leading-relaxed font-medium mb-3 md:mb-4">
-            Amy Points are our way of rewarding behaviour, not gambling.
+            Amy Points are our way of rewarding behaviour — not gambling.
           </p>
-          <p className="text-sm md:text-lg text-gray-300">
-            They are not a token and not something you trade – they&apos;re a points system that sits on top of the app and our partner ecosystem.
+          <p className="text-sm md:text-lg text-gray-300 mb-4">
+            They&apos;re not a token and not something you trade. Amy Points are in-app points that sit on top of the Amy app and our partner ecosystem.
+          </p>
+          <p className="text-sm md:text-lg text-gray-300 mb-6">
+            You start with a base earning rate by holding $AMY. Your tier determines how many Amy Points you earn per hour. You can then boost this with badges and activity.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-4">
+            <div className="bg-gradient-to-br from-orange-900/40 to-amber-900/20 p-4 rounded-xl border-2 border-orange-500/30">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🟫</span>
+                <div>
+                  <span className="font-bold text-orange-400">Bronze</span>
+                  <span className="text-gray-300 text-sm ml-2">– 300+ AMY</span>
+                </div>
+              </div>
+              <p className="text-gray-400 text-sm mt-1">→ 1 Amy Point per hour</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-slate-600/40 to-gray-700/20 p-4 rounded-xl border-2 border-slate-400/30">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🥈</span>
+                <div>
+                  <span className="font-bold text-slate-300">Silver</span>
+                  <span className="text-gray-300 text-sm ml-2">– 1,000+ AMY</span>
+                </div>
+              </div>
+              <p className="text-gray-400 text-sm mt-1">→ 3 Amy Points per hour</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-yellow-700/40 to-amber-800/20 p-4 rounded-xl border-2 border-yellow-500/30">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🥇</span>
+                <div>
+                  <span className="font-bold text-yellow-400">Gold</span>
+                  <span className="text-gray-300 text-sm ml-2">– 10,000+ AMY</span>
+                </div>
+              </div>
+              <p className="text-gray-400 text-sm mt-1">→ 5 Amy Points per hour</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-cyan-700/40 to-blue-800/20 p-4 rounded-xl border-2 border-cyan-400/30">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">💎</span>
+                <div>
+                  <span className="font-bold text-cyan-300">Platinum</span>
+                  <span className="text-gray-300 text-sm ml-2">– 100,000+ AMY</span>
+                </div>
+              </div>
+              <p className="text-gray-400 text-sm mt-1">→ 10 Amy Points per hour</p>
+            </div>
+          </div>
+
+          <p className="text-sm md:text-base text-gray-400 italic">
+            All tiers qualify for Weekly Focus participation.
           </p>
         </div>
 
@@ -622,6 +702,82 @@ export default function PointsPage() {
               isActive={false}
             />
 
+            {/* Staked plsBERA */}
+            <MultiplierBadge
+              name="Staked"
+              title="plsBERA"
+              image="/plsbera.jpg"
+              description="Rewarding users who stake plsBERA and support Berachain's economic security. This badge reflects active staking participation and may update over time as your position changes. Powered by Plutus."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'TBC' },
+                { requirement: 'Level 2', multiplier: 'TBC' },
+                { requirement: 'Level 3', multiplier: 'TBC' },
+              ]}
+              isActive={false}
+            />
+
+            {/* plvHEDGE */}
+            <MultiplierBadge
+              name="plvHEDGE"
+              title="Vault"
+              image="/plvhedge.jpg"
+              description="Rewarding users who deploy capital into the plvHEDGE delta-neutral strategy. plvHEDGE is an automated vault with dynamic yield sourcing, designed to generate yield while managing market exposure across chains. Powered by Plutus."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'TBC' },
+                { requirement: 'Level 2', multiplier: 'TBC' },
+                { requirement: 'Level 3', multiplier: 'TBC' },
+              ]}
+              isActive={false}
+            />
+
+            {/* SAIL.r */}
+            <MultiplierBadge
+              name="SAIL.r"
+              title="Royalty"
+              image="/sail.jpg"
+              description="Rewarding users who hold SAIL.r, a royalty token backed by real e-commerce revenue. SAIL.r represents a claim on revenue from e-commerce brands, with holders receiving monthly stablecoin distributions based on their share of tokens held. Powered by Liquid Royalty."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'TBC' },
+                { requirement: 'Level 2', multiplier: 'TBC' },
+                { requirement: 'Level 3', multiplier: 'TBC' },
+              ]}
+              isActive={false}
+              actionUrl="https://www.liquidroyalty.com/invest"
+              actionLabel="View SAIL.r"
+            />
+
+            {/* snrUSD */}
+            <MultiplierBadge
+              name="snrUSD"
+              title="Senior"
+              image="/snr.jpg"
+              description="Rewarding users who hold or deploy capital into snrUSD, a senior tranche stable yield product. snrUSD is designed to maintain a stable $1 value while generating yield, backed by over-collateralisation and senior position within the strategy. Powered by Liquid Royalty."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'TBC' },
+                { requirement: 'Level 2', multiplier: 'TBC' },
+                { requirement: 'Level 3', multiplier: 'TBC' },
+              ]}
+              isActive={false}
+              actionUrl="https://www.liquidroyalty.com/vaults"
+              actionLabel="View Vaults"
+            />
+
+            {/* jnrUSD */}
+            <MultiplierBadge
+              name="jnrUSD"
+              title="Junior"
+              image="/jnr.jpg"
+              description="Rewarding users who deploy capital into jnrUSD, the junior tranche designed to capture excess yield. jnrUSD sits below the senior tranche and is exposed to variable returns, offering higher potential yield in exchange for higher risk. Powered by Liquid Royalty."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'TBC' },
+                { requirement: 'Level 2', multiplier: 'TBC' },
+                { requirement: 'Level 3', multiplier: 'TBC' },
+              ]}
+              isActive={false}
+              actionUrl="https://www.liquidroyalty.com/vaults"
+              actionLabel="View Vaults"
+            />
+
             {/* All other badges - Coming Soon */}
             {Array.from({ length: 20 }).map((_, index) => (
               <MultiplierBadge
@@ -681,31 +837,39 @@ export default function PointsPage() {
           </div>
         </div>
 
-        {/* Angels Info */}
-        <div className="info-box p-4 md:p-10 mb-6 md:mb-8" style={{ background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.05))', borderColor: '#FFD700' }}>
-          <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-            <div className="text-3xl md:text-5xl">👼</div>
-            <h2 className="text-xl md:text-3xl font-black text-yellow-400">
-              Angels Get More
-            </h2>
-          </div>
-
-          <p className="text-yellow-300 text-sm md:text-lg">
-            <strong>Angels</strong> (people who hold $AMY) will have extra ways to earn and use Amy Points, but everyone can start building a balance.
-          </p>
-        </div>
-
-        {/* Current Status */}
+        {/* Buy Amy Points */}
         <div className="info-box p-4 md:p-10">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-            <div className="text-3xl md:text-5xl">📊</div>
+            <div className="text-3xl md:text-5xl">💳</div>
             <h2 className="text-xl md:text-3xl font-black text-yellow-400">
-              Current Status
+              Buy Amy Points
             </h2>
           </div>
 
-          <p className="text-gray-400 text-sm md:text-lg">
-            Full Amy Points hub is still rolling out – right now we use it mainly for <span className="text-yellow-300 font-semibold">leaderboards</span> and <span className="text-yellow-300 font-semibold">Focus rewards</span> – but this will become a core part of the app as we move toward the full money experience.
+      
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+            <div className="bg-gradient-to-br from-pink-900/40 to-purple-900/20 p-4 md:p-5 rounded-xl md:rounded-2xl border-2 border-pink-500/30 text-center">
+              <div className="text-2xl md:text-3xl font-black text-pink-400 mb-1">$10</div>
+              <div className="text-lg md:text-xl font-bold text-white">10,000</div>
+              <div className="text-xs text-gray-400">Amy Points</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/20 p-4 md:p-5 rounded-xl md:rounded-2xl border-2 border-purple-500/30 text-center">
+              <div className="text-2xl md:text-3xl font-black text-purple-400 mb-1">$30</div>
+              <div className="text-lg md:text-xl font-bold text-white">50,000</div>
+              <div className="text-xs text-gray-400">Amy Points</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-yellow-700/40 to-amber-800/20 p-4 md:p-5 rounded-xl md:rounded-2xl border-2 border-yellow-500/30 text-center">
+              <div className="text-2xl md:text-3xl font-black text-yellow-400 mb-1">$100</div>
+              <div className="text-lg md:text-xl font-bold text-white">250,000</div>
+              <div className="text-xs text-gray-400">Amy Points</div>
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-500 mt-4 text-center italic">
+            Coming soon
           </p>
         </div>
 
