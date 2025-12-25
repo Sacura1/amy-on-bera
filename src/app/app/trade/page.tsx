@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SwapWidget } from 'thirdweb/react';
 import { client } from '@/app/client';
@@ -14,7 +14,22 @@ const TOKEN_ADDRESSES: Record<string, string> = {
   'BERA': '', // Native token, no address needed
 };
 
-export default function TradePage() {
+// Resolve token address - if it's a known symbol, use its address; otherwise treat it as an address
+const resolveTokenAddress = (param: string | null): string | undefined => {
+  if (!param) return undefined;
+  // Check if it's a known symbol
+  const upperParam = param.toUpperCase();
+  if (upperParam in TOKEN_ADDRESSES) {
+    return TOKEN_ADDRESSES[upperParam] || undefined; // Return undefined for native BERA
+  }
+  // Otherwise assume it's already an address
+  if (param.startsWith('0x')) {
+    return param;
+  }
+  return undefined;
+};
+
+function TradeWidget() {
   const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
 
@@ -26,24 +41,41 @@ export default function TradePage() {
   const fromParam = searchParams.get('from');
   const toParam = searchParams.get('to');
 
-  // Resolve token address - if it's a known symbol, use its address; otherwise treat it as an address
-  const resolveTokenAddress = (param: string | null): string | undefined => {
-    if (!param) return undefined;
-    // Check if it's a known symbol
-    const upperParam = param.toUpperCase();
-    if (upperParam in TOKEN_ADDRESSES) {
-      return TOKEN_ADDRESSES[upperParam] || undefined; // Return undefined for native BERA
-    }
-    // Otherwise assume it's already an address
-    if (param.startsWith('0x')) {
-      return param;
-    }
-    return undefined;
-  };
-
   const sellTokenAddress = resolveTokenAddress(fromParam);
   const buyTokenAddress = resolveTokenAddress(toParam) || AMY_TOKEN_ADDRESS;
 
+  if (!mounted) {
+    return <div className="loading-spinner w-10 h-10" />;
+  }
+
+  return (
+    <SwapWidget
+      key={`${fromParam || 'default'}-${toParam || 'default'}`}
+      client={client}
+      theme="dark"
+      prefill={{
+        sellToken: sellTokenAddress ? {
+          chainId: BERACHAIN_ID,
+          tokenAddress: sellTokenAddress,
+        } : {
+          chainId: BERACHAIN_ID,
+        },
+        buyToken: {
+          chainId: BERACHAIN_ID,
+          tokenAddress: buyTokenAddress,
+        },
+      }}
+      style={{
+        width: '100%',
+        maxWidth: '360px',
+        border: 'none',
+        borderRadius: '12px',
+      }}
+    />
+  );
+}
+
+export default function TradePage() {
   return (
     <div className="container mx-auto px-4 py-4 md:py-8">
       <div className="max-w-md mx-auto">
@@ -59,33 +91,9 @@ export default function TradePage() {
 
         {/* Swap Widget Container */}
         <div className="glass-card p-3 md:p-4 flex justify-center min-h-[400px] items-center">
-          {mounted ? (
-            <SwapWidget
-              key={`${fromParam || 'default'}-${toParam || 'default'}`}
-              client={client}
-              theme="dark"
-              prefill={{
-                sellToken: sellTokenAddress ? {
-                  chainId: BERACHAIN_ID,
-                  tokenAddress: sellTokenAddress,
-                } : {
-                  chainId: BERACHAIN_ID,
-                },
-                buyToken: {
-                  chainId: BERACHAIN_ID,
-                  tokenAddress: buyTokenAddress,
-                },
-              }}
-              style={{
-                width: '100%',
-                maxWidth: '360px',
-                border: 'none',
-                borderRadius: '12px',
-              }}
-            />
-          ) : (
-            <div className="loading-spinner w-10 h-10" />
-          )}
+          <Suspense fallback={<div className="loading-spinner w-10 h-10" />}>
+            <TradeWidget />
+          </Suspense>
         </div>
 
       </div>

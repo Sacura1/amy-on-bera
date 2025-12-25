@@ -25,11 +25,14 @@ const amyTheme = darkTheme({
   },
 });
 
-// Menu items for the dropdown
+// Full menu items - same structure for desktop and mobile
 const MENU_ITEMS = [
+  { href: '/app/profile', label: 'PROFILE' },
+  { href: '/app/earn', label: 'EARN' },
+  { href: '/app/points', label: 'AMY POINTS' },
+  { href: '/app/leaderboard', label: 'LEADERBOARD' },
   { href: '/app/trade', label: 'TRADE' },
   { href: BUY_LINK, label: 'GET $AMY', external: true },
-  { href: '/app/leaderboard', label: 'LEADERBOARD' },
   { href: '/app/contact', label: 'PARTNERS & INVESTORS' },
 ];
 
@@ -170,7 +173,7 @@ export default function AppHeader() {
         />
       </div>
 
-      {/* Dropdown Menu */}
+      {/* Dropdown Menu - Same structure for desktop and mobile */}
       {isMenuOpen && (
         <div
           className="fixed top-0 left-0 w-full h-full z-40 flex items-center justify-center md:justify-end animate-fadeIn"
@@ -181,7 +184,7 @@ export default function AppHeader() {
             }
           }}
         >
-          <div className="md:mr-12 space-y-6 relative z-50">
+          <div className="md:mr-12 space-y-2 md:space-y-3 relative z-50 max-h-[80vh] overflow-y-auto px-4">
             {MENU_ITEMS.map((item) => (
               item.external ? (
                 <a
@@ -190,7 +193,7 @@ export default function AppHeader() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setIsMenuOpen(false)}
-                  className="block btn-samy btn-samy-enhanced text-white px-12 py-4 rounded-full text-xl font-bold uppercase text-center cursor-pointer"
+                  className="block btn-samy btn-samy-enhanced text-white px-6 md:px-10 py-2 md:py-2.5 rounded-full text-sm md:text-base font-bold uppercase text-center cursor-pointer"
                 >
                   {item.label}
                 </a>
@@ -199,30 +202,12 @@ export default function AppHeader() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block btn-samy btn-samy-enhanced text-white px-12 py-4 rounded-full text-xl font-bold uppercase text-center cursor-pointer"
+                  className="block btn-samy btn-samy-enhanced text-white px-6 md:px-10 py-2 md:py-2.5 rounded-full text-sm md:text-base font-bold uppercase text-center cursor-pointer"
                 >
                   {item.label}
                 </Link>
               )
             ))}
-
-            {/* Mobile-only menu items */}
-            <div className="md:hidden space-y-6">
-              <Link
-                href="/app/earn"
-                onClick={() => setIsMenuOpen(false)}
-                className="block btn-samy btn-samy-enhanced text-white px-12 py-4 rounded-full text-xl font-bold uppercase text-center cursor-pointer"
-              >
-                EARN
-              </Link>
-              <Link
-                href="/app/points"
-                onClick={() => setIsMenuOpen(false)}
-                className="block btn-samy btn-samy-enhanced text-white px-12 py-4 rounded-full text-xl font-bold uppercase text-center cursor-pointer"
-              >
-                AMY POINTS
-              </Link>
-            </div>
           </div>
         </div>
       )}
