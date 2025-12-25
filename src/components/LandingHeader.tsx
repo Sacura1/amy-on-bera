@@ -14,8 +14,11 @@ export default function LandingHeader() {
 
         {/* Right side buttons */}
         <div className="flex items-center gap-2 md:gap-4">
-          <Link href="/app/profile" className="btn-web-app">
-            <span className="btn-web-app-text">WEB APP</span>
+          <Link
+            href="/app/profile"
+            className="btn-samy btn-samy-enhanced text-white px-4 md:px-8 py-2 md:py-3 rounded-full text-sm md:text-xl font-bold uppercase"
+          >
+            PROFILE
           </Link>
           <a
             href={BUY_LINK}

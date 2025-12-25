@@ -6,7 +6,7 @@ import { ConnectButton } from 'thirdweb/react';
 import { darkTheme } from 'thirdweb/react';
 import { client } from '@/app/client';
 import { berachain } from '@/lib/chain';
-import { NAV_LINKS, BUY_LINK, AMY_TOKEN_ADDRESS } from '@/lib/constants';
+import { BUY_LINK, AMY_TOKEN_ADDRESS } from '@/lib/constants';
 
 // Custom theme matching Amy's pink/gold design
 const amyTheme = darkTheme({
@@ -24,6 +24,14 @@ const amyTheme = darkTheme({
     secondaryText: '#cccccc',
   },
 });
+
+// Menu items for the dropdown
+const MENU_ITEMS = [
+  { href: '/app/trade', label: 'TRADE' },
+  { href: BUY_LINK, label: 'GET $AMY', external: true },
+  { href: '/app/leaderboard', label: 'LEADERBOARD' },
+  { href: '/app/contact', label: 'PARTNERS & INVESTORS' },
+];
 
 export default function AppHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -70,27 +78,25 @@ export default function AppHeader() {
           $AMY
         </Link>
 
-        {/* Desktop: Nav Buttons + Menu */}
+        {/* Desktop: Nav Buttons - Profile, Earn, Amy Points, Menu */}
         <div className="hidden md:flex items-center gap-4">
           <Link
-            href="/"
+            href="/app/profile"
             className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase"
           >
-            HOME
+            PROFILE
           </Link>
-          <a
-            href={BUY_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase"
-          >
-            GET $AMY
-          </a>
           <Link
-            href="/app/trade"
+            href="/app/earn"
             className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase"
           >
-            TRADE
+            EARN
+          </Link>
+          <Link
+            href="/app/points"
+            className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase"
+          >
+            AMY POINTS
           </Link>
           <button
             onClick={toggleMenu}
@@ -100,12 +106,12 @@ export default function AppHeader() {
           </button>
         </div>
 
-        {/* Mobile: Home Button */}
+        {/* Mobile: Profile Button */}
         <Link
-          href="/"
+          href="/app/profile"
           className="md:hidden btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase"
         >
-          HOME
+          PROFILE
         </Link>
       </nav>
 
@@ -176,25 +182,47 @@ export default function AppHeader() {
           }}
         >
           <div className="md:mr-12 space-y-6 relative z-50">
-            {NAV_LINKS.map((link) => (
+            {MENU_ITEMS.map((item) => (
+              item.external ? (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block btn-samy btn-samy-enhanced text-white px-12 py-4 rounded-full text-xl font-bold uppercase text-center cursor-pointer"
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block btn-samy btn-samy-enhanced text-white px-12 py-4 rounded-full text-xl font-bold uppercase text-center cursor-pointer"
+                >
+                  {item.label}
+                </Link>
+              )
+            ))}
+
+            {/* Mobile-only menu items */}
+            <div className="md:hidden space-y-6">
               <Link
-                key={link.href}
-                href={link.href}
+                href="/app/earn"
                 onClick={() => setIsMenuOpen(false)}
                 className="block btn-samy btn-samy-enhanced text-white px-12 py-4 rounded-full text-xl font-bold uppercase text-center cursor-pointer"
               >
-                {link.label}
+                EARN
               </Link>
-            ))}
-            <a
-              href={BUY_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setIsMenuOpen(false)}
-              className="block btn-samy btn-samy-enhanced text-white px-12 py-4 rounded-full text-xl font-bold uppercase text-center cursor-pointer"
-            >
-              GET $AMY
-            </a>
+              <Link
+                href="/app/points"
+                onClick={() => setIsMenuOpen(false)}
+                className="block btn-samy btn-samy-enhanced text-white px-12 py-4 rounded-full text-xl font-bold uppercase text-center cursor-pointer"
+              >
+                AMY POINTS
+              </Link>
+            </div>
           </div>
         </div>
       )}
