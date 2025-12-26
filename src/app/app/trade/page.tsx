@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SwapWidget } from 'thirdweb/react';
 import { client } from '@/app/client';
-import { BERACHAIN_ID } from '@/lib/chain';
+import { berachain } from '@/lib/chain';
 import { AMY_TOKEN_ADDRESS } from '@/lib/constants';
 
 // Known token addresses
@@ -12,6 +12,36 @@ const TOKEN_ADDRESSES: Record<string, string> = {
   'AMY': AMY_TOKEN_ADDRESS,
   'HONEY': '0xfcbd14dc51f0a4d49d5e53c2e0950e0bc26d0dce',
   'BERA': '', // Native token, no address needed
+};
+
+// Supported tokens with icons for the swap widget
+const SUPPORTED_TOKENS = {
+  [berachain.id]: [
+    {
+      address: AMY_TOKEN_ADDRESS,
+      name: 'AMY',
+      symbol: 'AMY',
+      icon: '/pro.jpg',
+    },
+    {
+      address: '0xfcbd14dc51f0a4d49d5e53c2e0950e0bc26d0dce',
+      name: 'HONEY',
+      symbol: 'HONEY',
+      icon: '/honey.jpg',
+    },
+    {
+      address: '0x59a61B8d3064A51a95a5D6393c03e2152b1a2770',
+      name: 'SAIL.r',
+      symbol: 'SAIL.r',
+      icon: '/sail.jpg',
+    },
+    {
+      address: '0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',
+      name: 'plvHEDGE',
+      symbol: 'plvHEDGE',
+      icon: '/plvhedge.jpg',
+    },
+  ],
 };
 
 // Resolve token address - if it's a known symbol, use its address; otherwise treat it as an address
@@ -52,16 +82,18 @@ function TradeWidget() {
     <SwapWidget
       key={`${fromParam || 'default'}-${toParam || 'default'}`}
       client={client}
+      chain={berachain}
       theme="dark"
+      supportedTokens={SUPPORTED_TOKENS}
       prefill={{
         sellToken: sellTokenAddress ? {
-          chainId: BERACHAIN_ID,
+          chainId: berachain.id,
           tokenAddress: sellTokenAddress,
         } : {
-          chainId: BERACHAIN_ID,
+          chainId: berachain.id,
         },
         buyToken: {
-          chainId: BERACHAIN_ID,
+          chainId: berachain.id,
           tokenAddress: buyTokenAddress,
         },
       }}

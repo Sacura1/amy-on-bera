@@ -65,8 +65,9 @@ const STRATEGIES: Strategy[] = [
     apy: '22.54%',
     amyPoints: 'TBC',
     riskCategory: 'balanced',
-    actionType: 'deposit',
-    actionUrl: 'https://plutus.fi/Vaults/v/plvHEDGE/chain/berachain',
+    actionType: 'buy',
+    buyToken: '0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',
+    fromToken: 'BERA',
   },
   {
     id: 'sailr',

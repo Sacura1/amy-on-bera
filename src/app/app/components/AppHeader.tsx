@@ -167,6 +167,18 @@ export default function AppHeader() {
                 symbol: 'HONEY',
                 icon: '/honey.jpg',
               },
+              {
+                address: '0x59a61B8d3064A51a95a5D6393c03e2152b1a2770',
+                name: 'SAIL.r',
+                symbol: 'SAIL.r',
+                icon: '/sail.jpg',
+              },
+              {
+                address: '0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',
+                name: 'plvHEDGE',
+                symbol: 'plvHEDGE',
+                icon: '/plvhedge.jpg',
+              },
             ],
           }}
           theme={amyTheme}
