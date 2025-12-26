@@ -82,7 +82,6 @@ function TradeWidget() {
     <SwapWidget
       key={`${fromParam || 'default'}-${toParam || 'default'}`}
       client={client}
-      chain={berachain}
       theme="dark"
       supportedTokens={SUPPORTED_TOKENS}
       prefill={{
