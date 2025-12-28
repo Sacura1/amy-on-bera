@@ -462,19 +462,11 @@ export default function PointsPage() {
   const currentTier = getCurrentTier();
 
   return (
-    <div className="container mx-auto px-4 py-12 md:py-24">
+    <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8 md:mb-12">
-          <div className="text-4xl md:text-7xl mb-3 md:mb-4">⭐</div>
-          <h1 className="text-3xl md:text-6xl font-black mb-3 md:mb-4 text-shadow-strong" style={{ color: '#FF1493' }}>
-            Amy Points
-          </h1>
-        </div>
-
         {/* Points Dashboard - Only show when wallet connected */}
         {account && walletAddress && (
-          <div className="glass-card p-6 md:p-8 mb-6 md:mb-8">
+          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6 md:p-8 mb-6 md:mb-8">
             {isLoading ? (
               <div className="flex justify-center py-8">
                 <div className="loading-spinner w-12 h-12" />
@@ -523,7 +515,7 @@ export default function PointsPage() {
                 </div>
 
                 {/* Current Tier Display */}
-                <div className="bg-black/40 rounded-2xl p-4 md:p-6 border-2 border-yellow-400/30">
+                <div className="bg-gray-800/60 rounded-xl p-4 md:p-6">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <TierIcon tier={currentTier.name.toLowerCase()} />
@@ -546,7 +538,7 @@ export default function PointsPage() {
         )}
 
         {/* How You Earn Amy Points */}
-        <div className="info-box p-4 md:p-10 mb-6 md:mb-8">
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-8 mb-6 md:mb-8">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
             <div className="text-3xl md:text-5xl">📈</div>
             <h2 className="text-xl md:text-3xl font-black text-yellow-400">
@@ -616,7 +608,7 @@ export default function PointsPage() {
         </div>
 
         {/* Amy Multiplier Badges */}
-        <div className="info-box p-4 md:p-10 mb-6 md:mb-8">
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-8 mb-6 md:mb-8">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
             <div className="text-3xl md:text-5xl">🏅</div>
             <h2 className="text-xl md:text-3xl font-black text-yellow-400">
@@ -792,7 +784,7 @@ export default function PointsPage() {
         </div>
 
         {/* What Points Can Be Used For */}
-        <div className="info-box p-4 md:p-10 mb-6 md:mb-8">
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-8 mb-6 md:mb-8">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
             <div className="text-3xl md:text-5xl">🛒</div>
             <h2 className="text-xl md:text-3xl font-black text-yellow-400">
@@ -838,7 +830,7 @@ export default function PointsPage() {
         </div>
 
         {/* Buy Amy Points */}
-        <div className="info-box p-4 md:p-10">
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-8">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
             <div className="text-3xl md:text-5xl">💳</div>
             <h2 className="text-xl md:text-3xl font-black text-yellow-400">

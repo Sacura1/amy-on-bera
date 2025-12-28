@@ -42,7 +42,7 @@ export default function Home() {
           </p>
 
           {/* Info Box with combined content */}
-          <div className="max-w-4xl mx-auto info-box p-6 md:p-12 mb-8 md:mb-12">
+          <div className="max-w-4xl mx-auto bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6 md:p-12 mb-8 md:mb-12">
             <p className="text-lg sm:text-xl md:text-2xl text-yellow-300 font-semibold mb-4 md:mb-6">
               A powerful, advanced money app built on Berachain
             </p>
@@ -61,7 +61,7 @@ export default function Home() {
         {/* Features Section */}
         <section className="container mx-auto px-4 py-8 md:py-12">
           <div className="flex justify-center">
-            <div className="info-box p-6 md:p-8 text-center hover:scale-105 transition transform max-w-md w-full">
+            <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6 md:p-8 text-center hover:scale-105 transition transform max-w-md w-full">
               <div className="text-4xl md:text-5xl mb-3 md:mb-4">🐻⛓️</div>
               <div className="text-xl md:text-2xl font-bold text-yellow-400 mb-2">
                 Berachain Native
@@ -75,7 +75,7 @@ export default function Home() {
 
         {/* How to Get $AMY Section */}
         <section className="container mx-auto px-4 py-8 md:py-12">
-          <div className="max-w-3xl mx-auto info-box p-6 md:p-10">
+          <div className="max-w-3xl mx-auto bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6 md:p-10">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 md:mb-6 text-center text-yellow-400">
               Become an Amy Angel (get $AMY)
             </h2>
@@ -135,7 +135,7 @@ export default function Home() {
 
         {/* Contact Section */}
         <section className="container mx-auto px-4 py-8 md:py-12">
-          <div className="max-w-2xl mx-auto info-box p-8 md:p-12 text-center">
+          <div className="max-w-2xl mx-auto bg-gray-900/80 rounded-2xl border border-gray-700/50 p-8 md:p-12 text-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 md:mb-8 text-yellow-400">
               JOIN THE COMMUNITY
             </h2>

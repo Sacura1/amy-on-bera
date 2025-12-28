@@ -46,38 +46,8 @@ export default function AppHeader() {
   return (
     <header className="container mx-auto px-4 py-4 md:py-6">
       <nav className="flex justify-between items-center">
-        {/* Mobile: Hamburger + Logo */}
-        <div className="flex items-center gap-3 md:hidden">
-          <button
-            onClick={toggleMenu}
-            className="text-white focus:outline-none z-50"
-            aria-label="Toggle menu"
-          >
-            <div className="space-y-2">
-              <span
-                className={`block w-8 h-1 bg-yellow-400 transition-all duration-300 ${
-                  isMenuOpen ? 'rotate-45 translate-y-3' : ''
-                }`}
-              />
-              <span
-                className={`block w-8 h-1 bg-yellow-400 transition-all duration-300 ${
-                  isMenuOpen ? 'opacity-0' : ''
-                }`}
-              />
-              <span
-                className={`block w-8 h-1 bg-yellow-400 transition-all duration-300 ${
-                  isMenuOpen ? '-rotate-45 -translate-y-3' : ''
-                }`}
-              />
-            </div>
-          </button>
-          <Link href="/" className="text-3xl font-bold text-shadow-strong text-white">
-            $AMY
-          </Link>
-        </div>
-
-        {/* Desktop: Logo */}
-        <Link href="/" className="hidden md:block text-4xl font-bold text-shadow-strong text-white">
+        {/* Logo - links to home */}
+        <Link href="/" className="text-3xl md:text-4xl font-bold text-shadow-strong text-white">
           $AMY
         </Link>
 
@@ -109,13 +79,21 @@ export default function AppHeader() {
           </button>
         </div>
 
-        {/* Mobile: Profile Button */}
-        <Link
-          href="/app/profile"
-          className="md:hidden btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase"
-        >
-          PROFILE
-        </Link>
+        {/* Mobile: Profile + Menu buttons */}
+        <div className="flex md:hidden items-center gap-2">
+          <Link
+            href="/app/profile"
+            className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase"
+          >
+            PROFILE
+          </Link>
+          <button
+            onClick={toggleMenu}
+            className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase"
+          >
+            MENU
+          </button>
+        </div>
       </nav>
 
       {/* Wallet Connect Button using thirdweb */}

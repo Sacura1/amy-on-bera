@@ -310,10 +310,10 @@ function ProfilePageContent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12 md:py-24">
+    <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="max-w-2xl mx-auto">
         {/* X Account Connection Card */}
-        <div className="glass-card p-4 md:p-6">
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-6">
           <div className="flex items-center justify-between gap-3 flex-wrap md:flex-nowrap">
             <div className="flex items-center gap-3 flex-1 min-w-[200px]">
               <div className="icon-badge-small flex-shrink-0">𝕏</div>
@@ -344,7 +344,7 @@ function ProfilePageContent() {
 
         {/* Balance Display */}
         {account && (
-          <div className="glass-card p-4 md:p-6 mt-6">
+          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-6 mt-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="icon-badge-small">💰</div>
@@ -368,7 +368,7 @@ function ProfilePageContent() {
                 )}
               </div>
             </div>
-            <div className="mt-4 pt-4 border-t border-yellow-400/20">
+            <div className="mt-4 pt-4 border-t border-gray-700/50">
               <div className="flex items-center justify-between text-xs md:text-sm">
                 <span className="text-gray-400">Minimum Required:</span>
                 <span className="text-yellow-300 font-bold">{MINIMUM_AMY_BALANCE} $AMY</span>
@@ -379,7 +379,7 @@ function ProfilePageContent() {
 
         {/* Eligibility Status */}
         {account && xConnected && (
-          <div className="glass-card p-6 md:p-8 mt-6">
+          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6 md:p-8 mt-6">
             <div className="text-center">
               <div className="icon-badge mx-auto mb-4">{isEligible ? '✅' : '⚠️'}</div>
               <h3 className="text-xl md:text-2xl font-bold mb-2 text-white">
@@ -396,10 +396,10 @@ function ProfilePageContent() {
 
         {/* Referral Section */}
         {account && isEligible && (
-          <div className="glass-card mt-6 overflow-hidden">
+          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 mt-6 overflow-hidden">
             {/* Enter Referral Code Section */}
             {!usedReferralCode && (
-              <div className="p-4 md:p-6 border-b border-yellow-400/20">
+              <div className="p-4 md:p-6 border-b border-gray-700/50">
                 <div className="mb-4">
                   <h3 className="text-lg md:text-xl font-bold text-yellow-400 mb-2">
                     Enter a referral code here (this cannot be changed):
@@ -429,7 +429,7 @@ function ProfilePageContent() {
 
             {/* Already Used Referral Code Section */}
             {usedReferralCode && (
-              <div className="p-4 md:p-6 border-b border-yellow-400/20">
+              <div className="p-4 md:p-6 border-b border-gray-700/50">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-green-400 text-lg">✓</span>
                   <h3 className="text-lg md:text-xl font-bold text-green-400">Referral Code Used</h3>
@@ -442,7 +442,7 @@ function ProfilePageContent() {
             )}
 
             {/* Your Referral Code Section */}
-            <div className="p-4 md:p-6 border-b border-yellow-400/20">
+            <div className="p-4 md:p-6 border-b border-gray-700/50">
               {!userReferralCode ? (
                 <div className="text-center">
                   <p className="text-gray-300 mb-4">
@@ -512,8 +512,8 @@ function ProfilePageContent() {
 
         {/* Admin Section - Leaderboard Management */}
         {account && isAdmin && (
-          <div className="glass-card mt-6 overflow-hidden">
-            <div className="bg-gradient-to-r from-red-900/40 to-orange-900/40 p-4 md:p-5 border-b-2 border-red-400/30">
+          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 mt-6 overflow-hidden">
+            <div className="bg-gradient-to-r from-red-900/40 to-orange-900/40 p-4 md:p-5 border-b border-gray-700/50">
               <div className="flex items-center gap-3">
                 <div className="icon-badge-small">🔐</div>
                 <h3 className="text-lg md:text-xl font-black text-red-400">Admin Panel</h3>
@@ -521,7 +521,7 @@ function ProfilePageContent() {
             </div>
 
             {/* Download Holders Button */}
-            <div className="p-4 md:p-6 border-b border-red-400/20">
+            <div className="p-4 md:p-6 border-b border-gray-700/50">
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
                   <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1">
@@ -604,9 +604,9 @@ function ProfilePageContent() {
 export default function ProfilePage() {
   return (
     <Suspense fallback={
-      <div className="container mx-auto px-4 py-12 md:py-24">
+      <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-2xl mx-auto">
-          <div className="glass-card p-6 flex justify-center">
+          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6 flex justify-center">
             <div className="loading-spinner w-12 h-12" />
           </div>
         </div>

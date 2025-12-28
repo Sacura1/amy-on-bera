@@ -6,15 +6,12 @@ import { XIcon, TelegramIcon, DiscordIcon } from '@/components';
 
 export default function PartnersPage() {
   return (
-    <div className="container mx-auto px-4 py-12 md:py-24">
+    <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8 md:mb-12">
-          <h1 className="text-3xl md:text-6xl font-black mb-4 md:mb-6 text-shadow-strong" style={{ color: '#FF1493' }}>
-            Partners & Investors
-          </h1>
-          <div className="max-w-3xl mx-auto info-box p-4 md:p-10">
-            <p className="text-sm md:text-xl text-yellow-300 leading-relaxed font-medium">
+        <div className="mb-6 md:mb-8">
+          <div className="max-w-3xl mx-auto bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-10">
+            <p className="text-sm md:text-xl text-gray-200 leading-relaxed font-medium">
               Amy is a money app being built on Berachain – starting with Pay, simple Earn strategies, Amy Points and education.
             </p>
             <p className="text-sm md:text-lg text-gray-300 mt-3 md:mt-4">
@@ -24,7 +21,7 @@ export default function PartnersPage() {
         </div>
 
         {/* Protocols & Product Partners Section */}
-        <div className="info-box p-4 md:p-10 mb-6 md:mb-8">
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-10 mb-6 md:mb-8">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
             <div className="text-3xl md:text-5xl">🤝</div>
             <h2 className="text-xl md:text-3xl font-black text-yellow-400">
@@ -37,7 +34,7 @@ export default function PartnersPage() {
           </p>
 
           <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
-            <div className="bg-black/40 p-4 md:p-5 rounded-xl md:rounded-2xl border-2 border-yellow-400/30">
+            <div className="bg-gray-800/60 p-4 md:p-5 rounded-xl">
               <div className="flex items-start gap-3 md:gap-4">
                 <div className="text-xl md:text-3xl">📅</div>
                 <div>
@@ -49,7 +46,7 @@ export default function PartnersPage() {
               </div>
             </div>
 
-            <div className="bg-black/40 p-4 md:p-5 rounded-xl md:rounded-2xl border-2 border-yellow-400/30">
+            <div className="bg-gray-800/60 p-4 md:p-5 rounded-xl">
               <div className="flex items-start gap-3 md:gap-4">
                 <div className="text-xl md:text-3xl">💎</div>
                 <div>
@@ -87,7 +84,7 @@ export default function PartnersPage() {
         </div>
 
         {/* Investors Section */}
-        <div className="info-box p-4 md:p-10 mb-6 md:mb-8">
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-10 mb-6 md:mb-8">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
             <div className="text-3xl md:text-5xl">💰</div>
             <h2 className="text-xl md:text-3xl font-black text-yellow-400">
@@ -103,18 +100,18 @@ export default function PartnersPage() {
             If you&apos;re a fund or angel focused on fintech / web3 and want a short overview of:
           </p>
 
-          <div className="bg-black/40 p-4 md:p-5 rounded-xl md:rounded-2xl border-2 border-yellow-400/30 mb-4 md:mb-6">
+          <div className="bg-gray-800/60 p-4 md:p-5 rounded-xl mb-4 md:mb-6">
             <ul className="space-y-2 md:space-y-3 text-gray-300 text-sm md:text-base">
               <li className="flex items-center gap-2 md:gap-3">
-                <span className="text-yellow-400 text-base md:text-xl">→</span>
+                <span className="text-gray-400 text-base md:text-xl">→</span>
                 <span>our roadmap (Pay / Earn / Points / Learn),</span>
               </li>
               <li className="flex items-center gap-2 md:gap-3">
-                <span className="text-yellow-400 text-base md:text-xl">→</span>
+                <span className="text-gray-400 text-base md:text-xl">→</span>
                 <span>current traction from Angels & partner campaigns,</span>
               </li>
               <li className="flex items-center gap-2 md:gap-3">
-                <span className="text-yellow-400 text-base md:text-xl">→</span>
+                <span className="text-gray-400 text-base md:text-xl">→</span>
                 <span>and where $AMY fits as a loyalty layer,</span>
               </li>
             </ul>
@@ -143,7 +140,7 @@ export default function PartnersPage() {
         </div>
 
         {/* Community & Updates Section */}
-        <div className="info-box p-4 md:p-10">
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-10">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
             <div className="text-3xl md:text-5xl">🌟</div>
             <h2 className="text-xl md:text-3xl font-black text-yellow-400">

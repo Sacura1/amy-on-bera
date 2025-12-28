@@ -153,21 +153,10 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12 md:py-24">
+    <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8 md:mb-12">
-          <div className="inline-flex items-center justify-center gap-3 mb-4">
-            <span className="text-4xl md:text-6xl trophy-bounce">🏆</span>
-            <h2 className="text-4xl md:text-6xl font-black hero-text">
-              Leaderboard
-            </h2>
-            <span className="text-4xl md:text-6xl trophy-bounce" style={{ animationDelay: '0.5s' }}>🏆</span>
-          </div>
-        </div>
-
         {/* Information Box */}
-        <div className="info-box p-4 md:p-8 mb-6 md:mb-8">
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-8 mb-6 md:mb-8">
           <div className="space-y-3 md:space-y-4 text-yellow-300">
             <p className="text-sm md:text-base leading-relaxed">
               This page shows the supporters who are currently eligible for Amy rewards.
@@ -199,18 +188,18 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Leaderboard Card */}
-        <div className="glass-card overflow-hidden">
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden">
           {/* Header Bar */}
-          <div className="bg-gradient-to-r from-yellow-900/40 to-orange-900/40 p-4 md:p-5 border-b-2 border-yellow-400/30">
+          <div className="p-4 md:p-5 border-b border-gray-700/50">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
                 <div className="icon-badge-small">📊</div>
-                <h3 className="text-lg md:text-xl font-black text-yellow-300">Top Performers</h3>
+                <h3 className="text-lg md:text-xl font-black text-white">Top Performers</h3>
               </div>
               {lastUpdated && (
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400">🔄</span>
-                  <span className="text-xs md:text-sm text-yellow-400 font-semibold">
+                  <span className="text-xs md:text-sm text-gray-400 font-semibold">
                     {formatLastUpdated(lastUpdated)}
                   </span>
                 </div>
@@ -219,7 +208,7 @@ export default function LeaderboardPage() {
           </div>
 
           {/* Table Header (Desktop) */}
-          <div className="hidden md:block px-6 py-4 bg-black/30 border-b border-yellow-400/20">
+          <div className="hidden md:block px-6 py-4 bg-gray-800/50 border-b border-gray-700/50">
             <p className="text-xs uppercase tracking-wider text-gray-400 font-bold">
               Eligible Users (300+ AMY + X Connected)
             </p>
