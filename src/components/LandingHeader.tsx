@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { BUY_LINK } from '@/lib/constants';
 
 // Menu items for the dropdown
 const MENU_ITEMS = [
@@ -87,27 +86,14 @@ export default function LandingHeader() {
         >
           <div className="md:mr-12 space-y-2 md:space-y-3 relative z-50 max-h-[80vh] overflow-y-auto px-4">
             {MENU_ITEMS.map((item) => (
-              item.external ? (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block btn-samy btn-samy-enhanced text-white px-6 md:px-10 py-2 md:py-2.5 rounded-full text-sm md:text-base font-bold uppercase text-center cursor-pointer"
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block btn-samy btn-samy-enhanced text-white px-6 md:px-10 py-2 md:py-2.5 rounded-full text-sm md:text-base font-bold uppercase text-center cursor-pointer"
-                >
-                  {item.label}
-                </Link>
-              )
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsMenuOpen(false)}
+                className="block btn-samy btn-samy-enhanced text-white px-6 md:px-10 py-2 md:py-2.5 rounded-full text-sm md:text-base font-bold uppercase text-center cursor-pointer"
+              >
+                {item.label}
+              </Link>
             ))}
           </div>
         </div>

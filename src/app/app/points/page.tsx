@@ -44,7 +44,7 @@ const TIERS: Record<string, TierInfo> = {
 };
 
 // TEST MODE - set to true to see the page with mock data (no wallet needed)
-const TEST_MODE = true;
+const TEST_MODE = false;
 const MOCK_BALANCE = 150000; // Platinum tier
 const MOCK_POINTS_DATA: PointsData = {
   wallet: '0xMockWallet',
