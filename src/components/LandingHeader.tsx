@@ -9,9 +9,8 @@ const MENU_ITEMS = [
   { href: '/app/profile', label: 'PROFILE' },
   { href: '/app/earn', label: 'EARN' },
   { href: '/app/points', label: 'AMY POINTS' },
-  { href: '/app/leaderboard', label: 'LEADERBOARD' },
   { href: '/app/trade', label: 'TRADE' },
-  { href: BUY_LINK, label: 'GET $AMY', external: true },
+  { href: '/app/leaderboard', label: 'LEADERBOARD' },
   { href: '/app/contact', label: 'PARTNERS & INVESTORS' },
 ];
 
@@ -26,8 +25,8 @@ export default function LandingHeader() {
     <header className="container mx-auto px-4 py-4 md:py-6">
       <nav className="flex justify-between items-center">
         {/* Logo */}
-        <Link href="/" className="text-3xl md:text-4xl font-bold text-shadow-strong text-white">
-          $AMY
+        <Link href="/" className="text-3xl md:text-4xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
+          AMY
         </Link>
 
         {/* Desktop: 4 buttons - Profile, Earn, Amy Points, Menu */}

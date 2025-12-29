@@ -16,6 +16,19 @@ interface LpData {
   amyPriceUsd: number;
 }
 
+interface DynamicPoolData {
+  tvl: string;
+  apy: string;
+}
+
+interface DynamicEarnData {
+  'amy-honey': DynamicPoolData;
+  'sailr': DynamicPoolData;
+  'snrusd': DynamicPoolData;
+  'jnrusd': DynamicPoolData;
+  lastUpdated: string;
+}
+
 interface Strategy {
   id: string;
   name: string;
@@ -38,23 +51,28 @@ interface Strategy {
     token: string;
     fromToken: string;
   };
+  // Whether this strategy's TVL/APY can be dynamically updated
+  dynamicDataKey?: string;
 }
 
 const STRATEGIES: Strategy[] = [
+  // 1. AMY/HONEY Pool
   {
     id: 'amy-honey',
     name: 'AMY/ HONEY Pool',
     subtitle: 'Bulla Exchange',
     image: '/bulla.jpg',
     tvl: '$1.17K',
-    apy: '0.54%',
+    apy: '2.68%',
     amyPoints: 'Earn up to 100x',
     riskCategory: 'hedge',
     actionType: 'deposit',
     actionUrl: 'https://www.bulla.exchange/pools/0xff716930eefb37b5b4ac55b1901dc5704b098d84',
     description: 'Provide liquidity to the AMY / HONEY pool on Bulla Exchange. Earn trading fees plus Amy Points multipliers based on your LP value.',
     infoButtonLabel: 'AMY Pool',
+    dynamicDataKey: 'amy-honey',
   },
+  // 2. plsBERA
   {
     id: 'plsbera',
     name: 'Staked – plsBERA',
@@ -72,39 +90,43 @@ const STRATEGIES: Strategy[] = [
       fromToken: 'HONEY',
     },
   },
+  // 3. plvHEDGE
   {
     id: 'plvhedge',
     name: 'plvHEDGE – Vault',
     subtitle: 'Plutus',
     image: '/plvhedge.jpg',
-    tvl: '$270,279K',
+    tvl: '$271.91K',
     apy: '22.54%',
     amyPoints: 'TBC',
     riskCategory: 'balanced',
     actionType: 'buy',
     buyToken: '0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',
-    fromToken: 'BERA',
+    fromToken: 'HONEY',
     description: 'Deploy capital into the plvHEDGE delta-neutral strategy. plvHEDGE is an automated vault with dynamic yield sourcing, designed to generate yield while managing market exposure across chains. Powered by Plutus.',
     protocolUrl: 'https://plutus.fi',
   },
+  // 4. SAIL.r
   {
     id: 'sailr',
-    name: 'SAIL.r – Liquid Royalty',
+    name: 'SAIL.r – Royalty',
     subtitle: 'Liquid Royalty',
     image: '/sail.jpg',
-    tvl: '',
+    tvl: '$4.32M',
     apy: '30%',
     amyPoints: 'TBC',
     riskCategory: 'balanced',
     actionType: 'buy',
     buyToken: '0x59a61B8d3064A51a95a5D6393c03e2152b1a2770',
-    fromToken: 'BERA',
+    fromToken: 'HONEY',
     description: 'Hold SAIL.r, a royalty token backed by real e-commerce revenue. SAIL.r represents a claim on revenue from e-commerce brands, with holders receiving monthly stablecoin distributions based on their share of tokens held. Powered by Liquid Royalty.',
     protocolUrl: 'https://www.liquidroyalty.com',
+    dynamicDataKey: 'sailr',
   },
+  // 5. snrUSD
   {
     id: 'snrusd',
-    name: 'snrUSD – Senior Vault',
+    name: 'snrUSD – Senior',
     subtitle: 'Liquid Royalty',
     image: '/snr.jpg',
     tvl: '$2.13M',
@@ -119,14 +141,16 @@ const STRATEGIES: Strategy[] = [
       token: '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34', // USDe
       fromToken: 'HONEY',
     },
+    dynamicDataKey: 'snrusd',
   },
+  // 6. jnrUSD
   {
     id: 'jnrusd',
-    name: 'jnrUSD – Junior Vault',
+    name: 'jnrUSD – Junior',
     subtitle: 'Liquid Royalty',
     image: '/jnr.jpg',
-    tvl: '$2.13M',
-    apy: '136%',
+    tvl: '$2.12M',
+    apy: '93%',
     amyPoints: 'TBC',
     riskCategory: 'hedge',
     actionType: 'deposit',
@@ -137,6 +161,7 @@ const STRATEGIES: Strategy[] = [
       token: '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34', // USDe
       fromToken: 'HONEY',
     },
+    dynamicDataKey: 'jnrusd',
   },
 ];
 
@@ -170,10 +195,17 @@ const RiskBars = ({ level }: { level: number }) => (
   </div>
 );
 
-const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
+const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicData?: DynamicEarnData }) => {
   const router = useRouter();
   const risk = getRiskStyles(strategy.riskCategory);
   const [showInfo, setShowInfo] = useState(false);
+
+  // Get TVL and APY from dynamic data if available
+  const poolData = strategy.dynamicDataKey && dynamicData
+    ? dynamicData[strategy.dynamicDataKey as keyof Omit<DynamicEarnData, 'lastUpdated'>]
+    : null;
+  const displayTvl = poolData?.tvl || strategy.tvl;
+  const displayApy = poolData?.apy || strategy.apy;
 
   const handleAction = () => {
     if (strategy.actionType === 'deposit' && strategy.actionUrl) {
@@ -234,11 +266,11 @@ const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
           <div className="px-4 pb-3 flex items-center gap-6">
             <div>
               <div className="text-xs text-gray-500 uppercase">TVL</div>
-              <div className="text-lg font-bold text-white">{strategy.tvl || '—'}</div>
+              <div className="text-lg font-bold text-white">{displayTvl || '—'}</div>
             </div>
             <div>
               <div className="text-xs text-gray-500 uppercase">APY</div>
-              <div className="text-lg font-bold text-green-400">{strategy.apy}</div>
+              <div className="text-lg font-bold text-green-400">{displayApy}</div>
             </div>
           </div>
 
@@ -441,6 +473,27 @@ export default function EarnPage() {
   const [isLoadingLp, setIsLoadingLp] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const [dynamicEarnData, setDynamicEarnData] = useState<DynamicEarnData | null>(null);
+
+  // Fetch dynamic TVL/APY data
+  useEffect(() => {
+    const fetchEarnData = async () => {
+      try {
+        const response = await fetch('/api/earn-data');
+        const result = await response.json();
+        if (result.success && result.data) {
+          setDynamicEarnData(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching earn data:', error);
+      }
+    };
+
+    fetchEarnData();
+    // Refresh every hour
+    const interval = setInterval(fetchEarnData, 60 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -482,17 +535,34 @@ export default function EarnPage() {
   // Check if user has active LP position (or TEST_MODE is enabled)
   const hasActiveLp = TEST_MODE || (lpData && lpData.lpValueUsd > 0 && lpData.positionsFound > 0);
 
+  // Helper to get dynamic value for a strategy
+  const getDynamicTvl = (strategy: Strategy) => {
+    if (strategy.dynamicDataKey && dynamicEarnData) {
+      const poolData = dynamicEarnData[strategy.dynamicDataKey as keyof Omit<DynamicEarnData, 'lastUpdated'>];
+      return poolData?.tvl || strategy.tvl;
+    }
+    return strategy.tvl;
+  };
+
+  const getDynamicApy = (strategy: Strategy) => {
+    if (strategy.dynamicDataKey && dynamicEarnData) {
+      const poolData = dynamicEarnData[strategy.dynamicDataKey as keyof Omit<DynamicEarnData, 'lastUpdated'>];
+      return poolData?.apy || strategy.apy;
+    }
+    return strategy.apy;
+  };
+
   // Sort strategies based on selected option
   const sortedStrategies = [...STRATEGIES].sort((a, b) => {
     switch (sortBy) {
       case 'tvl-high':
-        return parseValue(b.tvl) - parseValue(a.tvl);
+        return parseValue(getDynamicTvl(b)) - parseValue(getDynamicTvl(a));
       case 'tvl-low':
-        return parseValue(a.tvl) - parseValue(b.tvl);
+        return parseValue(getDynamicTvl(a)) - parseValue(getDynamicTvl(b));
       case 'apy-high':
-        return parseValue(b.apy) - parseValue(a.apy);
+        return parseValue(getDynamicApy(b)) - parseValue(getDynamicApy(a));
       case 'apy-low':
-        return parseValue(a.apy) - parseValue(b.apy);
+        return parseValue(getDynamicApy(a)) - parseValue(getDynamicApy(b));
       case 'points-high':
         return parsePoints(b.amyPoints) - parsePoints(a.amyPoints);
       case 'points-low':
@@ -584,9 +654,9 @@ export default function EarnPage() {
           </div>
 
           {/* Strategy Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
             {sortedStrategies.map((strategy) => (
-              <StrategyCard key={strategy.id} strategy={strategy} />
+              <StrategyCard key={strategy.id} strategy={strategy} dynamicData={dynamicEarnData || undefined} />
             ))}
           </div>
         </div>

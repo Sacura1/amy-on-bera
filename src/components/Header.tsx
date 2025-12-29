@@ -44,14 +44,14 @@ export default function Header({ showWalletButton = false, walletButton }: Heade
               />
             </div>
           </button>
-          <Link href="/" className="text-3xl font-bold text-shadow-strong text-white">
-            $AMY
+          <Link href="/" className="text-3xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
+            AMY
           </Link>
         </div>
 
         {/* Desktop: Logo */}
-        <Link href="/" className="hidden md:block text-4xl font-bold text-shadow-strong text-white">
-          $AMY
+        <Link href="/" className="hidden md:block text-4xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
+          AMY
         </Link>
 
         {/* Desktop: Nav Buttons + Menu */}

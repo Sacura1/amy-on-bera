@@ -41,7 +41,8 @@ function TradeWidget() {
   const fromParam = searchParams.get('from');
   const toParam = searchParams.get('to');
 
-  const sellTokenAddress = resolveTokenAddress(fromParam);
+  // Default to HONEY if no from token specified
+  const sellTokenAddress = resolveTokenAddress(fromParam) || TOKEN_ADDRESSES['HONEY'];
   const buyTokenAddress = resolveTokenAddress(toParam) || AMY_TOKEN_ADDRESS;
 
   if (!mounted) {
@@ -54,11 +55,9 @@ function TradeWidget() {
       client={client}
       theme="dark"
       prefill={{
-        sellToken: sellTokenAddress ? {
+        sellToken: {
           chainId: berachain.id,
           tokenAddress: sellTokenAddress,
-        } : {
-          chainId: berachain.id,
         },
         buyToken: {
           chainId: berachain.id,

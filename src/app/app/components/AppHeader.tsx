@@ -30,9 +30,8 @@ const MENU_ITEMS = [
   { href: '/app/profile', label: 'PROFILE' },
   { href: '/app/earn', label: 'EARN' },
   { href: '/app/points', label: 'AMY POINTS' },
-  { href: '/app/leaderboard', label: 'LEADERBOARD' },
   { href: '/app/trade', label: 'TRADE' },
-  { href: BUY_LINK, label: 'GET $AMY', external: true },
+  { href: '/app/leaderboard', label: 'LEADERBOARD' },
   { href: '/app/contact', label: 'PARTNERS & INVESTORS' },
 ];
 
@@ -47,8 +46,8 @@ export default function AppHeader() {
     <header className="container mx-auto px-4 py-4 md:py-6">
       <nav className="flex justify-between items-center">
         {/* Logo - links to home */}
-        <Link href="/" className="text-3xl md:text-4xl font-bold text-shadow-strong text-white">
-          $AMY
+        <Link href="/" className="text-3xl md:text-4xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
+          AMY
         </Link>
 
         {/* Desktop: Nav Buttons - Profile, Earn, Amy Points, Menu */}
@@ -146,10 +145,34 @@ export default function AppHeader() {
                 icon: '/honey.jpg',
               },
               {
+                address: '0x779Ded0c9e1022225f8E0630b35a9b54bE713736',
+                name: 'USDT0',
+                symbol: 'USDT0',
+                icon: '/usdt0.jpg',
+              },
+              {
+                address: '0x549943e04f40284185054145c6E4e9568C1D3241',
+                name: 'USDC.e',
+                symbol: 'USDC.e',
+                icon: '/usdce.jpg',
+              },
+              {
+                address: '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34',
+                name: 'USDe',
+                symbol: 'USDe',
+                icon: '/usde.jpg',
+              },
+              {
                 address: '0x59a61B8d3064A51a95a5D6393c03e2152b1a2770',
                 name: 'SAIL.r',
                 symbol: 'SAIL.r',
                 icon: '/sail.jpg',
+              },
+              {
+                address: '0xc66D1a2460De7b96631f4AC37ce906aCFa6A3c30',
+                name: 'plsBERA',
+                symbol: 'plsBERA',
+                icon: '/plsbera.jpg',
               },
               {
                 address: '0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',

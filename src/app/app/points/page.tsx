@@ -43,6 +43,28 @@ const TIERS: Record<string, TierInfo> = {
   none: { minBalance: 0, pointsPerHour: 0, name: 'None', emoji: '⚪' }
 };
 
+// TEST MODE - set to true to see the page with mock data (no wallet needed)
+const TEST_MODE = true;
+const MOCK_BALANCE = 150000; // Platinum tier
+const MOCK_POINTS_DATA: PointsData = {
+  wallet: '0xMockWallet',
+  totalPoints: 52843.75,
+  currentTier: 'platinum',
+  tierInfo: TIERS.platinum,
+  pointsPerHour: 10,
+  lastAmyBalance: 150000,
+  lastPointsUpdate: new Date().toISOString(),
+};
+const MOCK_LP_DATA: LpData = {
+  lpValueUsd: 750,
+  totalLpValueUsd: 5000,
+  lpMultiplier: 100,
+  positionsFound: 3,
+  inRangePositions: 2,
+  isInRange: true,
+  amyPriceUsd: 0.0042,
+};
+
 // Multiplier Badge Component
 interface MultiplierTier {
   requirement: string;
@@ -355,17 +377,21 @@ const TierIcon = ({ tier }: { tier: string }) => {
 
 export default function PointsPage() {
   const account = useActiveAccount();
-  const { balance, walletAddress } = useAmyBalance();
+  const { balance: realBalance, walletAddress: realWalletAddress } = useAmyBalance();
 
-  const [pointsData, setPointsData] = useState<PointsData | null>(null);
-  const [lpData, setLpData] = useState<LpData | null>(null);
+  // Use mock data in test mode
+  const balance = TEST_MODE ? MOCK_BALANCE : realBalance;
+  const walletAddress = TEST_MODE ? '0xMockWallet' : realWalletAddress;
+
+  const [pointsData, setPointsData] = useState<PointsData | null>(TEST_MODE ? MOCK_POINTS_DATA : null);
+  const [lpData, setLpData] = useState<LpData | null>(TEST_MODE ? MOCK_LP_DATA : null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingLp, setIsLoadingLp] = useState(false);
-  const [displayPoints, setDisplayPoints] = useState(0);
+  const [displayPoints, setDisplayPoints] = useState(TEST_MODE ? MOCK_POINTS_DATA.totalPoints : 0);
 
   // Fetch points data
   const fetchPointsData = useCallback(async () => {
-    if (!walletAddress) return;
+    if (!walletAddress || TEST_MODE) return;
 
     setIsLoading(true);
     try {
@@ -411,7 +437,7 @@ export default function PointsPage() {
 
   // Fetch LP data
   const fetchLpData = useCallback(async () => {
-    if (!walletAddress) return;
+    if (!walletAddress || TEST_MODE) return;
 
     setIsLoadingLp(true);
     try {
@@ -464,8 +490,8 @@ export default function PointsPage() {
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="max-w-4xl mx-auto">
-        {/* Points Dashboard - Only show when wallet connected */}
-        {account && walletAddress && (
+        {/* Points Dashboard - Only show when wallet connected (or in test mode) */}
+        {(TEST_MODE || (account && walletAddress)) && (
           <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6 md:p-8 mb-6 md:mb-8">
             {isLoading ? (
               <div className="flex justify-center py-8">
@@ -476,42 +502,30 @@ export default function PointsPage() {
                 {/* Points Balance */}
                 <div className="text-center mb-6">
                   <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Your Points Balance</div>
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-center gap-4 md:gap-6">
                     <div className="text-5xl md:text-7xl font-black hero-text">
                       {displayPoints.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
-                    {lpData && lpData.lpMultiplier > 1 && (() => {
-                      // Color based on multiplier tier
-                      let badgeColors = 'from-amber-700 to-amber-600 text-amber-200 border-amber-500'; // 3x - Bronze
-                      if (lpData.lpMultiplier >= 100) {
-                        badgeColors = 'from-yellow-400 to-yellow-500 text-yellow-950 border-yellow-300'; // 100x - Gold
-                      } else if (lpData.lpMultiplier >= 10) {
-                        badgeColors = 'from-slate-400 to-slate-500 text-slate-900 border-slate-200'; // 10x - Silver
-                      }
-                      return (
-                        <div className={`bg-gradient-to-r ${badgeColors} text-sm md:text-base font-black px-2 md:px-3 py-1 rounded-lg shadow-md border`}>
-                          {lpData.lpMultiplier}x
+                    {/* Base Points and Total Multiplier badges */}
+                    <div className="flex flex-row gap-3 md:gap-4">
+                      {/* Base Points */}
+                      <div className="flex flex-col items-center">
+                        <div className="text-[10px] md:text-xs font-bold text-white leading-tight">Base</div>
+                        <div className="text-[10px] md:text-xs font-bold text-white mb-1 leading-tight">Points</div>
+                        <div className="bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 px-3 md:px-4 py-1.5 md:py-2 rounded-lg">
+                          <div className="text-sm md:text-base font-black text-gray-900">{currentTier.pointsPerHour}x</div>
                         </div>
-                      );
-                    })()}
-                  </div>
-                  {lpData && lpData.lpMultiplier > 1 && (
-                    <div className="flex flex-col items-center gap-2 mt-3">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/30">
-                        <span className={`w-1.5 h-1.5 rounded-full ${lpData.isInRange ? 'bg-green-400' : 'bg-red-400'} animate-pulse`}></span>
-                        <span className="text-xs text-gray-300">Your LP</span>
-                        <span className="text-xs text-yellow-400 font-bold">${lpData.lpValueUsd.toFixed(0)}</span>
-                        <span className={`text-[10px] font-medium ${lpData.isInRange ? 'text-green-400' : 'text-red-400'}`}>
-                          • {lpData.isInRange ? 'In Range' : 'Out of Range'}
-                        </span>
                       </div>
-                      {balance < 300 && (
-                        <div className="text-xs text-amber-400/80 bg-amber-900/20 px-3 py-1 rounded-full border border-amber-500/20">
-                          Hold 300 $AMY to activate your {lpData.lpMultiplier}x multiplier
+                      {/* Total Multiplier */}
+                      <div className="flex flex-col items-center">
+                        <div className="text-[10px] md:text-xs font-bold text-white leading-tight">Total</div>
+                        <div className="text-[10px] md:text-xs font-bold text-white mb-1 leading-tight">multiplier</div>
+                        <div className="bg-gradient-to-br from-yellow-400 to-amber-500 px-3 md:px-4 py-1.5 md:py-2 rounded-lg">
+                          <div className="text-sm md:text-base font-black text-gray-900">{lpData && lpData.lpMultiplier > 1 ? lpData.lpMultiplier : 1}x</div>
                         </div>
-                      )}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 {/* Current Tier Display */}
@@ -635,7 +649,7 @@ export default function PointsPage() {
 
           {/* Badge Grid */}
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
-            {/* Bulla Exchange - AMY/HONEY */}
+            {/* 1. Bulla Exchange - AMY/HONEY */}
             <MultiplierBadge
               name="Bulla Exchange"
               title="AMY/HONEY"
@@ -652,49 +666,7 @@ export default function PointsPage() {
               actionLabel="Add Liquidity"
             />
 
-            {/* Amy × Kodiak Perps */}
-            <MultiplierBadge
-              name="Amy × Kodiak"
-              title="Perps"
-              image="/kodiak.jpg"
-              description="Trade perpetuals on Kodiak through Amy in December 2025."
-              multipliers={[
-                { requirement: 'Level 1', multiplier: 'TBC' },
-                { requirement: 'Level 2', multiplier: 'TBC' },
-                { requirement: 'Level 3', multiplier: 'TBC' },
-              ]}
-              isActive={false}
-            />
-
-            {/* Dawn Referral Season */}
-            <MultiplierBadge
-              name="Dawn Referral"
-              title="Season"
-              image="/ref.jpg"
-              description="Invite new users to Amy during the Dawn referral season. Ends 12 January 2025."
-              multipliers={[
-                { requirement: 'Level 1', multiplier: 'TBC' },
-                { requirement: 'Level 2', multiplier: 'TBC' },
-                { requirement: 'Level 3', multiplier: 'TBC' },
-              ]}
-              isActive={false}
-            />
-
-            {/* Amy Onchain Conviction */}
-            <MultiplierBadge
-              name="Amy Onchain"
-              title="Conviction"
-              image="/convic.jpg"
-              description="Rewarding users who actively deploy capital on Berachain. This badge reflects ongoing onchain activity and may change over time."
-              multipliers={[
-                { requirement: 'Level 1', multiplier: 'x3' },
-                { requirement: 'Level 2', multiplier: 'x5' },
-                { requirement: 'Level 3', multiplier: 'x10' },
-              ]}
-              isActive={false}
-            />
-
-            {/* Staked plsBERA */}
+            {/* 2. Staked plsBERA */}
             <MultiplierBadge
               name="Staked"
               title="plsBERA"
@@ -708,7 +680,7 @@ export default function PointsPage() {
               isActive={false}
             />
 
-            {/* plvHEDGE */}
+            {/* 3. plvHEDGE */}
             <MultiplierBadge
               name="plvHEDGE"
               title="Vault"
@@ -722,7 +694,7 @@ export default function PointsPage() {
               isActive={false}
             />
 
-            {/* SAIL.r */}
+            {/* 4. SAIL.r */}
             <MultiplierBadge
               name="SAIL.r"
               title="Royalty"
@@ -738,7 +710,7 @@ export default function PointsPage() {
               actionLabel="View SAIL.r"
             />
 
-            {/* snrUSD */}
+            {/* 5. snrUSD */}
             <MultiplierBadge
               name="snrUSD"
               title="Senior"
@@ -754,7 +726,7 @@ export default function PointsPage() {
               actionLabel="View Vaults"
             />
 
-            {/* jnrUSD */}
+            {/* 6. jnrUSD */}
             <MultiplierBadge
               name="jnrUSD"
               title="Junior"
@@ -768,6 +740,48 @@ export default function PointsPage() {
               isActive={false}
               actionUrl="https://www.liquidroyalty.com/vaults"
               actionLabel="View Vaults"
+            />
+
+            {/* 7. Amy × Kodiak Perps */}
+            <MultiplierBadge
+              name="Amy × Kodiak"
+              title="Perps"
+              image="/kodiak.jpg"
+              description="Trade perpetuals on Kodiak through Amy in December 2025."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'TBC' },
+                { requirement: 'Level 2', multiplier: 'TBC' },
+                { requirement: 'Level 3', multiplier: 'TBC' },
+              ]}
+              isActive={false}
+            />
+
+            {/* 8. Dawn Referral Season */}
+            <MultiplierBadge
+              name="Dawn Referral"
+              title="Season"
+              image="/ref.jpg"
+              description="Invite new users to Amy during the Dawn referral season. Ends 12 January 2025."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'TBC' },
+                { requirement: 'Level 2', multiplier: 'TBC' },
+                { requirement: 'Level 3', multiplier: 'TBC' },
+              ]}
+              isActive={false}
+            />
+
+            {/* 9. Amy Onchain Conviction */}
+            <MultiplierBadge
+              name="Amy Onchain"
+              title="Conviction"
+              image="/convic.jpg"
+              description="Rewarding users who actively deploy capital on Berachain. This badge reflects ongoing onchain activity and may change over time."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'x3' },
+                { requirement: 'Level 2', multiplier: 'x5' },
+                { requirement: 'Level 3', multiplier: 'x10' },
+              ]}
+              isActive={false}
             />
 
             {/* All other badges - Coming Soon */}

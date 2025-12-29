@@ -505,3 +505,13 @@
   .leaderboard-row:hover { transform: none; }
   .leaderboard-row { padding: 0.75rem; margin-bottom: 0.75rem; }
 }
+
+/* Thirdweb modal token icons - make them circular */
+[data-testid="token-icon"],
+.tw-connected-wallet img,
+[class*="TokenIcon"] img,
+[class*="tokenIcon"] img,
+div[role="dialog"] img[alt],
+.tw-modal img {
+  border-radius: 50% !important;
+}
