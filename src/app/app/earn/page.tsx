@@ -31,6 +31,8 @@ interface Strategy {
   fromToken?: string;
   description: string;
   protocolUrl?: string;
+  // Custom label for the info panel action button
+  infoButtonLabel?: string;
   // For deposit strategies that also need a "Buy" button for underlying token
   buyUnderlying?: {
     token: string;
@@ -51,7 +53,7 @@ const STRATEGIES: Strategy[] = [
     actionType: 'deposit',
     actionUrl: 'https://www.bulla.exchange/pools/0xff716930eefb37b5b4ac55b1901dc5704b098d84',
     description: 'Provide liquidity to the AMY / HONEY pool on Bulla Exchange. Earn trading fees plus Amy Points multipliers based on your LP value.',
-    protocolUrl: 'https://www.bulla.exchange',
+    infoButtonLabel: 'AMY Pool',
   },
   {
     id: 'plsbera',
@@ -65,7 +67,6 @@ const STRATEGIES: Strategy[] = [
     actionType: 'deposit',
     actionUrl: 'https://plutus.fi/Assets/a/plsBERA/tab/convert',
     description: 'Stake plsBERA and support Berachain\'s economic security. This strategy reflects active staking participation and may update over time as your position changes. Powered by Plutus.',
-    protocolUrl: 'https://plutus.fi',
     buyUnderlying: {
       token: '0xc66D1a2460De7b96631f4AC37ce906aCFa6A3c30', // plsBERA
       fromToken: 'HONEY',
@@ -309,7 +310,7 @@ const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </div>
-                <span className="text-sm text-white font-medium">View {getShortName()} pool details</span>
+                <span className="text-sm text-white font-medium">{strategy.infoButtonLabel || `View ${getShortName()} pool details`}</span>
               </a>
             )}
             {strategy.protocolUrl && (
