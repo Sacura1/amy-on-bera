@@ -508,22 +508,50 @@ export default function PointsPage() {
                     </div>
                     {/* Base Points and Total Multiplier badges */}
                     <div className="flex flex-row gap-3 md:gap-4">
-                      {/* Base Points */}
-                      <div className="flex flex-col items-center">
-                        <div className="text-[10px] md:text-xs font-bold text-white leading-tight">Base</div>
-                        <div className="text-[10px] md:text-xs font-bold text-white mb-1 leading-tight">Points</div>
-                        <div className="bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 px-3 md:px-4 py-1.5 md:py-2 rounded-lg">
-                          <div className="text-sm md:text-base font-black text-gray-900">{currentTier.pointsPerHour}x</div>
-                        </div>
-                      </div>
-                      {/* Total Multiplier */}
-                      <div className="flex flex-col items-center">
-                        <div className="text-[10px] md:text-xs font-bold text-white leading-tight">Total</div>
-                        <div className="text-[10px] md:text-xs font-bold text-white mb-1 leading-tight">multiplier</div>
-                        <div className="bg-gradient-to-br from-yellow-400 to-amber-500 px-3 md:px-4 py-1.5 md:py-2 rounded-lg">
-                          <div className="text-sm md:text-base font-black text-gray-900">{lpData && lpData.lpMultiplier > 1 ? lpData.lpMultiplier : 1}x</div>
-                        </div>
-                      </div>
+                      {/* Base Points - color based on tier */}
+                      {(() => {
+                        const tierName = currentTier.name.toLowerCase();
+                        let badgeGradient = 'bg-gray-600'; // none
+                        if (tierName === 'platinum') {
+                          badgeGradient = 'bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500';
+                        } else if (tierName === 'gold') {
+                          badgeGradient = 'bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500';
+                        } else if (tierName === 'silver') {
+                          badgeGradient = 'bg-gradient-to-br from-slate-300 via-slate-400 to-gray-500';
+                        } else if (tierName === 'bronze') {
+                          badgeGradient = 'bg-gradient-to-br from-orange-600 via-amber-700 to-yellow-800';
+                        }
+                        return (
+                          <div className="flex flex-col items-center">
+                            <div className="text-[10px] md:text-xs font-bold text-white leading-tight">Base</div>
+                            <div className="text-[10px] md:text-xs font-bold text-white mb-1 leading-tight">Points</div>
+                            <div className={`${badgeGradient} px-3 md:px-4 py-1.5 md:py-2 rounded-lg`}>
+                              <div className="text-sm md:text-base font-black text-gray-900">{currentTier.pointsPerHour}x</div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      {/* Total Multiplier - color based on multiplier value */}
+                      {(() => {
+                        const totalMultiplier = lpData && lpData.lpMultiplier > 1 ? lpData.lpMultiplier : 1;
+                        let badgeGradient = 'bg-gray-600'; // default for 1x
+                        if (totalMultiplier >= 100) {
+                          badgeGradient = 'bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500';
+                        } else if (totalMultiplier >= 10) {
+                          badgeGradient = 'bg-gradient-to-br from-slate-300 via-slate-400 to-gray-500';
+                        } else if (totalMultiplier >= 3) {
+                          badgeGradient = 'bg-gradient-to-br from-orange-600 via-amber-700 to-yellow-800';
+                        }
+                        return (
+                          <div className="flex flex-col items-center">
+                            <div className="text-[10px] md:text-xs font-bold text-white leading-tight">Total</div>
+                            <div className="text-[10px] md:text-xs font-bold text-white mb-1 leading-tight">multiplier</div>
+                            <div className={`${badgeGradient} px-3 md:px-4 py-1.5 md:py-2 rounded-lg`}>
+                              <div className="text-sm md:text-base font-black text-gray-900">{totalMultiplier}x</div>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
