@@ -16,6 +16,20 @@ interface LpData {
   amyPriceUsd: number;
 }
 
+interface TokenHolding {
+  token: string;
+  address: string;
+  balance: number;
+  priceUsd: number;
+  valueUsd: number;
+  multiplier: number;
+  isActive: boolean;
+}
+
+interface TokenHoldingsData {
+  sailr: TokenHolding;
+  plvhedge: TokenHolding;
+}
 interface DynamicPoolData {
   tvl: string;
   apy: string;
@@ -470,6 +484,8 @@ const parsePoints = (points: string): number => {
 export default function EarnPage() {
   const account = useActiveAccount();
   const [lpData, setLpData] = useState<LpData | null>(TEST_MODE ? MOCK_LP_DATA : null);
+  const [tokenData, setTokenData] = useState<TokenHoldingsData | null>(null);
+  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
   const [isLoadingLp, setIsLoadingLp] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [showSortMenu, setShowSortMenu] = useState(false);
@@ -523,10 +539,30 @@ export default function EarnPage() {
     }
   }, [account?.address]);
 
+  // Fetch token holdings data (SAIL.r, plvHEDGE)
+  const fetchTokenData = useCallback(async () => {
+    if (!account?.address) return;
+
+    setIsLoadingTokens(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/tokens/${account.address}`);
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        setTokenData(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching token data:', error);
+    } finally {
+      setIsLoadingTokens(false);
+    }
+  }, [account?.address]);
+
   // Fetch LP data when wallet connects
   useEffect(() => {
     if (account?.address) {
       fetchLpData();
+      fetchTokenData();
     } else {
       setLpData(null);
     }
@@ -534,6 +570,8 @@ export default function EarnPage() {
 
   // Check if user has active LP position (or TEST_MODE is enabled)
   const hasActiveLp = TEST_MODE || (lpData && lpData.lpValueUsd > 0 && lpData.positionsFound > 0);
+  const hasActiveTokens = tokenData && (tokenData.sailr?.isActive || tokenData.plvhedge?.isActive);
+  const hasAnyActivePosition = hasActiveLp || hasActiveTokens;
 
   // Helper to get dynamic value for a strategy
   const getDynamicTvl = (strategy: Strategy) => {
@@ -583,8 +621,68 @@ export default function EarnPage() {
             <div className="bg-gray-900/60 rounded-2xl border border-gray-700/50 p-8 flex justify-center">
               <div className="loading-spinner w-8 h-8" />
             </div>
-          ) : hasActiveLp ? (
-            <ActivePositionCard lpData={lpData || MOCK_LP_DATA} />
+          ) : hasAnyActivePosition ? (
+            <>
+              {hasActiveLp && <ActivePositionCard lpData={lpData || MOCK_LP_DATA} />}
+              {tokenData?.sailr?.isActive && (
+                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
+                  <div className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-white flex items-center justify-center">
+                        <img src="/sail.jpg" alt="SAIL.r" className="w-12 h-12 object-contain" />
+                      </div>
+                      <div>
+                        <div className="text-white font-bold">SAIL.r</div>
+                        <div className="text-sm text-gray-400">Liquid Royalty</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-yellow-400 font-bold">{tokenData.sailr.multiplier}x</div>
+                      <div className="text-xs text-gray-400">multiplier</div>
+                    </div>
+                  </div>
+                  <div className="px-4 pb-4 grid grid-cols-2 gap-4">
+                    <div className="bg-gray-800/60 rounded-lg p-3">
+                      <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
+                      <div className="text-lg font-bold text-white">{tokenData.sailr.balance.toFixed(2)}</div>
+                    </div>
+                    <div className="bg-gray-800/60 rounded-lg p-3">
+                      <div className="text-xs text-gray-500 uppercase mb-1">Value</div>
+                      <div className="text-lg font-bold text-white">${tokenData.sailr.valueUsd.toFixed(2)}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {tokenData?.plvhedge?.isActive && (
+                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
+                  <div className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-white flex items-center justify-center">
+                        <img src="/plvhedge.jpg" alt="plvHEDGE" className="w-12 h-12 object-contain" />
+                      </div>
+                      <div>
+                        <div className="text-white font-bold">plvHEDGE</div>
+                        <div className="text-sm text-gray-400">Plutus</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-yellow-400 font-bold">{tokenData.plvhedge.multiplier}x</div>
+                      <div className="text-xs text-gray-400">multiplier</div>
+                    </div>
+                  </div>
+                  <div className="px-4 pb-4 grid grid-cols-2 gap-4">
+                    <div className="bg-gray-800/60 rounded-lg p-3">
+                      <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
+                      <div className="text-lg font-bold text-white">{tokenData.plvhedge.balance.toFixed(2)}</div>
+                    </div>
+                    <div className="bg-gray-800/60 rounded-lg p-3">
+                      <div className="text-xs text-gray-500 uppercase mb-1">Value</div>
+                      <div className="text-lg font-bold text-white">${tokenData.plvhedge.valueUsd.toFixed(2)}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="bg-gray-900/60 rounded-2xl border border-gray-700/50 p-8 text-center">
               <p className="text-gray-400 mb-4">You don&apos;t have any yield earning assets currently.</p>

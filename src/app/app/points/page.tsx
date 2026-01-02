@@ -35,6 +35,21 @@ interface LpData {
   amyPriceUsd: number;
 }
 
+interface TokenHolding {
+  token: string;
+  address: string;
+  balance: number;
+  priceUsd: number;
+  valueUsd: number;
+  multiplier: number;
+  isActive: boolean;
+}
+
+interface TokenHoldingsData {
+  sailr: TokenHolding;
+  plvhedge: TokenHolding;
+}
+
 const TIERS: Record<string, TierInfo> = {
   platinum: { minBalance: 100000, pointsPerHour: 10, name: 'Platinum', emoji: '💎' },
   gold: { minBalance: 10000, pointsPerHour: 5, name: 'Gold', emoji: '🥇' },
@@ -63,6 +78,26 @@ const MOCK_LP_DATA: LpData = {
   inRangePositions: 2,
   isInRange: true,
   amyPriceUsd: 0.0042,
+};
+const MOCK_TOKEN_DATA: TokenHoldingsData = {
+  sailr: {
+    token: 'SAIL.r',
+    address: '0x59a61B8d3064A51a95a5D6393c03e2152b1a2770',
+    balance: 250,
+    priceUsd: 2.5,
+    valueUsd: 625,
+    multiplier: 10,
+    isActive: true,
+  },
+  plvhedge: {
+    token: 'plvHEDGE',
+    address: '0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',
+    balance: 50,
+    priceUsd: 1.2,
+    valueUsd: 60,
+    multiplier: 3,
+    isActive: true,
+  },
 };
 
 // Multiplier Badge Component
@@ -385,6 +420,8 @@ export default function PointsPage() {
 
   const [pointsData, setPointsData] = useState<PointsData | null>(TEST_MODE ? MOCK_POINTS_DATA : null);
   const [lpData, setLpData] = useState<LpData | null>(TEST_MODE ? MOCK_LP_DATA : null);
+  const [tokenData, setTokenData] = useState<TokenHoldingsData | null>(TEST_MODE ? MOCK_TOKEN_DATA : null);
+  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingLp, setIsLoadingLp] = useState(false);
   const [displayPoints, setDisplayPoints] = useState(TEST_MODE ? MOCK_POINTS_DATA.totalPoints : 0);
@@ -454,13 +491,33 @@ export default function PointsPage() {
     }
   }, [walletAddress]);
 
-  // Fetch points and LP data when wallet connects
+  // Fetch token holdings data (SAIL.r, plvHEDGE)
+  const fetchTokenData = useCallback(async () => {
+    if (!walletAddress || TEST_MODE) return;
+
+    setIsLoadingTokens(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/tokens/${walletAddress}`);
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        setTokenData(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching token data:', error);
+    } finally {
+      setIsLoadingTokens(false);
+    }
+  }, [walletAddress]);
+
+  // Fetch points, LP data, and token data when wallet connects
   useEffect(() => {
     if (walletAddress) {
       fetchPointsData();
       fetchLpData();
+      fetchTokenData();
     }
-  }, [walletAddress, fetchPointsData, fetchLpData]);
+  }, [walletAddress, fetchPointsData, fetchLpData, fetchTokenData]);
 
   // Animate points counter (increment based on points per hour)
   useEffect(() => {
@@ -502,12 +559,13 @@ export default function PointsPage() {
                 {/* Points Balance */}
                 <div className="text-center mb-6">
                   <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Your Points Balance</div>
-                  <div className="flex items-center justify-center gap-4 md:gap-6">
+                  {/* Desktop: side by side, Mobile: stacked */}
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
                     <div className="text-5xl md:text-7xl font-black hero-text">
                       {displayPoints.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
-                    {/* Base Points and Total Multiplier badges */}
-                    <div className="flex flex-row gap-3 md:gap-4">
+                    {/* Base Points, Total Multiplier, and Points Per Hour badges */}
+                    <div className="flex flex-row items-end gap-2 md:gap-3">
                       {/* Base Points - color based on tier */}
                       {(() => {
                         const tierName = currentTier.name.toLowerCase();
@@ -531,9 +589,18 @@ export default function PointsPage() {
                           </div>
                         );
                       })()}
+                      {/* X symbol */}
+                      <div className="flex items-center pb-1.5 md:pb-2">
+                        <span className="text-white font-bold text-sm md:text-base">X</span>
+                      </div>
                       {/* Total Multiplier - color based on multiplier value */}
                       {(() => {
-                        const totalMultiplier = lpData && lpData.lpMultiplier > 1 ? lpData.lpMultiplier : 1;
+                        // Calculate total multiplier from all badges (additive)
+                        const lpMult = lpData && lpData.lpMultiplier > 1 ? lpData.lpMultiplier : 0;
+                        const sailrMult = tokenData && tokenData.sailr.multiplier > 1 ? tokenData.sailr.multiplier : 0;
+                        const plvhedgeMult = tokenData && tokenData.plvhedge.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult);
+
                         let badgeGradient = 'bg-gray-600'; // default for 1x
                         if (totalMultiplier >= 100) {
                           badgeGradient = 'bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500';
@@ -548,6 +615,28 @@ export default function PointsPage() {
                             <div className="text-[10px] md:text-xs font-bold text-white mb-1 leading-tight">multiplier</div>
                             <div className={`${badgeGradient} px-3 md:px-4 py-1.5 md:py-2 rounded-lg`}>
                               <div className="text-sm md:text-base font-black text-gray-900">{totalMultiplier}x</div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      {/* = symbol */}
+                      <div className="flex items-center pb-1.5 md:pb-2">
+                        <span className="text-white font-bold text-sm md:text-base">=</span>
+                      </div>
+                      {/* Points Per Hour */}
+                      {(() => {
+                        // Calculate total multiplier from all badges (additive)
+                        const lpMult = lpData && lpData.lpMultiplier > 1 ? lpData.lpMultiplier : 0;
+                        const sailrMult = tokenData && tokenData.sailr.multiplier > 1 ? tokenData.sailr.multiplier : 0;
+                        const plvhedgeMult = tokenData && tokenData.plvhedge.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult);
+                        const pointsPerHour = currentTier.pointsPerHour * totalMultiplier;
+                        return (
+                          <div className="flex flex-col items-center">
+                            <div className="text-[10px] md:text-xs font-bold text-white leading-tight">Points</div>
+                            <div className="text-[10px] md:text-xs font-bold text-white mb-1 leading-tight">per hr</div>
+                            <div className="bg-gradient-to-br from-pink-500 via-pink-600 to-rose-600 px-3 md:px-4 py-1.5 md:py-2 rounded-lg">
+                              <div className="text-sm md:text-base font-black text-white">{pointsPerHour.toLocaleString()}</div>
                             </div>
                           </div>
                         );
@@ -715,11 +804,14 @@ export default function PointsPage() {
               image="/plvhedge.jpg"
               description="Rewarding users who deploy capital into the plvHEDGE delta-neutral strategy. plvHEDGE is an automated vault with dynamic yield sourcing, designed to generate yield while managing market exposure across chains. Powered by Plutus."
               multipliers={[
-                { requirement: 'Level 1', multiplier: 'TBC' },
-                { requirement: 'Level 2', multiplier: 'TBC' },
-                { requirement: 'Level 3', multiplier: 'TBC' },
+                { requirement: '$10+ holdings', multiplier: 'x3' },
+                { requirement: '$100+ holdings', multiplier: 'x5' },
+                { requirement: '$500+ holdings', multiplier: 'x10' },
               ]}
-              isActive={false}
+              isActive={tokenData ? tokenData.plvhedge.isActive : false}
+              currentMultiplier={tokenData && tokenData.plvhedge.multiplier > 1 ? `${tokenData.plvhedge.multiplier}x` : undefined}
+              actionUrl="https://plutus.fi"
+              actionLabel="View plvHEDGE"
             />
 
             {/* 4. SAIL.r */}
@@ -729,11 +821,12 @@ export default function PointsPage() {
               image="/sail.jpg"
               description="Rewarding users who hold SAIL.r, a royalty token backed by real e-commerce revenue. SAIL.r represents a claim on revenue from e-commerce brands, with holders receiving monthly stablecoin distributions based on their share of tokens held. Powered by Liquid Royalty."
               multipliers={[
-                { requirement: 'Level 1', multiplier: 'TBC' },
-                { requirement: 'Level 2', multiplier: 'TBC' },
-                { requirement: 'Level 3', multiplier: 'TBC' },
+                { requirement: '$10+ holdings', multiplier: 'x3' },
+                { requirement: '$100+ holdings', multiplier: 'x5' },
+                { requirement: '$500+ holdings', multiplier: 'x10' },
               ]}
-              isActive={false}
+              isActive={tokenData ? tokenData.sailr.isActive : false}
+              currentMultiplier={tokenData && tokenData.sailr.multiplier > 1 ? `${tokenData.sailr.multiplier}x` : undefined}
               actionUrl="https://www.liquidroyalty.com/invest"
               actionLabel="View SAIL.r"
             />

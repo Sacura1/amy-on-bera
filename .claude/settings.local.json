@@ -20,7 +20,9 @@
       "WebFetch(domain:api.plutus.fi)",
       "WebFetch(domain:api.geckoterminal.com)",
       "WebFetch(domain:scan.liquidroyalty.com)",
-      "WebFetch(domain:berascan.com)"
+      "WebFetch(domain:berascan.com)",
+      "WebFetch(domain:blog.thirdweb.com)",
+      "Bash(powershell -Command:*)"
     ]
   }
 }

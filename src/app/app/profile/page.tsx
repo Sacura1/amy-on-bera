@@ -1,10 +1,20 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useActiveAccount } from 'thirdweb/react';
+import { useActiveAccount, useLinkProfile, useProfiles } from 'thirdweb/react';
 import { useSearchParams } from 'next/navigation';
 import { useAmyBalance } from '@/hooks';
 import { API_BASE_URL, MINIMUM_AMY_BALANCE, ADMIN_WALLETS } from '@/lib/constants';
+import { client } from '@/app/client';
+import {
+  ProfileCard,
+  BadgeSelector,
+  SocialConnections,
+  ProfileEditor,
+  NewUserView,
+  CustomiseSection,
+  // EmailVerificationModal - Commented out until SendGrid implementation is ready
+} from './components';
 
 function ProfilePageContent() {
   const searchParams = useSearchParams();
@@ -19,12 +29,36 @@ function ProfilePageContent() {
   const [referralCount, setReferralCount] = useState(0);
   const [referralInputStatus, setReferralInputStatus] = useState('');
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
+  const [currentTier, setCurrentTier] = useState('none');
+  const [totalMultiplier, setTotalMultiplier] = useState(1);
+  const [pointsPerHour, setPointsPerHour] = useState(0);
+  const [userPoints, setUserPoints] = useState(0);
+
+  // Social connection states
+  const [discordConnected, setDiscordConnected] = useState(false);
+  const [telegramConnected, setTelegramConnected] = useState(false);
+  const [emailConnected, setEmailConnected] = useState(false);
+
+  // Customization states
+  const [currentBackground, setCurrentBackground] = useState('bg_default');
+  const [currentFilter, setCurrentFilter] = useState('filter_none');
+  const [currentAnimation, setCurrentAnimation] = useState('anim_none');
+
+  // Modal states
+  const [showBadgeSelector, setShowBadgeSelector] = useState(false);
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
+  // const [showEmailModal, setShowEmailModal] = useState(false); // Commented out until SendGrid implementation is ready
+  const [profileKey, setProfileKey] = useState(0); // For refreshing ProfileCard
 
   // Admin state
   const [leaderboardInput, setLeaderboardInput] = useState('');
   const [isUploadingLeaderboard, setIsUploadingLeaderboard] = useState(false);
   const [leaderboardStatus, setLeaderboardStatus] = useState('');
   const [isDownloadingUsers, setIsDownloadingUsers] = useState(false);
+
+  // Thirdweb social linking
+  const { mutate: linkProfile, isPending: isLinkingProfile } = useLinkProfile();
+  const { data: linkedProfiles, refetch: refetchProfiles } = useProfiles({ client });
 
   // Check if current wallet is admin
   const isAdmin = walletAddress ? ADMIN_WALLETS.includes(walletAddress.toLowerCase()) : false;
@@ -33,7 +67,6 @@ function ProfilePageContent() {
     if (!walletAddress) return;
 
     try {
-      // Check user verification status from backend
       const response = await fetch(`${API_BASE_URL}/api/status/${walletAddress}`);
       const data = await response.json();
 
@@ -50,7 +83,7 @@ function ProfilePageContent() {
     if (!walletAddress) return;
 
     try {
-      // Fetch referral data from backend
+      // Fetch referral data
       const response = await fetch(`${API_BASE_URL}/api/referral/${walletAddress}`);
       const data = await response.json();
 
@@ -65,12 +98,48 @@ function ProfilePageContent() {
           setReferralCount(data.data.referralCount);
         }
       }
+
+      // Fetch points data to get tier and multiplier info
+      const pointsRes = await fetch(`${API_BASE_URL}/api/points/${walletAddress}`);
+      const pointsData = await pointsRes.json();
+      if (pointsData.success && pointsData.data) {
+        setCurrentTier(pointsData.data.currentTier || 'none');
+        setTotalMultiplier(pointsData.data.totalMultiplier || 1);
+        setPointsPerHour(pointsData.data.effectivePointsPerHour || pointsData.data.pointsPerHour || 0);
+        setUserPoints(pointsData.data.totalPoints || 0);
+      }
+
+      // Fetch social connection status
+      try {
+        const socialRes = await fetch(`${API_BASE_URL}/api/social/${walletAddress}`);
+        const socialData = await socialRes.json();
+        if (socialData.success && socialData.data) {
+          setDiscordConnected(!!socialData.data.discord || !!socialData.data.discordUsername);
+          setTelegramConnected(!!socialData.data.telegram || !!socialData.data.telegramUsername);
+          setEmailConnected(!!socialData.data.email);
+        }
+      } catch (err) {
+        console.error('Error fetching social data:', err);
+      }
+
+      // Fetch customization data
+      try {
+        const profileRes = await fetch(`${API_BASE_URL}/api/profile/${walletAddress}`);
+        const profileData = await profileRes.json();
+        if (profileData.success && profileData.data?.profile) {
+          const profile = profileData.data.profile;
+          if (profile.backgroundId) setCurrentBackground(profile.backgroundId);
+          if (profile.filterId) setCurrentFilter(profile.filterId);
+          if (profile.animationId) setCurrentAnimation(profile.animationId);
+        }
+      } catch (err) {
+        console.error('Error fetching profile data:', err);
+      }
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   }, [walletAddress]);
 
-  // Check X connection status when wallet is connected
   useEffect(() => {
     if (walletAddress) {
       checkXStatus();
@@ -78,87 +147,262 @@ function ProfilePageContent() {
     }
   }, [walletAddress, checkXStatus, fetchUserData]);
 
-  // Handle OAuth callback - read URL params and save to backend
+  // Update balance on backend when balance is loaded (separate from fetchUserData to avoid race condition)
+  useEffect(() => {
+    if (!walletAddress || !balance || balance <= 0) return;
+    
+    const updateBalance = async () => {
+      try {
+        await fetch(`${API_BASE_URL}/api/points/update-balance`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            wallet: walletAddress,
+            amyBalance: balance,
+            xUsername: xUsername || undefined
+          })
+        });
+        // Refetch points data after balance update
+        const pointsRes = await fetch(`${API_BASE_URL}/api/points/${walletAddress}`);
+        const pointsData = await pointsRes.json();
+        if (pointsData.success && pointsData.data) {
+          setCurrentTier(pointsData.data.currentTier || 'none');
+          setTotalMultiplier(pointsData.data.totalMultiplier || 1);
+          setPointsPerHour(pointsData.data.effectivePointsPerHour || pointsData.data.pointsPerHour || 0);
+          setUserPoints(pointsData.data.totalPoints || 0);
+        }
+      } catch (err) {
+        console.error('Error updating balance:', err);
+      }
+    };
+    updateBalance();
+  }, [walletAddress, balance, xUsername]);
+
+  // Handle OAuth callback
   useEffect(() => {
     const xConnectedParam = searchParams.get('x_connected');
     const usernameParam = searchParams.get('username');
     const walletParam = searchParams.get('wallet');
     const errorParam = searchParams.get('error');
 
-    // Handle error cases
     if (errorParam) {
       console.error('OAuth error:', errorParam, searchParams.get('reason'), searchParams.get('details'));
       return;
     }
 
-    // Handle successful OAuth callback
     if (xConnectedParam === 'true' && usernameParam && walletParam) {
-      console.log('OAuth success - saving user:', usernameParam, walletParam);
-
-      // Update UI immediately
       setXConnected(true);
       setXUsername(usernameParam);
 
-      // Save to backend (single endpoint handles all tables)
-      const saveOAuthUser = async () => {
+      const saveUserToBackend = async () => {
         try {
-          const response = await fetch(`${API_BASE_URL}/api/oauth/save`, {
+          await fetch(`${API_BASE_URL}/api/oauth/save`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               wallet: walletParam,
               xUsername: usernameParam,
-              amyBalance: balance || 0
+              amyBalance: balance
             }),
           });
-
-          const data = await response.json();
-          if (data.success) {
-            console.log('OAuth user saved successfully');
-          } else {
-            console.error('Failed to save OAuth user:', data.error);
-          }
-
-          // Clean up URL params
-          window.history.replaceState({}, '', '/app/profile');
         } catch (error) {
-          console.error('Error saving OAuth user:', error);
+          console.error('Error saving user:', error);
         }
       };
 
-      saveOAuthUser();
+      saveUserToBackend();
     }
   }, [searchParams, balance]);
 
   const connectX = () => {
-    if (!walletAddress) {
-      alert('Please connect your wallet first');
-      return;
-    }
-
-    // Redirect to X OAuth
+    if (!walletAddress) return;
     window.location.href = `${API_BASE_URL}/auth/x?wallet=${walletAddress}`;
+  };
+
+  // Sync linked profiles to backend
+  const syncLinkedProfiles = useCallback(async () => {
+    if (!walletAddress || !linkedProfiles) return;
+
+    try {
+      // Extract usernames from linked profiles
+      // Backend expects: discord, telegram, email (not discordUsername, etc.)
+      const profileData: Record<string, string> = {};
+
+      for (const profile of linkedProfiles) {
+        // Get the profile details as any to access dynamic properties
+        const details = profile.details as Record<string, unknown> | undefined;
+        console.log(`Profile type: ${profile.type}, details:`, details);
+
+        if (profile.type === 'discord') {
+          // Try multiple fields for Discord username
+          const username = (details?.username as string) ||
+                          (details?.name as string) ||
+                          (details?.id as string) ||
+                          null;
+          if (username && username !== 'connected') {
+            profileData.discord = username;
+          }
+          setDiscordConnected(true);
+        }
+        if (profile.type === 'telegram') {
+          // Try multiple fields for Telegram username
+          const username = (details?.username as string) ||
+                          (details?.first_name as string) ||
+                          (details?.id as string) ||
+                          null;
+          if (username && username !== 'connected') {
+            profileData.telegram = username;
+          }
+          setTelegramConnected(true);
+        }
+        if (profile.type === 'email' && details?.email) {
+          profileData.email = details.email as string;
+          setEmailConnected(true);
+        }
+      }
+
+      // Sync to backend only if we have real usernames (not just 'connected')
+      if (Object.keys(profileData).length > 0) {
+        await fetch(`${API_BASE_URL}/api/social/sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wallet: walletAddress, ...profileData })
+        });
+      }
+    } catch (error) {
+      console.error('Error syncing linked profiles:', error);
+    }
+  }, [walletAddress, linkedProfiles]);
+
+  // Effect to sync profiles when they change
+  useEffect(() => {
+    if (linkedProfiles && linkedProfiles.length > 0) {
+      syncLinkedProfiles();
+    }
+  }, [linkedProfiles, syncLinkedProfiles]);
+
+  // Social connection handlers using Thirdweb useLinkProfile
+  const connectDiscord = async () => {
+    try {
+      const result = await linkProfile({ client, strategy: 'discord' });
+      console.log('Discord linkProfile result:', result);
+
+      // Set connected state immediately
+      setDiscordConnected(true);
+
+      // Try to extract username from result
+      const profiles = result?.profiles || [];
+      const discordProfile = profiles.find((p: { type: string }) => p.type === 'discord');
+      const details = discordProfile?.details as Record<string, unknown> | undefined;
+      const username = (details?.username as string) ||
+                      (details?.name as string) ||
+                      (details?.id as string) ||
+                      null;
+
+      // Sync to backend only if we have a real username
+      if (walletAddress && username) {
+        try {
+          await fetch(`${API_BASE_URL}/api/social/sync`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              wallet: walletAddress,
+              discord: username
+            })
+          });
+        } catch (syncError) {
+          console.error('Error syncing Discord to backend:', syncError);
+        }
+      }
+
+      // Refetch profiles to update any other state
+      await refetchProfiles();
+    } catch (error) {
+      console.error('Error connecting Discord:', error);
+      alert('Failed to connect Discord. Please try again.');
+    }
+  };
+
+  const connectTelegram = async () => {
+    try {
+      const result = await linkProfile({ client, strategy: 'telegram' });
+      console.log('Telegram linkProfile result:', result);
+
+      // Set connected state immediately
+      setTelegramConnected(true);
+
+      // Try to extract username from result
+      const profiles = result?.profiles || [];
+      const telegramProfile = profiles.find((p: { type: string }) => p.type === 'telegram');
+      const details = telegramProfile?.details as Record<string, unknown> | undefined;
+      const username = (details?.username as string) ||
+                      (details?.first_name as string) ||
+                      (details?.id as string) ||
+                      null;
+
+      // Sync to backend only if we have a real username
+      if (walletAddress && username) {
+        try {
+          await fetch(`${API_BASE_URL}/api/social/sync`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              wallet: walletAddress,
+              telegram: username
+            })
+          });
+        } catch (syncError) {
+          console.error('Error syncing Telegram to backend:', syncError);
+        }
+      }
+
+      await refetchProfiles();
+    } catch (error) {
+      console.error('Error connecting Telegram:', error);
+      alert('Failed to connect Telegram. Please try again.');
+    }
+  };
+
+  // Email connection - Commented out until SendGrid implementation is ready
+  const connectEmail = () => {
+    // setShowEmailModal(true);
+    console.log('Email connection coming soon');
+  };
+
+  // const handleEmailSuccess = async () => {
+  //   setEmailConnected(true);
+  //
+  //   // Sync email to backend
+  //   if (walletAddress) {
+  //     try {
+  //       // We'll get the email from the linked profiles after refetch
+  //       await refetchProfiles();
+  //     } catch (error) {
+  //       console.error('Error syncing email:', error);
+  //     }
+  //   }
+  // };
+
+  // Callback when customization is applied
+  const handleCustomizationApplied = () => {
+    fetchUserData();
   };
 
   const generateReferralCode = async () => {
     if (!walletAddress) return;
-
     setIsGeneratingCode(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/referral/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet: walletAddress, xUsername, amyBalance: balance }),
+        body: JSON.stringify({ wallet: walletAddress }),
       });
       const data = await response.json();
-
       if (data.success && data.referralCode) {
         setUserReferralCode(data.referralCode);
-      } else {
-        alert(data.error || 'Failed to generate referral code');
       }
     } catch (error) {
-      console.error('Error generating referral code:', error);
+      console.error('Error generating code:', error);
     } finally {
       setIsGeneratingCode(false);
     }
@@ -166,50 +410,42 @@ function ProfilePageContent() {
 
   const useReferralCode = async () => {
     if (!walletAddress || !referralCode.trim()) return;
-
+    setReferralInputStatus('Submitting...');
     try {
       const response = await fetch(`${API_BASE_URL}/api/referral/use`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet: walletAddress, referralCode: referralCode.toUpperCase() }),
+        body: JSON.stringify({ wallet: walletAddress, referralCode: referralCode.trim() }),
       });
       const data = await response.json();
-
       if (data.success) {
-        setUsedReferralCode(referralCode.toUpperCase());
-        setReferralInputStatus('Referral code applied successfully!');
+        setUsedReferralCode(referralCode.trim());
+        setReferralInputStatus(data.message || 'Referral code applied!');
       } else {
         setReferralInputStatus(data.error || 'Failed to apply referral code');
       }
     } catch (error) {
-      console.error('Error using referral code:', error);
       setReferralInputStatus('Error applying referral code');
     }
   };
 
-  const copyReferralCode = () => {
-    navigator.clipboard.writeText(userReferralCode);
-    alert('Referral code copied!');
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
   };
 
-  const copyReferralLink = () => {
-    const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/app/profile?ref=${userReferralCode}`;
-    navigator.clipboard.writeText(link);
-    alert('Referral link copied!');
-  };
-
-  // Admin: Download all holders (X + wallet connected with 300+ AMY)
+  // Admin functions
   const downloadUsersList = async () => {
     if (!walletAddress || !isAdmin) return;
-
     setIsDownloadingUsers(true);
     try {
-      // Get all holders (anyone with X + wallet + 300+ AMY) - admin endpoint includes all
       const response = await fetch(`${API_BASE_URL}/api/holders/all?wallet=${walletAddress}`);
       const data = await response.json();
 
       if (data.success && data.holders) {
-        // Format as CSV
         const headers = ['X Username', 'Wallet Address', 'AMY Balance', 'First Recorded', 'Last Updated'];
         const rows = data.holders.map((holder: { xUsername: string; wallet: string; amyBalance: number; firstRecordedAt: string; lastUpdatedAt: string }) => [
           `@${holder.xUsername}`,
@@ -219,12 +455,7 @@ function ProfilePageContent() {
           new Date(holder.lastUpdatedAt).toLocaleString()
         ]);
 
-        const csvContent = [
-          headers.join(','),
-          ...rows.map((row: string[]) => row.join(','))
-        ].join('\n');
-
-        // Download as CSV file
+        const csvContent = [headers.join(','), ...rows.map((row: string[]) => row.join(','))].join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -243,10 +474,8 @@ function ProfilePageContent() {
     }
   };
 
-  // Admin: Upload leaderboard data
   const uploadLeaderboard = async () => {
     if (!walletAddress || !isAdmin) return;
-
     const lines = leaderboardInput.trim().split('\n').filter(line => line.trim());
     if (lines.length === 0) {
       setLeaderboardStatus('Please enter at least one X username');
@@ -257,30 +486,15 @@ function ProfilePageContent() {
     setLeaderboardStatus('');
 
     try {
-      // Parse usernames from various formats:
-      // - "1 JoeDark - @Joedark01"
-      // - "@username"
-      // - "username"
-      // Assign sequential positions based on order in the pasted data
       const entries: { position: number; xUsername: string }[] = [];
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        // Try to match @username pattern first (handles "Name - @username" format)
+      for (const line of lines) {
         const atMatch = line.match(/@([a-zA-Z0-9_]+)/);
         if (atMatch) {
-          entries.push({
-            position: entries.length + 1,
-            xUsername: atMatch[1].trim()
-          });
+          entries.push({ position: entries.length + 1, xUsername: atMatch[1].trim() });
         } else {
-          // Fallback: treat whole line as username (after removing numbers and trimming)
           const cleaned = line.replace(/^\d+\s*/, '').trim();
           if (cleaned.length > 0) {
-            entries.push({
-              position: entries.length + 1,
-              xUsername: cleaned
-            });
+            entries.push({ position: entries.length + 1, xUsername: cleaned });
           }
         }
       }
@@ -288,10 +502,7 @@ function ProfilePageContent() {
       const response = await fetch(`${API_BASE_URL}/api/leaderboard/bulk`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          wallet: walletAddress,
-          entries
-        }),
+        body: JSON.stringify({ wallet: walletAddress, entries }),
       });
       const data = await response.json();
 
@@ -309,102 +520,83 @@ function ProfilePageContent() {
     }
   };
 
+  // Show NewUserView if no wallet connected
+  if (!account) {
+    return (
+      <NewUserView
+        onConnectX={connectX}
+        onConnectDiscord={connectDiscord}
+        onConnectTelegram={connectTelegram}
+        onConnectEmail={connectEmail}
+      />
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
-      <div className="max-w-2xl mx-auto">
-        {/* X Account Connection Card */}
-        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-6">
-          <div className="flex items-center justify-between gap-3 flex-wrap md:flex-nowrap">
-            <div className="flex items-center gap-3 flex-1 min-w-[200px]">
-              <div className="icon-badge-small flex-shrink-0">𝕏</div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span
-                    className={`connection-status ${xConnected ? 'status-connected' : 'status-disconnected'}`}
-                  />
-                  <h3 className="text-lg md:text-xl font-bold text-yellow-400">X Account</h3>
-                </div>
-                <p className="text-xs text-gray-300">
-                  {xConnected ? 'Connected' : 'Not connected'}
-                </p>
-                {xUsername && (
-                  <p className="text-sm text-gray-200 mt-1 font-semibold">@{xUsername}</p>
-                )}
-              </div>
-            </div>
-            <button
-              onClick={connectX}
-              disabled={xConnected}
-              className="btn-samy btn-samy-enhanced text-white px-4 md:px-6 py-2 md:py-3 rounded-full text-sm md:text-base font-bold uppercase w-full md:w-auto disabled:opacity-50"
-            >
-              {xConnected ? 'CONNECTED' : 'CONNECT'}
-            </button>
-          </div>
-        </div>
-
-        {/* Balance Display */}
-        {account && (
-          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-6 mt-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="icon-badge-small">💰</div>
-                <div>
-                  <div className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1">
-                    Your Holdings
-                  </div>
-                  <div className="text-lg md:text-xl text-yellow-300 font-bold">$AMY Balance</div>
-                </div>
-              </div>
-              <div className="text-right">
-                {balanceLoading ? (
-                  <div className="loading-spinner w-8 h-8" />
-                ) : (
-                  <>
-                    <div className="text-3xl md:text-4xl font-black hero-text">
-                      {balance.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">tokens</div>
-                  </>
-                )}
-              </div>
-            </div>
-            <div className="mt-4 pt-4 border-t border-gray-700/50">
-              <div className="flex items-center justify-between text-xs md:text-sm">
-                <span className="text-gray-400">Minimum Required:</span>
-                <span className="text-yellow-300 font-bold">{MINIMUM_AMY_BALANCE} $AMY</span>
-              </div>
-            </div>
-          </div>
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* Profile Card */}
+        {xConnected && (
+          <ProfileCard
+            key={profileKey}
+            wallet={walletAddress || ''}
+            xUsername={xUsername}
+            tier={currentTier}
+            balance={balance}
+            totalMultiplier={totalMultiplier}
+            pointsPerHour={pointsPerHour}
+            onEditProfile={() => setShowProfileEditor(true)}
+            onEditBadges={() => setShowBadgeSelector(true)}
+            onConnectX={connectX}
+            onConnectDiscord={connectDiscord}
+            onConnectTelegram={connectTelegram}
+            onConnectEmail={connectEmail}
+            socialConnections={{
+              xConnected,
+              discordConnected,
+              telegramConnected,
+              emailConnected
+            }}
+          />
         )}
 
-        {/* Eligibility Status */}
-        {account && xConnected && (
-          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6 md:p-8 mt-6">
-            <div className="text-center">
-              <div className="icon-badge mx-auto mb-4">{isEligible ? '✅' : '⚠️'}</div>
-              <h3 className="text-xl md:text-2xl font-bold mb-2 text-white">
-                {isEligible ? 'You are Eligible!' : 'Not Yet Eligible'}
-              </h3>
-              <p className="text-xs md:text-sm text-gray-300">
-                {isEligible
-                  ? 'You hold enough $AMY to access all features.'
-                  : `You need at least ${MINIMUM_AMY_BALANCE} $AMY tokens to be eligible.`}
-              </p>
-            </div>
-          </div>
+        {/* Social Connections - Show only if X not connected */}
+        {!xConnected && (
+          <SocialConnections
+            wallet={walletAddress || ''}
+            xConnected={xConnected}
+            xUsername={xUsername}
+            discordConnected={discordConnected}
+            telegramConnected={telegramConnected}
+            emailConnected={emailConnected}
+            onXConnect={connectX}
+            onDiscordConnect={connectDiscord}
+            onTelegramConnect={connectTelegram}
+            onEmailConnect={connectEmail}
+          />
+        )}
+
+        {/* Customise Section */}
+        {xConnected && (
+          <CustomiseSection
+            wallet={walletAddress || ''}
+            currentBackground={currentBackground}
+            currentFilter={currentFilter}
+            currentAnimation={currentAnimation}
+            userPoints={userPoints}
+            onItemApplied={handleCustomizationApplied}
+          />
         )}
 
         {/* Referral Section */}
-        {account && isEligible && (
-          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 mt-6 overflow-hidden">
-            {/* Enter Referral Code Section */}
+        {isEligible && (
+          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden">
+            {/* Enter Referral Code */}
             {!usedReferralCode && (
               <div className="p-4 md:p-6 border-b border-gray-700/50">
-                <div className="mb-4">
-                  <h3 className="text-lg md:text-xl font-bold text-yellow-400 mb-2">
-                    Enter a referral code here (this cannot be changed):
-                  </h3>
-                </div>
+                <h3 className="text-lg md:text-xl font-bold text-yellow-400 mb-4">
+                  Enter a referral code here (cannot be changed):
+                </h3>
                 <div className="flex gap-3 flex-col sm:flex-row">
                   <input
                     type="text"
@@ -427,7 +619,7 @@ function ProfilePageContent() {
               </div>
             )}
 
-            {/* Already Used Referral Code Section */}
+            {/* Already Used Code */}
             {usedReferralCode && (
               <div className="p-4 md:p-6 border-b border-gray-700/50">
                 <div className="flex items-center gap-2 mb-2">
@@ -441,7 +633,7 @@ function ProfilePageContent() {
               </div>
             )}
 
-            {/* Your Referral Code Section */}
+            {/* Your Referral Code */}
             <div className="p-4 md:p-6 border-b border-gray-700/50">
               {!userReferralCode ? (
                 <div className="text-center">
@@ -451,52 +643,36 @@ function ProfilePageContent() {
                   <button
                     onClick={generateReferralCode}
                     disabled={isGeneratingCode}
-                    className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-base font-bold uppercase disabled:opacity-50"
+                    className="btn-samy btn-samy-enhanced text-white px-6 py-3 rounded-full text-base font-bold uppercase disabled:opacity-50"
                   >
                     {isGeneratingCode ? 'GENERATING...' : 'GENERATE CODE'}
                   </button>
                 </div>
               ) : (
-                <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 p-4 rounded-xl border-2 border-green-500/30">
-                  <div className="flex items-center justify-between flex-wrap gap-3">
-                    <div>
-                      <p className="text-green-400 font-bold text-sm mb-1">Your referral code:</p>
-                      <p className="text-2xl md:text-3xl font-black text-white font-mono tracking-wider">
-                        {userReferralCode}
-                      </p>
+                <div>
+                  <h3 className="text-lg font-bold text-yellow-400 mb-3">Your Referral Code</h3>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="bg-black/50 px-6 py-3 rounded-xl border-2 border-yellow-400/50 font-mono text-2xl text-yellow-300 font-bold tracking-wider">
+                      {userReferralCode}
                     </div>
                     <button
-                      onClick={copyReferralCode}
-                      className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2"
+                      onClick={() => copyToClipboard(userReferralCode)}
+                      className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm text-white font-semibold transition-colors"
                     >
-                      <span>📋</span>
-                      <span>COPY CODE</span>
+                      Copy Code
                     </button>
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-green-500/20">
-                    <p className="text-green-400 font-bold text-sm mb-2">Your referral link:</p>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm text-gray-300 font-mono bg-black/30 px-3 py-2 rounded-lg break-all flex-1">
-                        {typeof window !== 'undefined' ? window.location.origin : ''}/app/profile?ref=
-                        {userReferralCode}
-                      </p>
-                      <button
-                        onClick={copyReferralLink}
-                        className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap"
-                      >
-                        <span>🔗</span>
-                        <span>COPY LINK</span>
-                      </button>
-                    </div>
-                    <p className="text-gray-300 text-xs mt-3">
-                      Share your code or link for an increased multiplier on Amy Points
-                    </p>
+                    <button
+                      onClick={() => copyToClipboard(`${window.location.origin}/app/profile?ref=${userReferralCode}`)}
+                      className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm text-white font-semibold transition-colors"
+                    >
+                      Copy Link
+                    </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Completed Referrals Section */}
+            {/* Completed Referrals */}
             <div className="p-4 md:p-6">
               <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 p-4 rounded-xl border-2 border-purple-500/30">
                 <h3 className="text-purple-400 font-bold text-sm mb-2">Completed referrals:</h3>
@@ -510,9 +686,9 @@ function ProfilePageContent() {
           </div>
         )}
 
-        {/* Admin Section - Leaderboard Management */}
-        {account && isAdmin && (
-          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 mt-6 overflow-hidden">
+        {/* Admin Section */}
+        {isAdmin && (
+          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden">
             <div className="bg-gradient-to-r from-red-900/40 to-orange-900/40 p-4 md:p-5 border-b border-gray-700/50">
               <div className="flex items-center gap-3">
                 <div className="icon-badge-small">🔐</div>
@@ -520,7 +696,6 @@ function ProfilePageContent() {
               </div>
             </div>
 
-            {/* Download Holders Button */}
             <div className="p-4 md:p-6 border-b border-gray-700/50">
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
@@ -596,11 +771,33 @@ function ProfilePageContent() {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      <BadgeSelector
+        wallet={walletAddress || ''}
+        isOpen={showBadgeSelector}
+        onClose={() => setShowBadgeSelector(false)}
+        onBadgesUpdated={() => setProfileKey(prev => prev + 1)}
+      />
+
+      <ProfileEditor
+        wallet={walletAddress || ''}
+        isOpen={showProfileEditor}
+        onClose={() => setShowProfileEditor(false)}
+        onProfileUpdated={() => setProfileKey(prev => prev + 1)}
+      />
+
+      {/* EmailVerificationModal - Commented out until SendGrid implementation is ready
+      <EmailVerificationModal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        onSuccess={handleEmailSuccess}
+      />
+      */}
     </div>
   );
 }
 
-// Wrap with Suspense for useSearchParams
 export default function ProfilePage() {
   return (
     <Suspense fallback={

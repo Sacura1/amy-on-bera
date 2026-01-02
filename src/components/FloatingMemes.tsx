@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAnimations } from '@/contexts';
 
 const MEMES = ['🚀', '💎', '🌙', '⭐', '✨', '🔥', '💰', '🎉', '🐻', '🍯', '🏆', '💸', '📈', '🎯', '🎮', '👾'];
 
@@ -14,6 +15,7 @@ interface FloatingMeme {
 }
 
 export default function FloatingMemes() {
+  const { animationsEnabled } = useAnimations();
   const [memes, setMemes] = useState<FloatingMeme[]>([]);
 
   useEffect(() => {
@@ -30,6 +32,11 @@ export default function FloatingMemes() {
     }
     setMemes(generatedMemes);
   }, []);
+
+  // Don't render anything if animations are disabled
+  if (!animationsEnabled) {
+    return null;
+  }
 
   return (
     <div className="fixed w-full h-full pointer-events-none z-[1] overflow-hidden">

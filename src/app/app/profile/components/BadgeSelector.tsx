@@ -1,0 +1,395 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/lib/constants';
+
+interface LpData {
+  lpValueUsd: number;
+  lpMultiplier: number;
+  isInRange: boolean;
+}
+
+interface TokenHolding {
+  multiplier: number;
+  isActive: boolean;
+  valueUsd?: number;
+}
+
+interface TokenHoldingsData {
+  sailr: TokenHolding;
+  plvhedge: TokenHolding;
+}
+
+interface EquippedBadge {
+  slotNumber: number;
+  badgeId: string;
+}
+
+interface ActiveBadge {
+  id: string;
+  name: string;
+  title: string;
+  image: string;
+  multiplier: number;
+}
+
+interface BadgeSelectorProps {
+  wallet: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onBadgesUpdated: () => void;
+}
+
+// Helper to get the correct backend badge ID based on value tier
+function getLpBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'lp_x10';
+  if (valueUsd >= 100) return 'lp_x5';
+  if (valueUsd >= 10) return 'lp_x3';
+  return null;
+}
+
+function getSailrBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'sailr_x10';
+  if (valueUsd >= 100) return 'sailr_x5';
+  if (valueUsd >= 10) return 'sailr_x3';
+  return null;
+}
+
+function getPlvhedgeBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'plvhedge_x10';
+  if (valueUsd >= 100) return 'plvhedge_x5';
+  if (valueUsd >= 10) return 'plvhedge_x3';
+  return null;
+}
+
+export default function BadgeSelector({
+  wallet,
+  isOpen,
+  onClose,
+  onBadgesUpdated
+}: BadgeSelectorProps) {
+  const [equippedBadges, setEquippedBadges] = useState<EquippedBadge[]>([]);
+  const [lpData, setLpData] = useState<LpData | null>(null);
+  const [tokenData, setTokenData] = useState<TokenHoldingsData | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [selectedBadge, setSelectedBadge] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (!wallet || !isOpen) return;
+
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const profileRes = await fetch(`${API_BASE_URL}/api/profile/${wallet}`);
+        const profileData = await profileRes.json();
+        if (profileData.success && profileData.data.badges?.equipped) {
+          setEquippedBadges(profileData.data.badges.equipped);
+        }
+
+        const lpRes = await fetch(`${API_BASE_URL}/api/lp/${wallet}`);
+        const lpDataResponse = await lpRes.json();
+        if (lpDataResponse.success && lpDataResponse.data) {
+          setLpData(lpDataResponse.data);
+        }
+
+        const tokenRes = await fetch(`${API_BASE_URL}/api/tokens/${wallet}`);
+        const tokenDataResponse = await tokenRes.json();
+        if (tokenDataResponse.success && tokenDataResponse.data) {
+          setTokenData(tokenDataResponse.data);
+        }
+      } catch (error) {
+        console.error('Error fetching badges:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [wallet, isOpen]);
+
+  // Reset selection when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedSlot(null);
+      setSelectedBadge(null);
+    }
+  }, [isOpen]);
+
+  const getActiveBadges = (): ActiveBadge[] => {
+    const active: ActiveBadge[] = [];
+
+    // LP (Bulla Exchange) badge - use the correct tier ID
+    if (lpData && lpData.lpValueUsd >= 10) {
+      const badgeId = getLpBadgeId(lpData.lpValueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          name: 'Bulla Exchange',
+          title: 'AMY/HONEY LP',
+          image: '/bulla.jpg',
+          multiplier: lpData.lpMultiplier
+        });
+      }
+    }
+
+    // plvHEDGE badge
+    if (tokenData && tokenData.plvhedge.isActive && tokenData.plvhedge.multiplier > 1) {
+      const valueUsd = tokenData.plvhedge.valueUsd || (tokenData.plvhedge.multiplier >= 100 ? 500 : tokenData.plvhedge.multiplier >= 10 ? 100 : 10);
+      const badgeId = getPlvhedgeBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          name: 'plvHEDGE',
+          title: 'Vault',
+          image: '/plvhedge.jpg',
+          multiplier: tokenData.plvhedge.multiplier
+        });
+      }
+    }
+
+    // SAIL.r badge
+    if (tokenData && tokenData.sailr.isActive && tokenData.sailr.multiplier > 1) {
+      const valueUsd = tokenData.sailr.valueUsd || (tokenData.sailr.multiplier >= 100 ? 500 : tokenData.sailr.multiplier >= 10 ? 100 : 10);
+      const badgeId = getSailrBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          name: 'SAIL.r',
+          title: 'Royalty',
+          image: '/sail.jpg',
+          multiplier: tokenData.sailr.multiplier
+        });
+      }
+    }
+
+    return active;
+  };
+
+  const activeBadges = getActiveBadges();
+
+  const getBadgeForSlot = (slotNumber: number) => {
+    const equipped = equippedBadges.find(b => b.slotNumber === slotNumber);
+    if (!equipped) return null;
+    return activeBadges.find(b => b.id === equipped.badgeId) || null;
+  };
+
+  const isBadgeEquipped = (badgeId: string) => equippedBadges.some(b => b.badgeId === badgeId);
+
+  const getMultiplierColors = (multiplier: number) => {
+    if (multiplier >= 100) return 'bg-yellow-500 text-yellow-950 border-yellow-300';
+    if (multiplier >= 10) return 'bg-slate-400 text-slate-900 border-slate-200';
+    return 'bg-amber-700 text-amber-200 border-amber-500';
+  };
+
+  const equipBadge = async () => {
+    if (selectedSlot === null || selectedBadge === null) return;
+
+    console.log('Equipping badge:', selectedBadge, 'to slot:', selectedSlot);
+
+    try {
+      setIsSaving(true);
+      const response = await fetch(`${API_BASE_URL}/api/badges/${wallet}/equip`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slotNumber: selectedSlot, badgeId: selectedBadge })
+      });
+      const data = await response.json();
+      console.log('Equip response:', data);
+
+      if (data.success) {
+        setEquippedBadges(data.data);
+        setSelectedSlot(null);
+        setSelectedBadge(null);
+        onBadgesUpdated();
+      } else {
+        alert(data.error || 'Failed to equip badge');
+      }
+    } catch (error) {
+      console.error('Error equipping badge:', error);
+      alert('Failed to equip badge');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const unequipBadge = async (slotNumber: number) => {
+    try {
+      setIsSaving(true);
+      const response = await fetch(`${API_BASE_URL}/api/badges/${wallet}/unequip`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slotNumber })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setEquippedBadges(data.data);
+        onBadgesUpdated();
+      }
+    } catch (error) {
+      console.error('Error unequipping badge:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  const canEquip = selectedSlot !== null && selectedBadge !== null && !isSaving;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+
+      <div className="relative bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-lg flex flex-col" style={{ maxHeight: '85vh' }}>
+        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+          <h2 className="text-xl font-bold text-white">Edit Multiplier Badges</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="p-4 overflow-y-auto flex-1">
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="loading-spinner w-8 h-8"></div>
+            </div>
+          ) : (
+            <>
+              {/* Slots */}
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  1. Select a slot
+                </h3>
+                <div className="flex justify-center gap-3">
+                  {[1, 2, 3, 4, 5].map((slotNumber) => {
+                    const badge = getBadgeForSlot(slotNumber);
+                    const isSelected = selectedSlot === slotNumber;
+                    return (
+                      <div
+                        key={slotNumber}
+                        className={`relative w-14 h-14 rounded-xl border-2 flex items-center justify-center cursor-pointer transition-all overflow-hidden ${
+                          isSelected
+                            ? 'border-yellow-400 bg-yellow-900/30 scale-110'
+                            : badge
+                            ? 'border-yellow-400/50 bg-white hover:border-yellow-400'
+                            : 'border-gray-600/50 bg-gray-800/50 border-dashed hover:border-gray-500'
+                        }`}
+                        onClick={() => setSelectedSlot(slotNumber)}
+                      >
+                        {badge ? (
+                          <>
+                            <img src={badge.image} alt={badge.name} className="w-10 h-10 object-contain" />
+                            <div className={`absolute -top-1 -left-1 text-[8px] font-black px-1 py-0.5 rounded z-10 border ${getMultiplierColors(badge.multiplier)}`}>
+                              x{badge.multiplier}
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); unequipBadge(slotNumber); }}
+                              className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white hover:bg-red-600"
+                              disabled={isSaving}
+                            >×</button>
+                          </>
+                        ) : (
+                          <span className={`text-sm ${isSelected ? 'text-yellow-400 font-bold' : 'text-gray-500'}`}>{slotNumber}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                {selectedSlot && (
+                  <p className="text-center text-sm text-yellow-400 mt-2">
+                    Slot {selectedSlot} selected
+                  </p>
+                )}
+              </div>
+
+              {/* Badges */}
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  2. Select a badge ({activeBadges.length} available)
+                </h3>
+                {activeBadges.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-gray-500 mb-2">No active multiplier badges yet.</p>
+                    <p className="text-gray-600 text-sm">Earn badges by providing LP on Bulla Exchange, holding SAIL.r, or plvHEDGE.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {activeBadges.map((badge) => {
+                      const isEquipped = isBadgeEquipped(badge.id);
+                      const isSelected = selectedBadge === badge.id;
+                      return (
+                        <div
+                          key={badge.id}
+                          onClick={() => {
+                            if (!isEquipped) {
+                              setSelectedBadge(badge.id);
+                            }
+                          }}
+                          className={`p-3 rounded-xl border-2 transition-all ${
+                            isEquipped
+                              ? 'border-green-500/50 bg-green-900/30 cursor-not-allowed opacity-60'
+                              : isSelected
+                              ? 'border-yellow-400 bg-yellow-900/30 cursor-pointer'
+                              : 'border-gray-600 bg-gray-800 hover:border-gray-500 cursor-pointer'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white flex items-center justify-center flex-shrink-0">
+                              <img src={badge.image} alt={badge.name} className="w-10 h-10 object-contain" />
+                              <div className={`absolute -top-1 -left-1 text-[8px] font-black px-1 py-0.5 rounded z-10 border ${getMultiplierColors(badge.multiplier)}`}>
+                                x{badge.multiplier}
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-white text-sm truncate">{badge.name}</p>
+                              <p className="text-xs text-gray-400 truncate">{badge.title}</p>
+                            </div>
+                            {isEquipped ? (
+                              <span className="text-green-400 text-xs font-bold">Already equipped</span>
+                            ) : isSelected ? (
+                              <span className="text-yellow-400 text-xs font-bold">Selected</span>
+                            ) : null}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Status message */}
+              {selectedSlot && selectedBadge && (
+                <div className="bg-yellow-900/30 border border-yellow-500/50 rounded-lg p-3 text-center">
+                  <p className="text-yellow-400 text-sm">
+                    Ready to equip badge to slot {selectedSlot}
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="p-4 border-t border-gray-700 flex gap-3">
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-gray-600 text-gray-300 font-semibold hover:bg-gray-800 transition-colors">
+            Cancel
+          </button>
+          <button
+            onClick={equipBadge}
+            disabled={!canEquip}
+            className={`flex-1 py-3 rounded-xl font-bold transition-colors ${
+              canEquip
+                ? 'bg-yellow-500 hover:bg-yellow-400 text-black'
+                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            {isSaving ? 'Saving...' : 'Equip Badge'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
