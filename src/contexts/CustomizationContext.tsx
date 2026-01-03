@@ -98,3 +98,8 @@ export function useCustomization() {
   }
   return context;
 }
+
+// Optional hook that returns null when not in a provider (for components used outside the app)
+export function useCustomizationOptional() {
+  return useContext(CustomizationContext);
+}

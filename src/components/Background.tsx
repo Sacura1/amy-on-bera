@@ -1,12 +1,31 @@
 'use client';
 
-import { useCustomization } from '@/contexts';
+import { useCustomizationOptional, BACKGROUNDS, FILTERS } from '@/contexts';
 
 export default function Background() {
-  const { backgroundId, getBackgroundStyle, getFilterStyle } = useCustomization();
+  const customization = useCustomizationOptional();
 
-  const bgStyle = getBackgroundStyle();
-  const filterStyle = getFilterStyle();
+  // If not in CustomizationProvider (e.g., landing page), use defaults
+  const backgroundId = customization?.backgroundId || 'bg_default';
+  const filterId = customization?.filterId || 'filter_none';
+
+  const bg = BACKGROUNDS[backgroundId];
+  const filter = FILTERS[filterId];
+
+  const bgStyle: React.CSSProperties = bg?.preview
+    ? {
+        backgroundImage: `url(${bg.preview})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }
+    : {};
+
+  const filterStyle: React.CSSProperties =
+    filter && filter.color !== 'transparent'
+      ? { backgroundColor: filter.color }
+      : {};
+
   const hasCustomBg = backgroundId !== 'bg_default';
 
   return (
