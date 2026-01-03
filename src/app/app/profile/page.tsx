@@ -290,10 +290,11 @@ function ProfilePageContent() {
       // Set connected state immediately
       setDiscordConnected(true);
 
-      // Try to extract username from result
-      const profiles = result?.profiles || [];
-      const discordProfile = profiles.find((p: { type: string }) => p.type === 'discord');
-      const details = discordProfile?.details as Record<string, unknown> | undefined;
+      // Try to extract username from result (cast to any since Thirdweb types are incomplete)
+      const resultAny = result as { profiles?: Array<{ type: string; details?: Record<string, unknown> }> } | undefined;
+      const profiles = resultAny?.profiles || [];
+      const discordProfile = profiles.find((p) => p.type === 'discord');
+      const details = discordProfile?.details;
       const username = (details?.username as string) ||
                       (details?.name as string) ||
                       (details?.id as string) ||
@@ -331,10 +332,11 @@ function ProfilePageContent() {
       // Set connected state immediately
       setTelegramConnected(true);
 
-      // Try to extract username from result
-      const profiles = result?.profiles || [];
-      const telegramProfile = profiles.find((p: { type: string }) => p.type === 'telegram');
-      const details = telegramProfile?.details as Record<string, unknown> | undefined;
+      // Try to extract username from result (cast to any since Thirdweb types are incomplete)
+      const resultAny = result as { profiles?: Array<{ type: string; details?: Record<string, unknown> }> } | undefined;
+      const profiles = resultAny?.profiles || [];
+      const telegramProfile = profiles.find((p) => p.type === 'telegram');
+      const details = telegramProfile?.details;
       const username = (details?.username as string) ||
                       (details?.first_name as string) ||
                       (details?.id as string) ||
