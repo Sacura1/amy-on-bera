@@ -186,8 +186,6 @@ export default function BadgeSelector({
   const equipBadge = async () => {
     if (selectedSlot === null || selectedBadge === null) return;
 
-    console.log('Equipping badge:', selectedBadge, 'to slot:', selectedSlot);
-
     try {
       setIsSaving(true);
       const response = await fetch(`${API_BASE_URL}/api/badges/${wallet}/equip`, {
@@ -196,7 +194,6 @@ export default function BadgeSelector({
         body: JSON.stringify({ slotNumber: selectedSlot, badgeId: selectedBadge })
       });
       const data = await response.json();
-      console.log('Equip response:', data);
 
       if (data.success) {
         setEquippedBadges(data.data);

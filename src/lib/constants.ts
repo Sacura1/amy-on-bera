@@ -6,6 +6,9 @@ export const API_BASE_URL = isDev
   ? '/api/proxy'
   : (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://amy-production-fd10.up.railway.app');
 
+// Direct backend URL for OAuth (bypasses proxy - OAuth needs browser redirects)
+export const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://amy-production-fd10.up.railway.app';
+
 // Token Configuration
 export const AMY_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_AMY_TOKEN_ADDRESS || '0x098a75bAedDEc78f9A8D0830d6B86eAc5cC8894e';
 export const MINIMUM_AMY_BALANCE = Number(process.env.NEXT_PUBLIC_MIN_AMY_BALANCE) || 300;

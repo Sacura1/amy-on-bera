@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useActiveAccount, useLinkProfile, useProfiles } from 'thirdweb/react';
+import { useActiveAccount } from 'thirdweb/react';
 import { useSearchParams } from 'next/navigation';
 import { useAmyBalance } from '@/hooks';
-import { API_BASE_URL, MINIMUM_AMY_BALANCE, ADMIN_WALLETS } from '@/lib/constants';
+import { API_BASE_URL, BACKEND_URL, MINIMUM_AMY_BALANCE, ADMIN_WALLETS } from '@/lib/constants';
 import { client } from '@/app/client';
 import { useCustomization } from '@/contexts';
 import {
@@ -14,8 +14,12 @@ import {
   ProfileEditor,
   NewUserView,
   CustomiseSection,
+  TelegramLoginWidget,
   // EmailVerificationModal - Commented out until SendGrid implementation is ready
 } from './components';
+
+// Telegram bot username (without @)
+const TELEGRAM_BOT_NAME = 'amyonberabot';
 
 function ProfilePageContent() {
   const searchParams = useSearchParams();
@@ -49,6 +53,7 @@ function ProfilePageContent() {
   // Modal states
   const [showBadgeSelector, setShowBadgeSelector] = useState(false);
   const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [showTelegramModal, setShowTelegramModal] = useState(false);
   // const [showEmailModal, setShowEmailModal] = useState(false); // Commented out until SendGrid implementation is ready
   const [profileKey, setProfileKey] = useState(0); // For refreshing ProfileCard
 
@@ -58,9 +63,6 @@ function ProfilePageContent() {
   const [leaderboardStatus, setLeaderboardStatus] = useState('');
   const [isDownloadingUsers, setIsDownloadingUsers] = useState(false);
 
-  // Thirdweb social linking
-  const { mutate: linkProfile, isPending: isLinkingProfile } = useLinkProfile();
-  const { data: linkedProfiles, refetch: refetchProfiles } = useProfiles({ client });
 
   // Check if current wallet is admin
   const isAdmin = walletAddress ? ADMIN_WALLETS.includes(walletAddress.toLowerCase()) : false;
@@ -188,10 +190,14 @@ function ProfilePageContent() {
     updateBalance();
   }, [walletAddress, balance, xUsername]);
 
-  // Handle OAuth callback
+  // Handle OAuth callback (X, Discord, Telegram)
   useEffect(() => {
     const xConnectedParam = searchParams.get('x_connected');
+    const discordConnectedParam = searchParams.get('discord_connected');
+    const telegramConnectedParam = searchParams.get('telegram_connected');
     const usernameParam = searchParams.get('username');
+    const discordUsernameParam = searchParams.get('discord_username');
+    const telegramUsernameParam = searchParams.get('telegram_username');
     const walletParam = searchParams.get('wallet');
     const errorParam = searchParams.get('error');
 
@@ -200,6 +206,7 @@ function ProfilePageContent() {
       return;
     }
 
+    // Handle X/Twitter OAuth callback
     if (xConnectedParam === 'true' && usernameParam && walletParam) {
       setXConnected(true);
       setXUsername(usernameParam);
@@ -222,163 +229,84 @@ function ProfilePageContent() {
 
       saveUserToBackend();
     }
-  }, [searchParams, balance]);
+
+    // Handle Discord OAuth callback
+    if (discordConnectedParam === 'true' && discordUsernameParam) {
+      setDiscordConnected(true);
+      // Data is already saved by backend, just update UI state
+      if (walletAddress) {
+        fetchUserData();
+      }
+    }
+
+    // Handle Telegram OAuth callback
+    if (telegramConnectedParam === 'true' && telegramUsernameParam) {
+      setTelegramConnected(true);
+      // Data is already saved by backend, just update UI state
+      if (walletAddress) {
+        fetchUserData();
+      }
+    }
+  }, [searchParams, balance, walletAddress, fetchUserData]);
 
   const connectX = () => {
     if (!walletAddress) return;
-    window.location.href = `${API_BASE_URL}/auth/x?wallet=${walletAddress}`;
+    // Use BACKEND_URL directly for OAuth (not proxy - browser needs to redirect)
+    window.location.href = `${BACKEND_URL}/auth/x?wallet=${walletAddress}`;
   };
 
-  // Sync linked profiles to backend
-  const syncLinkedProfiles = useCallback(async () => {
-    if (!walletAddress || !linkedProfiles) return;
-
-    try {
-      // Extract usernames from linked profiles
-      // Backend expects: discord, telegram, email (not discordUsername, etc.)
-      const profileData: Record<string, string> = {};
-
-      for (const profile of linkedProfiles) {
-        // Get the profile details as any to access dynamic properties
-        const details = profile.details as Record<string, unknown> | undefined;
-        console.log(`Profile type: ${profile.type}, details:`, details);
-
-        if (profile.type === 'discord') {
-          // Try multiple fields for Discord username
-          const username = (details?.username as string) ||
-                          (details?.name as string) ||
-                          (details?.id as string) ||
-                          null;
-          if (username && username !== 'connected') {
-            profileData.discord = username;
-          }
-          setDiscordConnected(true);
-        }
-        if (profile.type === 'telegram') {
-          // Try multiple fields for Telegram username
-          const username = (details?.username as string) ||
-                          (details?.first_name as string) ||
-                          (details?.id as string) ||
-                          null;
-          if (username && username !== 'connected') {
-            profileData.telegram = username;
-          }
-          setTelegramConnected(true);
-        }
-        if (profile.type === 'email' && details?.email) {
-          profileData.email = details.email as string;
-          setEmailConnected(true);
-        }
-      }
-
-      // Sync to backend only if we have real usernames (not just 'connected')
-      if (Object.keys(profileData).length > 0) {
-        await fetch(`${API_BASE_URL}/api/social/sync`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wallet: walletAddress, ...profileData })
-        });
-      }
-    } catch (error) {
-      console.error('Error syncing linked profiles:', error);
-    }
-  }, [walletAddress, linkedProfiles]);
-
-  // Effect to sync profiles when they change
-  useEffect(() => {
-    if (linkedProfiles && linkedProfiles.length > 0) {
-      syncLinkedProfiles();
-    }
-  }, [linkedProfiles, syncLinkedProfiles]);
-
-  // Social connection handlers using Thirdweb useLinkProfile
-  const connectDiscord = async () => {
-    try {
-      const result = await linkProfile({ client, strategy: 'discord' });
-      console.log('Discord linkProfile result:', result);
-
-      // Set connected state immediately
-      setDiscordConnected(true);
-
-      // Try to extract username from result (cast to any since Thirdweb types are incomplete)
-      const resultAny = result as { profiles?: Array<{ type: string; details?: Record<string, unknown> }> } | undefined;
-      const profiles = resultAny?.profiles || [];
-      const discordProfile = profiles.find((p) => p.type === 'discord');
-      const details = discordProfile?.details;
-      const username = (details?.username as string) ||
-                      (details?.name as string) ||
-                      (details?.id as string) ||
-                      null;
-
-      // Sync to backend only if we have a real username
-      if (walletAddress && username) {
-        try {
-          await fetch(`${API_BASE_URL}/api/social/sync`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              wallet: walletAddress,
-              discord: username
-            })
-          });
-        } catch (syncError) {
-          console.error('Error syncing Discord to backend:', syncError);
-        }
-      }
-
-      // Refetch profiles to update any other state
-      await refetchProfiles();
-    } catch (error) {
-      console.error('Error connecting Discord:', error);
-      alert('Failed to connect Discord. Please try again.');
-    }
+  // Social connection handlers using custom OAuth (like X/Twitter)
+  const connectDiscord = () => {
+    if (!walletAddress) return;
+    // Use BACKEND_URL directly for OAuth (not proxy - browser needs to redirect)
+    window.location.href = `${BACKEND_URL}/auth/discord?wallet=${walletAddress}`;
   };
 
-  const connectTelegram = async () => {
+  const connectTelegram = () => {
+    if (!walletAddress) return;
+    // Show the Telegram login widget modal
+    setShowTelegramModal(true);
+  };
+
+  // Handle Telegram auth callback from widget
+  const handleTelegramAuth = async (user: {
+    id: number;
+    first_name: string;
+    last_name?: string;
+    username?: string;
+    photo_url?: string;
+    auth_date: number;
+    hash: string;
+  }) => {
+    setShowTelegramModal(false);
+
     try {
-      const result = await linkProfile({ client, strategy: 'telegram' });
-      console.log('Telegram linkProfile result:', result);
+      // Send auth data to backend for verification and storage
+      const response = await fetch(`${API_BASE_URL}/auth/telegram/callback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...user,
+          wallet: walletAddress
+        })
+      });
 
-      // Set connected state immediately
-      setTelegramConnected(true);
-
-      // Try to extract username from result (cast to any since Thirdweb types are incomplete)
-      const resultAny = result as { profiles?: Array<{ type: string; details?: Record<string, unknown> }> } | undefined;
-      const profiles = resultAny?.profiles || [];
-      const telegramProfile = profiles.find((p) => p.type === 'telegram');
-      const details = telegramProfile?.details;
-      const username = (details?.username as string) ||
-                      (details?.first_name as string) ||
-                      (details?.id as string) ||
-                      null;
-
-      // Sync to backend only if we have a real username
-      if (walletAddress && username) {
-        try {
-          await fetch(`${API_BASE_URL}/api/social/sync`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              wallet: walletAddress,
-              telegram: username
-            })
-          });
-        } catch (syncError) {
-          console.error('Error syncing Telegram to backend:', syncError);
-        }
+      const data = await response.json();
+      if (data.success) {
+        setTelegramConnected(true);
+        // Refetch user data to get updated social connections
+        fetchUserData();
+      } else {
+        alert('Telegram authentication failed: ' + data.error);
       }
-
-      await refetchProfiles();
-    } catch (error) {
-      console.error('Error connecting Telegram:', error);
+    } catch {
       alert('Failed to connect Telegram. Please try again.');
     }
   };
 
   // Email connection - Commented out until SendGrid implementation is ready
   const connectEmail = () => {
-    // setShowEmailModal(true);
-    console.log('Email connection coming soon');
+    // Coming soon
   };
 
   // const handleEmailSuccess = async () => {
@@ -798,6 +726,35 @@ function ProfilePageContent() {
         onClose={() => setShowProfileEditor(false)}
         onProfileUpdated={() => setProfileKey(prev => prev + 1)}
       />
+
+      {/* Telegram Login Modal */}
+      {showTelegramModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 max-w-sm w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-white">Connect Telegram</h3>
+              <button
+                onClick={() => setShowTelegramModal(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-gray-400 text-sm mb-4">
+              Click the button below to connect your Telegram account:
+            </p>
+            <div className="flex justify-center">
+              <TelegramLoginWidget
+                botName={TELEGRAM_BOT_NAME}
+                onAuth={handleTelegramAuth}
+                buttonSize="large"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* EmailVerificationModal - Commented out until SendGrid implementation is ready
       <EmailVerificationModal

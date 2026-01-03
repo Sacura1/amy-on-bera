@@ -99,13 +99,11 @@ export default function ProfileEditor({
       });
 
       const responseText = await response.text();
-      console.log('Avatar upload response:', response.status, responseText);
 
       let data;
       try {
         data = JSON.parse(responseText);
       } catch {
-        console.error('Failed to parse response:', responseText);
         setError(`Upload failed: ${responseText.substring(0, 100)}`);
         return false;
       }

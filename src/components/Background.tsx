@@ -1,9 +1,25 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useCustomizationOptional, BACKGROUNDS, FILTERS } from '@/contexts';
 
 export default function Background() {
   const customization = useCustomizationOptional();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile vs desktop based on screen width
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Check on mount
+    checkMobile();
+
+    // Listen for resize events
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // If not in CustomizationProvider (e.g., landing page), use defaults
   const backgroundId = customization?.backgroundId || 'bg_default';
@@ -12,9 +28,12 @@ export default function Background() {
   const bg = BACKGROUNDS[backgroundId];
   const filter = FILTERS[filterId];
 
-  const bgStyle: React.CSSProperties = bg?.preview
+  // Select mobile or desktop preview based on screen size
+  const preview = isMobile ? bg?.previewMobile : bg?.previewDesktop;
+
+  const bgStyle: React.CSSProperties = preview
     ? {
-        backgroundImage: `url(${bg.preview})`,
+        backgroundImage: `url(${preview})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',

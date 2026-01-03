@@ -22,7 +22,8 @@
       "WebFetch(domain:scan.liquidroyalty.com)",
       "WebFetch(domain:berascan.com)",
       "WebFetch(domain:blog.thirdweb.com)",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

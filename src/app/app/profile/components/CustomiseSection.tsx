@@ -13,13 +13,15 @@ interface CustomiseSectionProps {
   onItemApplied: () => void;
 }
 
-// Backgrounds with actual images and pricing
+// Backgrounds with actual images and pricing (mobile/desktop variants)
 const BACKGROUNDS = [
-  { id: 'bg_default', name: 'Default', preview: null, cost: 0 },
-  { id: 'bg_1', name: 'BG 1', preview: '/bg_1.jpg', cost: 50 },
-  { id: 'bg_2', name: 'BG 2', preview: '/bg_2.jpg', cost: 100 },
-  { id: 'bg_3', name: 'BG 3', preview: '/bg_3.jpg', cost: 50 },
-  { id: 'bg_4', name: 'BG 4', preview: '/bg_4.jpg', cost: 50 },
+  { id: 'bg_default', name: 'Default', previewMobile: null, previewDesktop: null, cost: 0 },
+  { id: 'bg_1', name: 'BG 1', previewMobile: '/bg_mobile_1.jpg', previewDesktop: '/bg_desktop_1.jpg', cost: 50 },
+  { id: 'bg_2', name: 'BG 2', previewMobile: '/bg_mobile_2.jpg', previewDesktop: '/bg_desktop_2.jpg', cost: 50 },
+  { id: 'bg_3', name: 'BG 3', previewMobile: '/bg_mobile_3.jpg', previewDesktop: '/bg_desktop_3.jpg', cost: 50 },
+  { id: 'bg_4', name: 'BG 4', previewMobile: '/bg_mobile_4.jpg', previewDesktop: '/bg_desktop_4.jpg', cost: 50 },
+  { id: 'bg_5', name: 'BG 5', previewMobile: '/bg_mobile_5.jpg', previewDesktop: '/bg_desktop_5.jpg', cost: 100 },
+  { id: 'bg_6', name: 'BG 6', previewMobile: '/bg_mobile_6.jpg', previewDesktop: '/bg_desktop_6.jpg', cost: 150 },
 ];
 
 // Filters with colors and pricing
@@ -207,9 +209,9 @@ export default function CustomiseSection({
               >
                 {/* Content that gets blurred */}
                 <div className={`w-full h-full ${isLocked ? 'blur-[2px]' : ''}`}>
-                  {bg.preview ? (
+                  {bg.previewDesktop ? (
                     <img
-                      src={bg.preview}
+                      src={bg.previewDesktop}
                       alt={bg.name}
                       className="w-full h-full object-cover"
                     />
