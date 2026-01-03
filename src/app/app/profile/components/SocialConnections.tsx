@@ -125,16 +125,17 @@ export default function SocialConnections({
       connected: telegramConnected || !!socialData?.telegramUsername,
       username: telegramUsername || socialData?.telegramUsername,
       onConnect: onTelegramConnect
-    },
-    {
-      id: 'email',
-      name: 'Email',
-      icon: <EmailIcon />,
-      color: 'bg-gray-600',
-      connected: emailConnected || !!socialData?.email,
-      username: emailAddress || socialData?.email,
-      onConnect: onEmailConnect
     }
+    // Email connection - commented out until implementation is ready
+    // {
+    //   id: 'email',
+    //   name: 'Email',
+    //   icon: <EmailIcon />,
+    //   color: 'bg-gray-600',
+    //   connected: emailConnected || !!socialData?.email,
+    //   username: emailAddress || socialData?.email,
+    //   onConnect: onEmailConnect
+    // }
   ];
 
   if (isLoading) {
@@ -143,7 +144,7 @@ export default function SocialConnections({
         <div className="animate-pulse">
           <div className="h-6 bg-gray-700 rounded w-1/3 mb-4"></div>
           <div className="space-y-3">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3].map((i) => (
               <div key={i} className="h-14 bg-gray-700 rounded-xl"></div>
             ))}
           </div>

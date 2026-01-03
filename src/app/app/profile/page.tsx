@@ -42,7 +42,9 @@ function ProfilePageContent() {
 
   // Social connection states
   const [discordConnected, setDiscordConnected] = useState(false);
+  const [discordUsername, setDiscordUsername] = useState<string | null>(null);
   const [telegramConnected, setTelegramConnected] = useState(false);
+  const [telegramUsername, setTelegramUsername] = useState<string | null>(null);
   const [emailConnected, setEmailConnected] = useState(false);
 
   // Customization states
@@ -118,12 +120,16 @@ function ProfilePageContent() {
         const socialRes = await fetch(`${API_BASE_URL}/api/social/${walletAddress}`);
         const socialData = await socialRes.json();
         if (socialData.success && socialData.data) {
-          setDiscordConnected(!!socialData.data.discord || !!socialData.data.discordUsername);
-          setTelegramConnected(!!socialData.data.telegram || !!socialData.data.telegramUsername);
+          const discord = socialData.data.discord || socialData.data.discordUsername;
+          const telegram = socialData.data.telegram || socialData.data.telegramUsername;
+          setDiscordConnected(!!discord);
+          setDiscordUsername(discord || null);
+          setTelegramConnected(!!telegram);
+          setTelegramUsername(telegram || null);
           setEmailConnected(!!socialData.data.email);
         }
-      } catch (err) {
-        console.error('Error fetching social data:', err);
+      } catch {
+        // Error fetching social data
       }
 
       // Fetch customization data
@@ -233,19 +239,13 @@ function ProfilePageContent() {
     // Handle Discord OAuth callback
     if (discordConnectedParam === 'true' && discordUsernameParam) {
       setDiscordConnected(true);
-      // Data is already saved by backend, just update UI state
-      if (walletAddress) {
-        fetchUserData();
-      }
+      setDiscordUsername(discordUsernameParam);
     }
 
     // Handle Telegram OAuth callback
     if (telegramConnectedParam === 'true' && telegramUsernameParam) {
       setTelegramConnected(true);
-      // Data is already saved by backend, just update UI state
-      if (walletAddress) {
-        fetchUserData();
-      }
+      setTelegramUsername(telegramUsernameParam);
     }
   }, [searchParams, balance, walletAddress, fetchUserData]);
 
@@ -294,8 +294,8 @@ function ProfilePageContent() {
       const data = await response.json();
       if (data.success) {
         setTelegramConnected(true);
-        // Refetch user data to get updated social connections
-        fetchUserData();
+        // Set username immediately from response or widget data
+        setTelegramUsername(data.data?.username || user.username || user.first_name);
       } else {
         alert('Telegram authentication failed: ' + data.error);
       }
@@ -507,7 +507,9 @@ function ProfilePageContent() {
             xConnected={xConnected}
             xUsername={xUsername}
             discordConnected={discordConnected}
+            discordUsername={discordUsername || undefined}
             telegramConnected={telegramConnected}
+            telegramUsername={telegramUsername || undefined}
             emailConnected={emailConnected}
             onXConnect={connectX}
             onDiscordConnect={connectDiscord}

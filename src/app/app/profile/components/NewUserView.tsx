@@ -64,13 +64,14 @@ export default function NewUserView({
           onConnect={onConnectTelegram}
         />
 
-        <SocialConnectionCard
+        {/* Email connection - commented out until implementation is ready */}
+        {/* <SocialConnectionCard
           icon="email"
           iconBg="bg-gray-600"
           name="Email"
           connected={false}
           onConnect={onConnectEmail}
-        />
+        /> */}
       </div>
     </div>
   );
