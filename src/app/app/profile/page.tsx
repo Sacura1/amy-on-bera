@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useAmyBalance } from '@/hooks';
 import { API_BASE_URL, MINIMUM_AMY_BALANCE, ADMIN_WALLETS } from '@/lib/constants';
 import { client } from '@/app/client';
+import { useCustomization } from '@/contexts';
 import {
   ProfileCard,
   BadgeSelector,
@@ -20,6 +21,7 @@ function ProfilePageContent() {
   const searchParams = useSearchParams();
   const account = useActiveAccount();
   const { balance, isLoading: balanceLoading, isEligible, walletAddress } = useAmyBalance();
+  const { setBackgroundId, setFilterId } = useCustomization();
 
   const [xConnected, setXConnected] = useState(false);
   const [xUsername, setXUsername] = useState('');
@@ -128,8 +130,16 @@ function ProfilePageContent() {
         const profileData = await profileRes.json();
         if (profileData.success && profileData.data?.profile) {
           const profile = profileData.data.profile;
-          if (profile.backgroundId) setCurrentBackground(profile.backgroundId);
-          if (profile.filterId) setCurrentFilter(profile.filterId);
+          if (profile.backgroundId) {
+            setCurrentBackground(profile.backgroundId);
+            // Sync to global context so Background component updates
+            setBackgroundId(profile.backgroundId);
+          }
+          if (profile.filterId) {
+            setCurrentFilter(profile.filterId);
+            // Sync to global context so Background component updates
+            setFilterId(profile.filterId);
+          }
           if (profile.animationId) setCurrentAnimation(profile.animationId);
         }
       } catch (err) {
@@ -138,7 +148,7 @@ function ProfilePageContent() {
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
-  }, [walletAddress]);
+  }, [walletAddress, setBackgroundId, setFilterId]);
 
   useEffect(() => {
     if (walletAddress) {

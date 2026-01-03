@@ -77,6 +77,22 @@ function getSailrBadgeId(valueUsd: number): string | null {
   return null;
 }
 
+// Get ring color based on tier
+function getTierRingColor(tier: string): string {
+  switch (tier) {
+    case 'platinum':
+      return 'border-cyan-400';
+    case 'gold':
+      return 'border-yellow-400';
+    case 'silver':
+      return 'border-slate-300';
+    case 'bronze':
+      return 'border-amber-600';
+    default:
+      return 'border-gray-500';
+  }
+}
+
 function getPlvhedgeBadgeId(valueUsd: number): string | null {
   if (valueUsd >= 500) return 'plvhedge_x10';
   if (valueUsd >= 100) return 'plvhedge_x5';
@@ -231,7 +247,7 @@ export default function ProfileCard({
 
   if (isLoading) {
     return (
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700 p-6">
+      <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6">
         <div className="flex justify-center py-8">
           <div className="loading-spinner w-8 h-8"></div>
         </div>
@@ -240,7 +256,7 @@ export default function ProfileCard({
   }
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700 p-6 relative">
+    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6 relative">
       {/* Edit Profile Button */}
       <button
         onClick={onEditProfile}
@@ -255,7 +271,7 @@ export default function ProfileCard({
       <div className="flex flex-col sm:flex-row gap-6">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-pink-500 overflow-hidden">
+          <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 ${getTierRingColor(tier)} overflow-hidden`}>
             {getAvatarUrl() ? (
               <img
                 src={getAvatarUrl()!}

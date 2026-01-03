@@ -112,7 +112,7 @@ const STRATEGIES: Strategy[] = [
     image: '/plvhedge.jpg',
     tvl: '$271.91K',
     apy: '22.54%',
-    amyPoints: 'TBC',
+    amyPoints: 'Earn upto 10x',
     riskCategory: 'balanced',
     actionType: 'buy',
     buyToken: '0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',
@@ -128,7 +128,7 @@ const STRATEGIES: Strategy[] = [
     image: '/sail.jpg',
     tvl: '$4.32M',
     apy: '30%',
-    amyPoints: 'TBC',
+    amyPoints: 'Earn upto 10x',
     riskCategory: 'balanced',
     actionType: 'buy',
     buyToken: '0x59a61B8d3064A51a95a5D6393c03e2152b1a2770',
@@ -248,8 +248,8 @@ const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicDa
     <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50">
       {/* Header with logo and action button(s) - always visible */}
       <div className="p-4 flex items-center justify-between">
-        <div className="w-14 h-14 rounded-xl overflow-hidden bg-white flex items-center justify-center">
-          <img src={strategy.image} alt={strategy.name} className="w-12 h-12 object-contain" />
+        <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+          <img src={strategy.image} alt={strategy.name} className="w-full h-full object-cover" />
         </div>
         <div className="flex items-center gap-2">
           {strategy.buyUnderlying && (
@@ -290,10 +290,13 @@ const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicDa
 
           {/* Amy Points and Risk */}
           <div className="px-4 pb-3 flex gap-2">
-            <div className="flex-1 bg-gray-800/80 rounded-lg px-3 py-2">
-              <div className="text-xs font-semibold text-white">Amy Points</div>
-              <div className="text-xs text-yellow-400 font-medium">{strategy.amyPoints}</div>
-            </div>
+            {/* Hide Amy Points for plvHEDGE and SAIL.r */}
+            {strategy.id !== 'plvhedge' && strategy.id !== 'sailr' && (
+              <div className="flex-1 bg-gray-800/80 rounded-lg px-3 py-2">
+                <div className="text-xs font-semibold text-white">Amy Points</div>
+                <div className="text-xs text-yellow-400 font-medium">{strategy.amyPoints}</div>
+              </div>
+            )}
             <div className={`flex-1 ${risk.bg} rounded-lg px-3 py-2 flex items-center justify-between`}>
               <div>
                 <div className={`text-xs font-semibold ${risk.text}`}>{risk.label}</div>
@@ -322,8 +325,8 @@ const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicDa
           {/* Title with collapse button */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex items-center justify-center">
-                <img src={strategy.image} alt={strategy.name} className="w-6 h-6 object-contain" />
+              <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-800 flex items-center justify-center">
+                <img src={strategy.image} alt={strategy.name} className="w-full h-full object-cover" />
               </div>
               <span className="text-white font-semibold">{strategy.name}</span>
             </div>
@@ -388,8 +391,8 @@ const ActivePositionCard = ({ lpData }: { lpData: LpData }) => {
       {/* Header with logo and status */}
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-14 h-14 rounded-xl overflow-hidden bg-white flex items-center justify-center">
-            <img src="/bulla.jpg" alt="Bulla Exchange" className="w-12 h-12 object-contain" />
+          <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+            <img src="/bulla.jpg" alt="Bulla Exchange" className="w-full h-full object-cover" />
           </div>
           <div>
             <div className="text-white font-bold">AMY / HONEY Pool</div>
@@ -628,8 +631,8 @@ export default function EarnPage() {
                 <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
                   <div className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-white flex items-center justify-center">
-                        <img src="/sail.jpg" alt="SAIL.r" className="w-12 h-12 object-contain" />
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+                        <img src="/sail.jpg" alt="SAIL.r" className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <div className="text-white font-bold">SAIL.r</div>
@@ -651,14 +654,25 @@ export default function EarnPage() {
                       <div className="text-lg font-bold text-white">${tokenData.sailr.valueUsd.toFixed(2)}</div>
                     </div>
                   </div>
+                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Manage your position on Liquid Royalty</span>
+                    <a
+                      href="https://www.liquidroyalty.com/invest"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
+                    >
+                      View Position →
+                    </a>
+                  </div>
                 </div>
               )}
               {tokenData?.plvhedge?.isActive && (
                 <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
                   <div className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-white flex items-center justify-center">
-                        <img src="/plvhedge.jpg" alt="plvHEDGE" className="w-12 h-12 object-contain" />
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+                        <img src="/plvhedge.jpg" alt="plvHEDGE" className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <div className="text-white font-bold">plvHEDGE</div>
@@ -679,6 +693,17 @@ export default function EarnPage() {
                       <div className="text-xs text-gray-500 uppercase mb-1">Value</div>
                       <div className="text-lg font-bold text-white">${tokenData.plvhedge.valueUsd.toFixed(2)}</div>
                     </div>
+                  </div>
+                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Manage your position on Plutus</span>
+                    <a
+                      href="https://plutus.fi"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
+                    >
+                      View Position →
+                    </a>
                   </div>
                 </div>
               )}

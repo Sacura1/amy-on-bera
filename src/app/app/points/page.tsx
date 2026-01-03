@@ -54,7 +54,7 @@ const TIERS: Record<string, TierInfo> = {
   platinum: { minBalance: 100000, pointsPerHour: 10, name: 'Platinum', emoji: '💎' },
   gold: { minBalance: 10000, pointsPerHour: 5, name: 'Gold', emoji: '🥇' },
   silver: { minBalance: 1000, pointsPerHour: 3, name: 'Silver', emoji: '🥈' },
-  bronze: { minBalance: 300, pointsPerHour: 1, name: 'Bronze', emoji: '🟫' },
+  bronze: { minBalance: 300, pointsPerHour: 1, name: 'Bronze', emoji: '🥉' },
   none: { minBalance: 0, pointsPerHour: 0, name: 'None', emoji: '⚪' }
 };
 
@@ -227,13 +227,18 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
 
         {/* Multiplier badge corner */}
         {isActive && currentMultiplier && (() => {
-          // Color based on multiplier tier
-          let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // x3 - Bronze
-          if (currentMultiplier.includes('100')) {
-            badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300'; // x100 - Gold
-          } else if (currentMultiplier.includes('10')) {
-            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200'; // x10 - Silver
+          // Extract number from multiplier string (e.g., "3x" -> 3, "100x" -> 100)
+          const multiplierNum = parseInt(currentMultiplier.replace(/[^0-9]/g, ''), 10);
+
+          // Color based on multiplier tier:
+          // Level 1 (x3) = Bronze, Level 2 (x5) = Silver, Level 3 (x10+) = Gold
+          let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // Level 1 - Bronze
+          if (multiplierNum >= 10) {
+            badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300'; // Level 3 - Gold (10x, 50x, 100x)
+          } else if (multiplierNum >= 5) {
+            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200'; // Level 2 - Silver (5x)
           }
+          // else: Level 1 - Bronze (3x) - default
 
           return (
             <div className={`absolute -top-2 -left-2 text-xs font-black px-2 py-1 rounded-md z-10 shadow-lg border-2 ${badgeColors}`}>
@@ -245,11 +250,11 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
         {/* Icon */}
         <div className="p-3 flex justify-center">
           <div className={`w-14 h-12 rounded-lg flex items-center justify-center overflow-hidden relative ${
-            isActive ? 'bg-white' : 'bg-gray-800/60'
+            isActive ? 'bg-gray-800' : 'bg-gray-800/60'
           }`}>
             {image ? (
               <>
-                <img src={image} alt={name} className={`w-10 h-10 object-contain ${!isActive && 'opacity-60'}`} />
+                <img src={image} alt={name} className={`w-full h-full object-cover ${!isActive && 'opacity-60'}`} />
                 {/* Subtle overlay for inactive state */}
                 {!isActive && <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" />}
               </>
@@ -289,9 +294,9 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
 
             {/* Header with logo */}
             <div className="bg-gradient-to-b from-gray-700/50 to-gray-800 p-4 flex justify-center">
-              <div className="w-24 h-20 rounded-xl flex items-center justify-center overflow-hidden bg-white shadow-lg">
+              <div className="w-24 h-20 rounded-xl flex items-center justify-center overflow-hidden bg-gray-800 shadow-lg">
                 {image ? (
-                  <img src={image} alt={name} className="w-16 h-16 object-contain" />
+                  <img src={image} alt={name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-12 h-10 rounded bg-green-500" />
                 )}
@@ -671,7 +676,6 @@ export default function PointsPage() {
         {/* How You Earn Amy Points */}
         <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-8 mb-6 md:mb-8">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-            <div className="text-3xl md:text-5xl">📈</div>
             <h2 className="text-xl md:text-3xl font-black text-yellow-400">
               How You Earn Amy Points
             </h2>
@@ -690,7 +694,7 @@ export default function PointsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-4">
             <div className="bg-gradient-to-br from-orange-900/40 to-amber-900/20 p-4 rounded-xl border-2 border-orange-500/30">
               <div className="flex items-center gap-2">
-                <span className="text-2xl">🟫</span>
+                <span className="text-2xl">🥉</span>
                 <div>
                   <span className="font-bold text-orange-400">Bronze</span>
                   <span className="text-gray-300 text-sm ml-2">– 300+ AMY</span>
@@ -741,7 +745,6 @@ export default function PointsPage() {
         {/* Amy Multiplier Badges */}
         <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-8 mb-6 md:mb-8">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-            <div className="text-3xl md:text-5xl">🏅</div>
             <h2 className="text-xl md:text-3xl font-black text-yellow-400">
               Amy Multiplier Badges
             </h2>
@@ -906,7 +909,7 @@ export default function PointsPage() {
             />
 
             {/* All other badges - Coming Soon */}
-            {Array.from({ length: 20 }).map((_, index) => (
+            {Array.from({ length: 6 }).map((_, index) => (
               <MultiplierBadge
                 key={index}
                 name=""
