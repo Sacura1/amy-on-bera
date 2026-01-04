@@ -65,6 +65,13 @@ function ProfilePageContent() {
   const [leaderboardStatus, setLeaderboardStatus] = useState('');
   const [isDownloadingUsers, setIsDownloadingUsers] = useState(false);
 
+  // Bonus points state
+  const [bonusUsername, setBonusUsername] = useState('');
+  const [bonusPoints, setBonusPoints] = useState('');
+  const [bonusReason, setBonusReason] = useState('');
+  const [isAwardingBonus, setIsAwardingBonus] = useState(false);
+  const [bonusStatus, setBonusStatus] = useState('');
+
 
   // Check if current wallet is admin
   const isAdmin = walletAddress ? ADMIN_WALLETS.includes(walletAddress.toLowerCase()) : false;
@@ -452,11 +459,58 @@ function ProfilePageContent() {
       } else {
         setLeaderboardStatus(data.error || 'Failed to upload leaderboard');
       }
-    } catch (error) {
-      console.error('Error uploading leaderboard:', error);
+    } catch {
       setLeaderboardStatus('Error uploading leaderboard');
     } finally {
       setIsUploadingLeaderboard(false);
+    }
+  };
+
+  // Award bonus points to a user
+  const awardBonusPoints = async () => {
+    if (!walletAddress || !isAdmin) return;
+    if (!bonusUsername.trim() || !bonusPoints.trim()) {
+      setBonusStatus('Please enter X username and points amount');
+      return;
+    }
+
+    const points = parseFloat(bonusPoints);
+    if (isNaN(points) || points <= 0) {
+      setBonusStatus('Please enter a valid positive number for points');
+      return;
+    }
+
+    setIsAwardingBonus(true);
+    setBonusStatus('');
+
+    try {
+      // Clean the username (remove @ if present)
+      const cleanUsername = bonusUsername.trim().replace(/^@/, '');
+
+      const response = await fetch(`${API_BASE_URL}/api/points/add-bonus`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wallet: walletAddress,
+          xUsername: cleanUsername,
+          points: points,
+          reason: bonusReason.trim() || 'admin_bonus'
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setBonusStatus(`Successfully awarded ${points} points to @${cleanUsername}!`);
+        setBonusUsername('');
+        setBonusPoints('');
+        setBonusReason('');
+      } else {
+        setBonusStatus(data.error || 'Failed to award bonus points');
+      }
+    } catch {
+      setBonusStatus('Error awarding bonus points');
+    } finally {
+      setIsAwardingBonus(false);
     }
   };
 
@@ -666,6 +720,83 @@ function ProfilePageContent() {
                   )}
                 </button>
               </div>
+            </div>
+
+            {/* Award Bonus Points Section */}
+            <div className="p-4 md:p-6 border-b border-gray-700/50">
+              <div className="mb-4">
+                <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1">
+                  Award Bonus Points
+                </h4>
+                <p className="text-xs text-gray-400">
+                  Give bonus points to a user by their X username
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">X Username</label>
+                  <input
+                    type="text"
+                    value={bonusUsername}
+                    onChange={(e) => setBonusUsername(e.target.value)}
+                    placeholder="@username"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Points Amount</label>
+                  <input
+                    type="number"
+                    value={bonusPoints}
+                    onChange={(e) => setBonusPoints(e.target.value)}
+                    placeholder="100"
+                    min="1"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Reason (optional)</label>
+                  <input
+                    type="text"
+                    value={bonusReason}
+                    onChange={(e) => setBonusReason(e.target.value)}
+                    placeholder="giveaway_winner"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                <div className="text-xs text-gray-400">
+                  {bonusUsername && bonusPoints
+                    ? `Award ${bonusPoints} points to ${bonusUsername.startsWith('@') ? bonusUsername : '@' + bonusUsername}`
+                    : 'Enter username and points amount'}
+                </div>
+                <button
+                  onClick={awardBonusPoints}
+                  disabled={isAwardingBonus || !bonusUsername.trim() || !bonusPoints.trim()}
+                  className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2.5 rounded-full text-sm font-bold uppercase disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isAwardingBonus ? (
+                    <>
+                      <span className="loading-spinner w-4 h-4" />
+                      <span>AWARDING...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🎁</span>
+                      <span>AWARD POINTS</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {bonusStatus && (
+                <p className={`text-sm mt-3 ${bonusStatus.includes('Successfully') ? 'text-green-400' : 'text-red-400'}`}>
+                  {bonusStatus}
+                </p>
+              )}
             </div>
 
             <div className="p-4 md:p-6">
