@@ -639,19 +639,21 @@ export default function EarnPage() {
                         <div className="text-sm text-gray-400">Liquid Royalty</div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-yellow-400 font-bold">{tokenData.sailr.multiplier}x</div>
-                      <div className="text-xs text-gray-400">multiplier</div>
-                    </div>
                   </div>
-                  <div className="px-4 pb-4 grid grid-cols-2 gap-4">
-                    <div className="bg-gray-800/60 rounded-lg p-3">
-                      <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                      <div className="text-lg font-bold text-white">{tokenData.sailr.balance.toFixed(2)}</div>
-                    </div>
-                    <div className="bg-gray-800/60 rounded-lg p-3">
-                      <div className="text-xs text-gray-500 uppercase mb-1">Value</div>
-                      <div className="text-lg font-bold text-white">${tokenData.sailr.valueUsd.toFixed(2)}</div>
+                  <div className="px-4 pb-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Your Token Value</div>
+                        <div className="text-xl font-bold text-white">${tokenData.sailr.valueUsd.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
+                        <div className="text-xl font-bold text-white">{tokenData.sailr.balance.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
+                        <div className="text-xl font-bold text-yellow-400">{tokenData.sailr.multiplier}x</div>
+                      </div>
                     </div>
                   </div>
                   <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
@@ -679,19 +681,21 @@ export default function EarnPage() {
                         <div className="text-sm text-gray-400">Plutus</div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-yellow-400 font-bold">{tokenData.plvhedge.multiplier}x</div>
-                      <div className="text-xs text-gray-400">multiplier</div>
-                    </div>
                   </div>
-                  <div className="px-4 pb-4 grid grid-cols-2 gap-4">
-                    <div className="bg-gray-800/60 rounded-lg p-3">
-                      <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                      <div className="text-lg font-bold text-white">{tokenData.plvhedge.balance.toFixed(2)}</div>
-                    </div>
-                    <div className="bg-gray-800/60 rounded-lg p-3">
-                      <div className="text-xs text-gray-500 uppercase mb-1">Value</div>
-                      <div className="text-lg font-bold text-white">${tokenData.plvhedge.valueUsd.toFixed(2)}</div>
+                  <div className="px-4 pb-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Your Token Value</div>
+                        <div className="text-xl font-bold text-white">${tokenData.plvhedge.valueUsd.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
+                        <div className="text-xl font-bold text-white">{tokenData.plvhedge.balance.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
+                        <div className="text-xl font-bold text-yellow-400">{tokenData.plvhedge.multiplier}x</div>
+                      </div>
                     </div>
                   </div>
                   <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">

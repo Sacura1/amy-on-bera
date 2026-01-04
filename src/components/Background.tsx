@@ -31,12 +31,15 @@ export default function Background() {
   // Select mobile or desktop preview based on screen size
   const preview = isMobile ? bg?.previewMobile : bg?.previewDesktop;
 
+  // Note: backgroundAttachment: 'fixed' doesn't work on iOS Safari
+  // On mobile, we use a different approach with position: fixed on the container
   const bgStyle: React.CSSProperties = preview
     ? {
         backgroundImage: `url(${preview})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
+        // Only use fixed attachment on desktop - iOS doesn't support it
+        ...(isMobile ? {} : { backgroundAttachment: 'fixed' }),
       }
     : {};
 
