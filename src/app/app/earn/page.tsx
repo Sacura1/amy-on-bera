@@ -29,10 +29,11 @@ interface TokenHolding {
 interface TokenHoldingsData {
   sailr: TokenHolding;
   plvhedge: TokenHolding;
+  plsbera: TokenHolding;
 }
 interface DynamicPoolData {
   tvl: string;
-  apy: string;
+  apr: string;
 }
 
 interface DynamicEarnData {
@@ -40,6 +41,8 @@ interface DynamicEarnData {
   'sailr': DynamicPoolData;
   'snrusd': DynamicPoolData;
   'jnrusd': DynamicPoolData;
+  'plvhedge': DynamicPoolData;
+  'plsbera': DynamicPoolData;
   lastUpdated: string;
 }
 
@@ -49,7 +52,7 @@ interface Strategy {
   subtitle: string;
   image: string;
   tvl: string;
-  apy: string;
+  apr: string;
   amyPoints: string;
   riskCategory: 'hedge' | 'balanced' | 'stable';
   actionType: 'deposit' | 'buy';
@@ -77,7 +80,7 @@ const STRATEGIES: Strategy[] = [
     subtitle: 'Bulla Exchange',
     image: '/bulla.jpg',
     tvl: '$1.17K',
-    apy: '2.68%',
+    apr: '2.11%',
     amyPoints: 'Earn up to 100x',
     riskCategory: 'hedge',
     actionType: 'deposit',
@@ -92,9 +95,9 @@ const STRATEGIES: Strategy[] = [
     name: 'Staked – plsBERA',
     subtitle: 'Plutus',
     image: '/plsbera.jpg',
-    tvl: '',
-    apy: '36.02%',
-    amyPoints: 'TBC',
+    tvl: '$22K',
+    apr: '31.91%',
+    amyPoints: 'Earn up to 10x',
     riskCategory: 'hedge',
     actionType: 'deposit',
     actionUrl: 'https://plutus.fi/Assets/a/plsBERA/tab/convert',
@@ -103,6 +106,7 @@ const STRATEGIES: Strategy[] = [
       token: '0xc66D1a2460De7b96631f4AC37ce906aCFa6A3c30', // plsBERA
       fromToken: 'HONEY',
     },
+    dynamicDataKey: 'plsbera',
   },
   // 3. plvHEDGE
   {
@@ -111,14 +115,15 @@ const STRATEGIES: Strategy[] = [
     subtitle: 'Plutus',
     image: '/plvhedge.jpg',
     tvl: '$271.91K',
-    apy: '22.54%',
-    amyPoints: 'Earn upto 10x',
+    apr: '22.54%',
+    amyPoints: 'Earn up to 10x',
     riskCategory: 'balanced',
     actionType: 'buy',
     buyToken: '0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',
     fromToken: 'HONEY',
     description: 'Deploy capital into the plvHEDGE delta-neutral strategy. plvHEDGE is an automated vault with dynamic yield sourcing, designed to generate yield while managing market exposure across chains. Powered by Plutus.',
     protocolUrl: 'https://plutus.fi',
+    dynamicDataKey: 'plvhedge',
   },
   // 4. SAIL.r
   {
@@ -127,8 +132,8 @@ const STRATEGIES: Strategy[] = [
     subtitle: 'Liquid Royalty',
     image: '/sail.jpg',
     tvl: '$4.32M',
-    apy: '30%',
-    amyPoints: 'Earn upto 10x',
+    apr: '30%',
+    amyPoints: 'Earn up to 10x',
     riskCategory: 'balanced',
     actionType: 'buy',
     buyToken: '0x59a61B8d3064A51a95a5D6393c03e2152b1a2770',
@@ -144,7 +149,7 @@ const STRATEGIES: Strategy[] = [
     subtitle: 'Liquid Royalty',
     image: '/snr.jpg',
     tvl: '$2.13M',
-    apy: '13%',
+    apr: '13%',
     amyPoints: 'TBC',
     riskCategory: 'stable',
     actionType: 'deposit',
@@ -164,7 +169,7 @@ const STRATEGIES: Strategy[] = [
     subtitle: 'Liquid Royalty',
     image: '/jnr.jpg',
     tvl: '$2.12M',
-    apy: '93%',
+    apr: '93%',
     amyPoints: 'TBC',
     riskCategory: 'hedge',
     actionType: 'deposit',
@@ -214,12 +219,12 @@ const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicDa
   const risk = getRiskStyles(strategy.riskCategory);
   const [showInfo, setShowInfo] = useState(false);
 
-  // Get TVL and APY from dynamic data if available
+  // Get TVL and APR from dynamic data if available
   const poolData = strategy.dynamicDataKey && dynamicData
     ? dynamicData[strategy.dynamicDataKey as keyof Omit<DynamicEarnData, 'lastUpdated'>]
     : null;
   const displayTvl = poolData?.tvl || strategy.tvl;
-  const displayApy = poolData?.apy || strategy.apy;
+  const displayApr = poolData?.apr || strategy.apr;
 
   const handleAction = () => {
     if (strategy.actionType === 'deposit' && strategy.actionUrl) {
@@ -276,22 +281,22 @@ const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicDa
       {/* Conditional content: Stats OR Info panel */}
       {!showInfo ? (
         <>
-          {/* TVL and APY */}
+          {/* TVL and APR */}
           <div className="px-4 pb-3 flex items-center gap-6">
             <div>
               <div className="text-xs text-gray-500 uppercase">TVL</div>
               <div className="text-lg font-bold text-white">{displayTvl || '—'}</div>
             </div>
             <div>
-              <div className="text-xs text-gray-500 uppercase">APY</div>
-              <div className="text-lg font-bold text-green-400">{displayApy}</div>
+              <div className="text-xs text-gray-500 uppercase">APR (est.)</div>
+              <div className="text-lg font-bold text-green-400">{displayApr}</div>
             </div>
           </div>
 
           {/* Amy Points and Risk */}
           <div className="px-4 pb-3 flex gap-2">
-            {/* Hide Amy Points for plvHEDGE and SAIL.r */}
-            {strategy.id !== 'plvhedge' && strategy.id !== 'sailr' && (
+            {/* Show Amy Points badge for strategies with multipliers */}
+            {strategy.amyPoints && strategy.amyPoints !== 'TBC' && (
               <div className="flex-1 bg-gray-800/80 rounded-lg px-3 py-2">
                 <div className="text-xs font-semibold text-white">Amy Points</div>
                 <div className="text-xs text-yellow-400 font-medium">{strategy.amyPoints}</div>
@@ -456,14 +461,14 @@ const MOCK_LP_DATA: LpData = {
   amyPriceUsd: 0.0042,
 };
 
-type SortOption = 'default' | 'tvl-high' | 'tvl-low' | 'apy-high' | 'apy-low' | 'points-high' | 'points-low';
+type SortOption = 'default' | 'tvl-high' | 'tvl-low' | 'apr-high' | 'apr-low' | 'points-high' | 'points-low';
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'default', label: 'Default' },
   { value: 'tvl-high', label: 'TVL (highest first)' },
   { value: 'tvl-low', label: 'TVL (lowest first)' },
-  { value: 'apy-high', label: 'APY (highest first)' },
-  { value: 'apy-low', label: 'APY (lowest first)' },
+  { value: 'apr-high', label: 'APR (highest first)' },
+  { value: 'apr-low', label: 'APR (lowest first)' },
   { value: 'points-high', label: 'Points (highest first)' },
   { value: 'points-low', label: 'Points (lowest first)' },
 ];
@@ -573,7 +578,7 @@ export default function EarnPage() {
 
   // Check if user has active LP position (or TEST_MODE is enabled)
   const hasActiveLp = TEST_MODE || (lpData && lpData.lpValueUsd > 0 && lpData.positionsFound > 0);
-  const hasActiveTokens = tokenData && (tokenData.sailr?.isActive || tokenData.plvhedge?.isActive);
+  const hasActiveTokens = tokenData && (tokenData.sailr?.isActive || tokenData.plvhedge?.isActive || tokenData.plsbera?.isActive);
   const hasAnyActivePosition = hasActiveLp || hasActiveTokens;
 
   // Helper to get dynamic value for a strategy
@@ -585,12 +590,12 @@ export default function EarnPage() {
     return strategy.tvl;
   };
 
-  const getDynamicApy = (strategy: Strategy) => {
+  const getDynamicApr = (strategy: Strategy) => {
     if (strategy.dynamicDataKey && dynamicEarnData) {
       const poolData = dynamicEarnData[strategy.dynamicDataKey as keyof Omit<DynamicEarnData, 'lastUpdated'>];
-      return poolData?.apy || strategy.apy;
+      return poolData?.apr || strategy.apr;
     }
-    return strategy.apy;
+    return strategy.apr;
   };
 
   // Sort strategies based on selected option
@@ -600,10 +605,10 @@ export default function EarnPage() {
         return parseValue(getDynamicTvl(b)) - parseValue(getDynamicTvl(a));
       case 'tvl-low':
         return parseValue(getDynamicTvl(a)) - parseValue(getDynamicTvl(b));
-      case 'apy-high':
-        return parseValue(getDynamicApy(b)) - parseValue(getDynamicApy(a));
-      case 'apy-low':
-        return parseValue(getDynamicApy(a)) - parseValue(getDynamicApy(b));
+      case 'apr-high':
+        return parseValue(getDynamicApr(b)) - parseValue(getDynamicApr(a));
+      case 'apr-low':
+        return parseValue(getDynamicApr(a)) - parseValue(getDynamicApr(b));
       case 'points-high':
         return parsePoints(b.amyPoints) - parsePoints(a.amyPoints);
       case 'points-low':
@@ -702,6 +707,48 @@ export default function EarnPage() {
                     <span className="text-sm text-gray-400">Manage your position on Plutus</span>
                     <a
                       href="https://plutus.fi"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
+                    >
+                      View Position →
+                    </a>
+                  </div>
+                </div>
+              )}
+              {tokenData?.plsbera?.isActive && (
+                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
+                  <div className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+                        <img src="/plsbera.jpg" alt="plsBERA" className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <div className="text-white font-bold">plsBERA</div>
+                        <div className="text-sm text-gray-400">Plutus</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-4 pb-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Your Staked Value</div>
+                        <div className="text-xl font-bold text-white">${tokenData.plsbera.valueUsd.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
+                        <div className="text-xl font-bold text-white">{tokenData.plsbera.balance.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
+                        <div className="text-xl font-bold text-yellow-400">{tokenData.plsbera.multiplier}x</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Manage your position on Plutus</span>
+                    <a
+                      href="https://plutus.fi/Assets/a/plsBERA/tab/convert"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium text-yellow-400 hover:text-yellow-300"

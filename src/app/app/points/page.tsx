@@ -5,6 +5,7 @@ import { useActiveAccount } from 'thirdweb/react';
 import { useAmyBalance } from '@/hooks';
 import { API_BASE_URL } from '@/lib/constants';
 import Link from 'next/link';
+import PointsHistory from '@/components/PointsHistory';
 
 interface TierInfo {
   minBalance: number;
@@ -48,6 +49,7 @@ interface TokenHolding {
 interface TokenHoldingsData {
   sailr: TokenHolding;
   plvhedge: TokenHolding;
+  plsbera: TokenHolding;
 }
 
 const TIERS: Record<string, TierInfo> = {
@@ -96,6 +98,15 @@ const MOCK_TOKEN_DATA: TokenHoldingsData = {
     priceUsd: 1.2,
     valueUsd: 60,
     multiplier: 3,
+    isActive: true,
+  },
+  plsbera: {
+    token: 'plsBERA',
+    address: '0xe8bEB147a93BB757DB15e468FaBD119CA087EfAE',
+    balance: 100,
+    priceUsd: 5.0,
+    valueUsd: 500,
+    multiplier: 10,
     isActive: true,
   },
 };
@@ -602,9 +613,10 @@ export default function PointsPage() {
                       {(() => {
                         // Calculate total multiplier from all badges (additive)
                         const lpMult = lpData && lpData.lpMultiplier > 1 ? lpData.lpMultiplier : 0;
-                        const sailrMult = tokenData && tokenData.sailr.multiplier > 1 ? tokenData.sailr.multiplier : 0;
-                        const plvhedgeMult = tokenData && tokenData.plvhedge.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult);
+                        const sailrMult = tokenData && tokenData.sailr?.multiplier > 1 ? tokenData.sailr.multiplier : 0;
+                        const plvhedgeMult = tokenData && tokenData.plvhedge?.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
+                        const plsberaMult = tokenData && tokenData.plsbera?.multiplier > 1 ? tokenData.plsbera.multiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult);
 
                         let badgeGradient = 'bg-gray-600'; // default for 1x
                         if (totalMultiplier >= 100) {
@@ -632,9 +644,10 @@ export default function PointsPage() {
                       {(() => {
                         // Calculate total multiplier from all badges (additive)
                         const lpMult = lpData && lpData.lpMultiplier > 1 ? lpData.lpMultiplier : 0;
-                        const sailrMult = tokenData && tokenData.sailr.multiplier > 1 ? tokenData.sailr.multiplier : 0;
-                        const plvhedgeMult = tokenData && tokenData.plvhedge.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult);
+                        const sailrMult = tokenData && tokenData.sailr?.multiplier > 1 ? tokenData.sailr.multiplier : 0;
+                        const plvhedgeMult = tokenData && tokenData.plvhedge?.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
+                        const plsberaMult = tokenData && tokenData.plsbera?.multiplier > 1 ? tokenData.plsbera.multiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult);
                         const pointsPerHour = currentTier.pointsPerHour * totalMultiplier;
                         return (
                           <div className="flex flex-col items-center">
@@ -671,6 +684,11 @@ export default function PointsPage() {
               </>
             )}
           </div>
+        )}
+
+        {/* Points History */}
+        {(TEST_MODE || (account && walletAddress)) && (
+          <PointsHistory walletAddress={walletAddress} />
         )}
 
         {/* How You Earn Amy Points */}
@@ -793,11 +811,14 @@ export default function PointsPage() {
               image="/plsbera.jpg"
               description="Rewarding users who stake plsBERA and support Berachain's economic security. This badge reflects active staking participation and may update over time as your position changes. Powered by Plutus."
               multipliers={[
-                { requirement: 'Level 1', multiplier: 'TBC' },
-                { requirement: 'Level 2', multiplier: 'TBC' },
-                { requirement: 'Level 3', multiplier: 'TBC' },
+                { requirement: '$10+ staked', multiplier: 'x3' },
+                { requirement: '$100+ staked', multiplier: 'x5' },
+                { requirement: '$500+ staked', multiplier: 'x10' },
               ]}
-              isActive={false}
+              isActive={tokenData ? tokenData.plsbera?.isActive : false}
+              currentMultiplier={tokenData && tokenData.plsbera?.multiplier > 1 ? `${tokenData.plsbera.multiplier}x` : undefined}
+              actionUrl="https://plutus.fi/Assets/a/plsBERA/tab/convert"
+              actionLabel="Stake plsBERA"
             />
 
             {/* 3. plvHEDGE */}

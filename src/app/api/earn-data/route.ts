@@ -9,7 +9,7 @@ const BERACHAIN_RPC = 'https://rpc.berachain.com';
 
 interface PoolData {
   tvl: string;
-  apy: string;
+  apr: string; // Changed from apr to apr
 }
 
 interface EarnData {
@@ -17,6 +17,8 @@ interface EarnData {
   'sailr': PoolData;
   'snrusd': PoolData;
   'jnrusd': PoolData;
+  'plvhedge': PoolData;
+  'plsbera': PoolData;
   lastUpdated: string;
 }
 
@@ -48,7 +50,7 @@ async function fetchBullaPoolData(): Promise<PoolData> {
                      html.match(/"apr"["\s:]+(\d+\.?\d*)/i);
 
     let tvl = '$1.17K'; // Default
-    let apy = '2.68%'; // Default
+    let apr = '2.68%'; // Default
 
     if (tvlMatch && tvlMatch[1]) {
       const tvlNum = parseFloat(tvlMatch[1]);
@@ -57,13 +59,13 @@ async function fetchBullaPoolData(): Promise<PoolData> {
 
     if (aprMatch && aprMatch[1]) {
       const aprNum = parseFloat(aprMatch[1]);
-      apy = `${aprNum.toFixed(2)}%`;
+      apr = `${aprNum.toFixed(2)}%`;
     }
 
-    return { tvl, apy };
+    return { tvl, apr };
   } catch (error) {
     console.error('Error fetching Bulla pool data:', error);
-    return { tvl: '$1.17K', apy: '2.68%' }; // Return defaults on error
+    return { tvl: '$1.17K', apr: '2.11%' }; // Return defaults on error
   }
 }
 
@@ -91,14 +93,94 @@ async function fetchSailrPoolData(): Promise<PoolData> {
       const reserveUsd = parseFloat(poolData.reserve_in_usd || '0');
       return {
         tvl: formatTvl(reserveUsd),
-        apy: '30%' // SAIL.r APY stays at 30% per user request
+        apr: '30%' // SAIL.r APR stays at 30% per user request
       };
     }
 
-    return { tvl: '$4.32M', apy: '30%' }; // Default
+    return { tvl: '$4.32M', apr: '30%' }; // Default
   } catch (error) {
     console.error('Error fetching SAIL.r pool data:', error);
-    return { tvl: '$4.32M', apy: '30%' }; // Return defaults on error
+    return { tvl: '$4.32M', apr: '30%' }; // Return defaults on error
+  }
+}
+
+
+// Fetch plvHEDGE APR from Plutus API
+async function fetchPlvHedgeData(): Promise<PoolData> {
+  try {
+    const response = await fetch(
+      'https://plutus.fi/api/assets/80094/0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',
+      {
+        headers: { 'Accept': 'application/json' },
+        next: { revalidate: 300 }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Plutus API fetch failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    // Plutus API returns APR and TVL in uppercase
+    const apr = data?.APR || data?.apr || data?.apy || 22.54;
+    const tvl = data?.TVL || data?.tvl || data?.totalValueLocked;
+
+    return {
+      tvl: tvl ? formatTvl(tvl) : '$271.91K',
+      apr: `${Number(apr).toFixed(2)}%`
+    };
+  } catch (error) {
+    console.error('Error fetching plvHEDGE data from Plutus:', error);
+    return { tvl: '$271.91K', apr: '22.25%' };
+  }
+}
+
+// Fetch plsBERA data from Plutus API and on-chain
+async function fetchPlsBeraData(): Promise<PoolData> {
+  try {
+    const aprResponse = await fetch(
+      'https://plutus.fi/api/assets/80094/0xe8bEB147a93BB757DB15e468FaBD119CA087EfAE',
+      {
+        headers: { 'Accept': 'application/json' },
+        next: { revalidate: 300 }
+      }
+    );
+
+    let apr = '15%';
+    if (aprResponse.ok) {
+      const aprData = await aprResponse.json();
+      // Plutus API returns APR in uppercase
+      const aprValue = aprData?.APR || aprData?.apr || aprData?.apy || 15;
+      apr = `${Number(aprValue).toFixed(2)}%`;
+    }
+
+    const totalSupply = await callContract(
+      '0xe8bEB147a93BB757DB15e468FaBD119CA087EfAE',
+      '0x18160ddd'
+    );
+
+    let tvl = '$500K';
+    if (totalSupply) {
+      const priceResponse = await fetch(
+        'https://api.geckoterminal.com/api/v2/networks/berachain/pools/0x225915329b032b3385ac28b0dc53d989e8446fd1',
+        { headers: { 'Accept': 'application/json' } }
+      );
+
+      if (priceResponse.ok) {
+        const priceData = await priceResponse.json();
+        const tokenPrice = parseFloat(priceData?.data?.attributes?.base_token_price_usd || '0');
+        if (tokenPrice > 0) {
+          const totalStaked = Number(totalSupply) / 1e18;
+          const tvlValue = totalStaked * tokenPrice;
+          tvl = formatTvl(tvlValue);
+        }
+      }
+    }
+
+    return { tvl, apr };
+  } catch (error) {
+    console.error('Error fetching plsBERA data:', error);
+    return { tvl: '$22K', apr: '31.91%' };
   }
 }
 
@@ -152,14 +234,14 @@ async function fetchSnrUsdData(): Promise<PoolData> {
       const tvl = Number(totalSupply) / 1e18;
       return {
         tvl: formatTvl(tvl),
-        apy: '13%' // Fixed APY per LiquidRoyalty
+        apr: '13%' // Fixed APR per LiquidRoyalty
       };
     }
 
-    return { tvl: '$2.13M', apy: '13%' };
+    return { tvl: '$2.13M', apr: '13%' };
   } catch (error) {
     console.error('Error fetching snrUSD data:', error);
-    return { tvl: '$2.13M', apy: '13%' };
+    return { tvl: '$2.13M', apr: '13%' };
   }
 }
 
@@ -176,14 +258,14 @@ async function fetchJnrUsdData(): Promise<PoolData> {
       const tvl = Number(totalAssets) / 1e18;
       return {
         tvl: formatTvl(tvl),
-        apy: '93%' // Variable APY - would need share price tracking for real-time
+        apr: '93%' // Variable APR - would need share price tracking for real-time
       };
     }
 
-    return { tvl: '$2.12M', apy: '93%' };
+    return { tvl: '$2.12M', apr: '93%' };
   } catch (error) {
     console.error('Error fetching jnrUSD data:', error);
-    return { tvl: '$2.12M', apy: '93%' };
+    return { tvl: '$2.12M', apr: '93%' };
   }
 }
 
@@ -201,11 +283,13 @@ export async function GET() {
 
   try {
     // Fetch data from all sources in parallel
-    const [bullaData, sailrData, snrUsdData, jnrUsdData] = await Promise.all([
+    const [bullaData, sailrData, snrUsdData, jnrUsdData, plvhedgeData, plsberaData] = await Promise.all([
       fetchBullaPoolData(),
       fetchSailrPoolData(),
       fetchSnrUsdData(),
-      fetchJnrUsdData()
+      fetchJnrUsdData(),
+      fetchPlvHedgeData(),
+      fetchPlsBeraData()
     ]);
 
     const earnData: EarnData = {
@@ -213,6 +297,8 @@ export async function GET() {
       'sailr': sailrData,
       'snrusd': snrUsdData,
       'jnrusd': jnrUsdData,
+      'plvhedge': plvhedgeData,
+      'plsbera': plsberaData,
       lastUpdated: new Date().toISOString()
     };
 
@@ -242,10 +328,12 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: {
-        'amy-honey': { tvl: '$1.17K', apy: '2.68%' },
-        'sailr': { tvl: '$4.32M', apy: '30%' },
-        'snrusd': { tvl: '$2.13M', apy: '13%' },
-        'jnrusd': { tvl: '$2.12M', apy: '93%' },
+        'amy-honey': { tvl: '$1.17K', apr: '2.11%' },
+        'sailr': { tvl: '$4.32M', apr: '30%' },
+        'snrusd': { tvl: '$2.13M', apr: '13%' },
+        'jnrusd': { tvl: '$2.12M', apr: '93%' },
+        'plvhedge': { tvl: '$271.91K', apr: '22.25%' },
+        'plsbera': { tvl: '$22K', apr: '31.91%' },
         lastUpdated: new Date().toISOString()
       },
       error: 'Using default values'
