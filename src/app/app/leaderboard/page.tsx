@@ -185,23 +185,30 @@ export default function LeaderboardPage() {
           return;
         }
 
-        // Fetch profile display names for each user
-        const entriesWithProfiles = await Promise.all(
-          leaderboardData.map(async (entry: PointsEntry) => {
-            try {
-              const profileResponse = await fetch(`${API_BASE_URL}/api/profile/${entry.wallet}`);
-              const profileData = await profileResponse.json();
-              return {
-                ...entry,
-                displayName: profileData.success && profileData.data?.displayName
-                  ? profileData.data.displayName
-                  : null
-              };
-            } catch {
-              return entry;
-            }
-          })
-        );
+        // Fetch profile display names for each user (in batches to avoid overwhelming proxy)
+        const entriesWithProfiles: PointsEntry[] = [];
+        const batchSize = 20;
+
+        for (let i = 0; i < leaderboardData.length; i += batchSize) {
+          const batch = leaderboardData.slice(i, i + batchSize);
+          const batchResults = await Promise.all(
+            batch.map(async (entry: PointsEntry) => {
+              try {
+                const profileResponse = await fetch(`${API_BASE_URL}/api/profile/${entry.wallet}`);
+                const profileData = await profileResponse.json();
+                return {
+                  ...entry,
+                  displayName: profileData.success && profileData.data?.profile?.displayName
+                    ? profileData.data.profile.displayName
+                    : null
+                };
+              } catch {
+                return entry;
+              }
+            })
+          );
+          entriesWithProfiles.push(...batchResults);
+        }
         setPointsEntries(entriesWithProfiles);
       }
     } catch (err) {
@@ -404,7 +411,7 @@ export default function LeaderboardPage() {
                 <div className="space-y-3 md:space-y-4">
                   {pointsEntries.map((entry, index) => {
                     const displayPosition = index + 1;
-                    const displayName = entry.displayName || entry.xUsername || shortenWallet(entry.wallet);
+                    const displayName = entry.displayName || shortenWallet(entry.wallet);
                     return (
                       <div
                         key={`${entry.wallet}-${index}`}
