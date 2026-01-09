@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThirdwebProvider } from "thirdweb/react";
 
@@ -9,6 +9,13 @@ export const metadata: Metadata = {
     icon: '/favicon.svg',
     apple: '/pro.jpg',
   },
+};
+
+// Enable viewport-fit=cover for iOS Safari to extend behind address bar
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({

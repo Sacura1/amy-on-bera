@@ -18,6 +18,7 @@ interface TokenHolding {
 interface TokenHoldingsData {
   sailr: TokenHolding;
   plvhedge: TokenHolding;
+  plsbera: TokenHolding;
 }
 
 interface EquippedBadge {
@@ -59,6 +60,13 @@ function getPlvhedgeBadgeId(valueUsd: number): string | null {
   if (valueUsd >= 500) return 'plvhedge_x10';
   if (valueUsd >= 100) return 'plvhedge_x5';
   if (valueUsd >= 10) return 'plvhedge_x3';
+  return null;
+}
+
+function getPlsberaBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'plsbera_x10';
+  if (valueUsd >= 100) return 'plsbera_x5';
+  if (valueUsd >= 10) return 'plsbera_x3';
   return null;
 }
 
@@ -160,6 +168,21 @@ export default function BadgeSelector({
           title: 'Royalty',
           image: '/sail.jpg',
           multiplier: tokenData.sailr.multiplier
+        });
+      }
+    }
+
+    // plsBERA badge
+    if (tokenData && tokenData.plsbera && tokenData.plsbera.isActive && tokenData.plsbera.multiplier > 1) {
+      const valueUsd = tokenData.plsbera.valueUsd || (tokenData.plsbera.multiplier >= 10 ? 500 : tokenData.plsbera.multiplier >= 5 ? 100 : 10);
+      const badgeId = getPlsberaBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          name: 'plsBERA',
+          title: 'Staking',
+          image: '/plsbera.jpg',
+          multiplier: tokenData.plsbera.multiplier
         });
       }
     }
@@ -311,7 +334,7 @@ export default function BadgeSelector({
                 {activeBadges.length === 0 ? (
                   <div className="text-center py-4">
                     <p className="text-gray-500 mb-2">No active multiplier badges yet.</p>
-                    <p className="text-gray-600 text-sm">Earn badges by providing LP on Bulla Exchange, holding SAIL.r, or plvHEDGE.</p>
+                    <p className="text-gray-600 text-sm">Earn badges by providing LP on Bulla Exchange, or holding SAIL.r, plvHEDGE, or plsBERA.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-3">

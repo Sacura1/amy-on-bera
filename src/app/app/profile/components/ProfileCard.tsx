@@ -18,6 +18,7 @@ interface TokenHolding {
 interface TokenHoldingsData {
   sailr: TokenHolding;
   plvhedge: TokenHolding;
+  plsbera: TokenHolding;
 }
 
 interface EquippedBadge {
@@ -97,6 +98,13 @@ function getPlvhedgeBadgeId(valueUsd: number): string | null {
   if (valueUsd >= 500) return 'plvhedge_x10';
   if (valueUsd >= 100) return 'plvhedge_x5';
   if (valueUsd >= 10) return 'plvhedge_x3';
+  return null;
+}
+
+function getPlsberaBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'plsbera_x10';
+  if (valueUsd >= 100) return 'plsbera_x5';
+  if (valueUsd >= 10) return 'plsbera_x3';
   return null;
 }
 
@@ -214,6 +222,21 @@ export default function ProfileCard({
       }
     }
 
+    // plsBERA badge
+    if (tokenData && tokenData.plsbera && tokenData.plsbera.isActive && tokenData.plsbera.multiplier > 1) {
+      const valueUsd = tokenData.plsbera.valueUsd || (tokenData.plsbera.multiplier >= 10 ? 500 : tokenData.plsbera.multiplier >= 5 ? 100 : 10);
+      const badgeId = getPlsberaBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: tokenData.plsbera.multiplier,
+          name: 'plsBERA',
+          title: 'Staking',
+          image: '/plsbera.jpg'
+        });
+      }
+    }
+
     return active;
   };
 
@@ -226,11 +249,11 @@ export default function ProfileCard({
     return activeBadges.find(b => b.id === equipped.badgeId) || null;
   };
 
-  // Get multiplier badge colors
-  const getMultiplierColors = (multiplier: number) => {
-    if (multiplier >= 100) return 'bg-yellow-500 text-yellow-950 border-yellow-300';
-    if (multiplier >= 10) return 'bg-slate-400 text-slate-900 border-slate-200';
-    return 'bg-amber-700 text-amber-200 border-amber-500';
+  // Get ring color based on multiplier tier (gold/silver/bronze)
+  const getMultiplierRingColor = (multiplier: number) => {
+    if (multiplier >= 10) return 'ring-4 ring-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]'; // Gold - $500+ (10x)
+    if (multiplier >= 5) return 'ring-4 ring-slate-300 shadow-[0_0_8px_rgba(203,213,225,0.5)]';  // Silver - $100+ (5x)
+    return 'ring-4 ring-amber-600 shadow-[0_0_8px_rgba(217,119,6,0.5)]';                         // Bronze - $10+ (3x)
   };
 
   const getAvatarUrl = () => {
@@ -296,25 +319,20 @@ export default function ProfileCard({
           )}
 
           {/* Multiplier Badge Slots */}
-          <div className="flex gap-2 my-3">
+          <div className="flex gap-3 my-3">
             {[1, 2, 3, 4, 5].map((slotNumber) => {
               const badge = getBadgeForSlot(slotNumber);
               return (
                 <div
                   key={slotNumber}
-                  className={`relative w-10 h-10 rounded-lg border-2 flex items-center justify-center overflow-hidden ${
+                  className={`relative w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${
                     badge
-                      ? 'border-yellow-400/50 bg-white'
-                      : 'border-gray-600/50 bg-gray-800/50 border-dashed'
+                      ? `bg-white ${getMultiplierRingColor(badge.multiplier)}`
+                      : 'border-2 border-gray-600/50 bg-gray-800/50 border-dashed'
                   }`}
                 >
                   {badge ? (
-                    <>
-                      <img src={badge.image} alt={badge.name} className="w-8 h-8 object-contain" />
-                      <div className={`absolute -top-1 -left-1 text-[7px] font-black px-0.5 py-0.5 rounded z-10 border ${getMultiplierColors(badge.multiplier)}`}>
-                        x{badge.multiplier}
-                      </div>
-                    </>
+                    <img src={badge.image} alt={badge.name} className="w-full h-full object-cover rounded-full" />
                   ) : (
                     <span className="text-[10px] text-gray-600">{slotNumber}</span>
                   )}
@@ -323,7 +341,7 @@ export default function ProfileCard({
             })}
             <button
               onClick={onEditBadges}
-              className="w-10 h-10 rounded-lg border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-full border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors"
               title="Edit Badges"
             >
               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

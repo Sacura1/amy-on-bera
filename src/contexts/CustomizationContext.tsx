@@ -2,15 +2,19 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// Background and filter configurations (mobile/desktop variants)
-export const BACKGROUNDS: Record<string, { previewMobile: string | null; previewDesktop: string | null }> = {
-  bg_default: { previewMobile: null, previewDesktop: null },
-  bg_1: { previewMobile: '/bg_mobile_1.jpg', previewDesktop: '/bg_desktop_1.jpg' },
-  bg_2: { previewMobile: '/bg_mobile_2.jpg', previewDesktop: '/bg_desktop_2.jpg' },
-  bg_3: { previewMobile: '/bg_mobile_3.jpg', previewDesktop: '/bg_desktop_3.jpg' },
-  bg_4: { previewMobile: '/bg_mobile_4.jpg', previewDesktop: '/bg_desktop_4.jpg' },
-  bg_5: { previewMobile: '/bg_mobile_5.jpg', previewDesktop: '/bg_desktop_5.jpg' },
-  bg_6: { previewMobile: '/bg_mobile_6.jpg', previewDesktop: '/bg_desktop_6.jpg' },
+// Background and filter configurations (mobile portrait/landscape and desktop variants)
+export const BACKGROUNDS: Record<string, {
+  previewMobile: string | null;
+  previewMobileLandscape: string | null;
+  previewDesktop: string | null;
+}> = {
+  bg_default: { previewMobile: null, previewMobileLandscape: null, previewDesktop: null },
+  bg_1: { previewMobile: '/bg_mobile_1.jpg', previewMobileLandscape: '/bg_desktop_1.jpg', previewDesktop: '/bg_desktop_1.jpg' },
+  bg_2: { previewMobile: '/bg_mobile_2.jpg', previewMobileLandscape: '/bg_desktop_2.jpg', previewDesktop: '/bg_desktop_2.jpg' },
+  bg_3: { previewMobile: '/bg_mobile_3.jpg', previewMobileLandscape: '/bg_desktop_3.jpg', previewDesktop: '/bg_desktop_3.jpg' },
+  bg_4: { previewMobile: '/bg_mobile_4.jpg', previewMobileLandscape: '/bg_desktop_4.jpg', previewDesktop: '/bg_desktop_4.jpg' },
+  bg_5: { previewMobile: '/bg_mobile_5.jpg', previewMobileLandscape: '/bg_desktop_5.jpg', previewDesktop: '/bg_desktop_5.jpg' },
+  bg_6: { previewMobile: '/bg_mobile_6.jpg', previewMobileLandscape: '/bg_desktop_6.jpg', previewDesktop: '/bg_desktop_6.jpg' },
 };
 
 export const FILTERS: Record<string, { color: string }> = {

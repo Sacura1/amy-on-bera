@@ -190,10 +190,10 @@ export default function CustomiseSection({
         </div>
       )}
 
-      {/* Background Section */}
+      {/* Background Section - Horizontally Swipeable */}
       <div className="mb-6">
         <h3 className="text-white font-semibold mb-3">Background</h3>
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {BACKGROUNDS.map((bg) => {
             const isSelected = selectedBackground === bg.id;
             const isOwned = ownedItems.includes(bg.id);
@@ -203,7 +203,7 @@ export default function CustomiseSection({
               <div
                 key={bg.id}
                 onClick={() => !isApplying && !isPurchasing && handleItemClick('background', bg.id, bg.cost, bg.name)}
-                className={`relative w-full aspect-[3/2] rounded-lg overflow-hidden cursor-pointer transition-all ${
+                className={`relative flex-shrink-0 w-24 h-16 md:w-28 md:h-[72px] rounded-lg overflow-hidden cursor-pointer transition-all ${
                   isSelected ? 'ring-2 ring-yellow-400 scale-105' : 'ring-1 ring-gray-600 hover:ring-gray-500'
                 }`}
               >
@@ -245,10 +245,10 @@ export default function CustomiseSection({
         </div>
       </div>
 
-      {/* Filter Section */}
+      {/* Filter Section - Horizontally Swipeable */}
       <div className="mb-6">
         <h3 className="text-white font-semibold mb-3">Filter</h3>
-        <div className="grid grid-cols-5 gap-2 sm:gap-3">
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {FILTERS.map((filter) => {
             const isSelected = selectedFilter === filter.id;
             const isOwned = ownedItems.includes(filter.id);
@@ -258,7 +258,7 @@ export default function CustomiseSection({
               <div
                 key={filter.id}
                 onClick={() => !isApplying && !isPurchasing && handleItemClick('filter', filter.id, filter.cost, filter.name)}
-                className={`relative w-full aspect-square rounded-lg cursor-pointer transition-all overflow-hidden ${
+                className={`relative flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-lg cursor-pointer transition-all overflow-hidden ${
                   isSelected ? 'ring-2 ring-yellow-400 scale-110' : 'ring-1 ring-gray-600 hover:ring-gray-500'
                 }`}
               >
@@ -271,7 +271,7 @@ export default function CustomiseSection({
                 {/* Price badge for locked items - NOT blurred */}
                 {isLocked && (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <span className="bg-yellow-500 text-black text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">{filter.cost}</span>
+                    <span className="bg-yellow-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded">{filter.cost}</span>
                   </div>
                 )}
 

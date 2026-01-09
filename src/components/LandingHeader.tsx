@@ -10,7 +10,7 @@ const MENU_ITEMS = [
   { href: '/app/points', label: 'AMY POINTS' },
   { href: '/app/trade', label: 'TRADE' },
   { href: '/app/leaderboard', label: 'LEADERBOARD' },
-  { href: '/app/contact', label: 'PARTNERS & INVESTORS' },
+  { href: '/app/partners', label: 'PARTNERS & INVESTORS' },
 ];
 
 export default function LandingHeader() {

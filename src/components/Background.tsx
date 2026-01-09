@@ -6,19 +6,28 @@ import { useCustomizationOptional, BACKGROUNDS, FILTERS } from '@/contexts';
 export default function Background() {
   const customization = useCustomizationOptional();
   const [isMobile, setIsMobile] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(false);
 
-  // Detect mobile vs desktop based on screen width
+  // Detect mobile vs desktop based on screen width and orientation
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const checkScreenState = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      setIsMobile(width < 768);
+      setIsLandscape(width > height);
     };
 
     // Check on mount
-    checkMobile();
+    checkScreenState();
 
-    // Listen for resize events
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    // Listen for resize and orientation change events
+    window.addEventListener('resize', checkScreenState);
+    window.addEventListener('orientationchange', checkScreenState);
+
+    return () => {
+      window.removeEventListener('resize', checkScreenState);
+      window.removeEventListener('orientationchange', checkScreenState);
+    };
   }, []);
 
   // If not in CustomizationProvider (e.g., landing page), use defaults
@@ -28,8 +37,22 @@ export default function Background() {
   const bg = BACKGROUNDS[backgroundId];
   const filter = FILTERS[filterId];
 
-  // Select mobile or desktop preview based on screen size
-  const preview = isMobile ? bg?.previewMobile : bg?.previewDesktop;
+  // Select appropriate preview based on screen size and orientation
+  // Mobile landscape uses the landscape variant (wider image)
+  // Mobile portrait uses the portrait variant
+  // Desktop always uses desktop variant
+  const getPreview = () => {
+    if (!isMobile) {
+      return bg?.previewDesktop;
+    }
+    // On mobile, use landscape image when in landscape orientation
+    if (isLandscape && bg?.previewMobileLandscape) {
+      return bg.previewMobileLandscape;
+    }
+    return bg?.previewMobile;
+  };
+
+  const preview = getPreview();
 
   // Note: backgroundAttachment: 'fixed' doesn't work on iOS Safari
   // On mobile, we use a different approach with position: fixed on the container
@@ -49,6 +72,7 @@ export default function Background() {
       : {};
 
   const hasCustomBg = backgroundId !== 'bg_default';
+  const hasFilter = filter && filter.color !== 'transparent' && filterId !== 'filter_none';
 
   return (
     <>
@@ -58,16 +82,18 @@ export default function Background() {
       {/* Custom background image */}
       {hasCustomBg && (
         <div
-          className="fixed inset-0 z-0"
+          className="fixed inset-0 z-[-2]"
           style={bgStyle}
         />
       )}
 
-      {/* Filter overlay */}
-      <div
-        className="fixed inset-0 z-0 pointer-events-none"
-        style={filterStyle}
-      />
+      {/* Filter overlay - only render if there's an active filter */}
+      {hasFilter && (
+        <div
+          className="fixed inset-0 z-[-1] pointer-events-none"
+          style={filterStyle}
+        />
+      )}
 
       {/* Default overlay for contrast */}
       <div className="bg-overlay" />
