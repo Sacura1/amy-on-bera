@@ -74,6 +74,15 @@ export default function Background() {
   const hasCustomBg = backgroundId !== 'bg_default';
   const hasFilter = filter && filter.color !== 'transparent' && filterId !== 'filter_none';
 
+  // Extend beyond viewport to cover iOS Safari address bar
+  const extendedStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: isMobile ? '-150px' : '-100px',
+    left: 0,
+    right: 0,
+    bottom: isMobile ? '-150px' : '-100px',
+  };
+
   return (
     <>
       {/* Default pattern background - hidden when custom bg is set */}
@@ -82,16 +91,23 @@ export default function Background() {
       {/* Custom background image */}
       {hasCustomBg && (
         <div
-          className="fixed inset-0 z-[-2]"
-          style={bgStyle}
+          style={{
+            ...extendedStyle,
+            ...bgStyle,
+            zIndex: -2,
+          }}
         />
       )}
 
       {/* Filter overlay - only render if there's an active filter */}
       {hasFilter && (
         <div
-          className="fixed inset-0 z-[-1] pointer-events-none"
-          style={filterStyle}
+          style={{
+            ...extendedStyle,
+            ...filterStyle,
+            zIndex: -1,
+            pointerEvents: 'none',
+          }}
         />
       )}
 
