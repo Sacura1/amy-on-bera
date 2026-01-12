@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '@/lib/constants';
 import { useAnimations, useCustomization } from '@/contexts';
 
@@ -24,13 +24,24 @@ const BACKGROUNDS = [
   { id: 'bg_6', name: 'BG 6', previewMobile: '/bg_mobile_6.jpg', previewDesktop: '/bg_desktop_6.jpg', cost: 150 },
 ];
 
-// Filters with colors and pricing
+// Filters with colors/images and pricing
 const FILTERS = [
   { id: 'filter_none', name: 'None', color: '#1a1a1a', cost: 0 },
   { id: 'filter_grey', name: 'Grey', color: '#6b7280', cost: 50 },
   { id: 'filter_blue', name: 'Blue', color: '#3b82f6', cost: 50 },
   { id: 'filter_pink', name: 'Pink', color: '#ec4899', cost: 50 },
   { id: 'filter_yellow', name: 'Yellow', color: '#eab308', cost: 50 },
+  { id: 'filter_green', name: 'Green', color: '#22c55e', cost: 50 },
+  // Image-based texture filters
+  { id: 'filter_crack', name: 'Crack', image: '/crack.png', cost: 250 },
+  { id: 'filter_dust', name: 'Dust', image: '/dust.png', cost: 250 },
+  { id: 'filter_film_grain', name: 'Film Grain', image: '/film_grain.png', cost: 250 },
+  { id: 'filter_film', name: 'Film', image: '/film.png', cost: 250 },
+  { id: 'filter_halftone', name: 'Halftone', image: '/halfton.png', cost: 250 },
+  { id: 'filter_noise', name: 'Noise', image: '/noise_texture.png', cost: 250 },
+  { id: 'filter_redacted', name: 'Redacted', image: '/redacted.png', cost: 250 },
+  { id: 'filter_scanlines', name: 'Scanlines', image: '/scanlines.png', cost: 250 },
+  { id: 'filter_vhs', name: 'VHS', image: '/vhs_effect.png', cost: 250 },
 ];
 
 // Animations (keeping as placeholders for now)
@@ -60,6 +71,20 @@ export default function CustomiseSection({
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [error, setError] = useState('');
   const [confirmPurchase, setConfirmPurchase] = useState<{ type: string; itemId: string; cost: number; name: string } | null>(null);
+
+  // Refs for scroll containers
+  const backgroundScrollRef = useRef<HTMLDivElement>(null);
+  const filterScrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (ref: React.RefObject<HTMLDivElement | null>, direction: 'left' | 'right') => {
+    if (ref.current) {
+      const scrollAmount = 200;
+      ref.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Sync selectedAnimation with animationsEnabled context
   useEffect(() => {
@@ -190,10 +215,29 @@ export default function CustomiseSection({
         </div>
       )}
 
-      {/* Background Section - Horizontally Swipeable */}
+      {/* Background Section - Horizontally Swipeable with Arrows */}
       <div className="mb-6">
         <h3 className="text-white font-semibold mb-3">Background</h3>
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div className="relative">
+          {/* Left Arrow */}
+          <button
+            onClick={() => scroll(backgroundScrollRef, 'left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-gray-800/90 hover:bg-gray-700 rounded-full flex items-center justify-center text-white shadow-lg transition-colors -ml-2 md:ml-0"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          {/* Right Arrow */}
+          <button
+            onClick={() => scroll(backgroundScrollRef, 'right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-gray-800/90 hover:bg-gray-700 rounded-full flex items-center justify-center text-white shadow-lg transition-colors -mr-2 md:mr-0"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          <div ref={backgroundScrollRef} className="flex gap-3 overflow-x-auto pt-2 pb-2 px-8 md:px-6 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {BACKGROUNDS.map((bg) => {
             const isSelected = selectedBackground === bg.id;
             const isOwned = ownedItems.includes(bg.id);
@@ -242,50 +286,87 @@ export default function CustomiseSection({
               </div>
             );
           })}
+          </div>
         </div>
       </div>
 
-      {/* Filter Section - Horizontally Swipeable */}
+      {/* Filter Section - Horizontally Swipeable with Arrows */}
       <div className="mb-6">
         <h3 className="text-white font-semibold mb-3">Filter</h3>
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div className="relative">
+          {/* Left Arrow - higher z-index to stay above items */}
+          <button
+            onClick={(e) => { e.stopPropagation(); scroll(filterScrollRef, 'left'); }}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center text-white shadow-lg transition-colors border border-gray-600"
+            style={{ marginTop: '-10px' }}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          {/* Right Arrow - higher z-index to stay above items */}
+          <button
+            onClick={(e) => { e.stopPropagation(); scroll(filterScrollRef, 'right'); }}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center text-white shadow-lg transition-colors border border-gray-600"
+            style={{ marginTop: '-10px' }}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          <div ref={filterScrollRef} className="flex gap-4 overflow-x-auto pt-2 pb-4 px-10 md:px-8 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {FILTERS.map((filter) => {
             const isSelected = selectedFilter === filter.id;
             const isOwned = ownedItems.includes(filter.id);
             const isLocked = !isOwned && filter.cost > 0;
+            const hasImage = 'image' in filter && filter.image;
 
             return (
               <div
                 key={filter.id}
-                onClick={() => !isApplying && !isPurchasing && handleItemClick('filter', filter.id, filter.cost, filter.name)}
-                className={`relative flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-lg cursor-pointer transition-all overflow-hidden ${
-                  isSelected ? 'ring-2 ring-yellow-400 scale-110' : 'ring-1 ring-gray-600 hover:ring-gray-500'
-                }`}
+                className="flex flex-col items-center gap-1 flex-shrink-0"
               >
-                {/* Color background - blurred when locked */}
                 <div
-                  className={`absolute inset-0 ${isLocked ? 'blur-[2px]' : ''}`}
-                  style={{ backgroundColor: filter.color }}
-                />
+                  onClick={() => !isApplying && !isPurchasing && handleItemClick('filter', filter.id, filter.cost, filter.name)}
+                  className={`relative w-24 h-16 md:w-28 md:h-[72px] rounded-lg cursor-pointer transition-all overflow-hidden ${
+                    isSelected ? 'ring-2 ring-yellow-400 scale-105' : 'ring-1 ring-gray-600 hover:ring-gray-500'
+                  }`}
+                >
+                  {/* Background - color or image based */}
+                  {hasImage ? (
+                    <img
+                      src={filter.image}
+                      alt={filter.name}
+                      className={`absolute inset-0 w-full h-full object-cover ${isLocked ? 'blur-[2px]' : ''}`}
+                    />
+                  ) : (
+                    <div
+                      className={`absolute inset-0 ${isLocked ? 'blur-[2px]' : ''}`}
+                      style={{ backgroundColor: filter.color }}
+                    />
+                  )}
 
-                {/* Price badge for locked items - NOT blurred */}
-                {isLocked && (
-                  <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <span className="bg-yellow-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded">{filter.cost}</span>
-                  </div>
-                )}
+                  {/* Price badge for locked items - NOT blurred */}
+                  {isLocked && (
+                    <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/40">
+                      <span className="bg-yellow-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded">{filter.cost}</span>
+                    </div>
+                  )}
 
-                {/* Selected indicator */}
-                {isSelected && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center z-10">
-                    <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                )}
+                  {/* Selected indicator */}
+                  {isSelected && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center z-10">
+                      <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <span className="text-[10px] text-gray-400">{filter.name}</span>
               </div>
             );
           })}
+          </div>
         </div>
       </div>
 

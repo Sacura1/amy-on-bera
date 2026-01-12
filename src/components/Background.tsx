@@ -1,34 +1,61 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useCustomizationOptional, BACKGROUNDS, FILTERS } from '@/contexts';
 
 export default function Background() {
   const customization = useCustomizationOptional();
   const [isMobile, setIsMobile] = useState(false);
   const [isLandscape, setIsLandscape] = useState(false);
+  const [, forceUpdate] = useState(0);
 
   // Detect mobile vs desktop based on screen width and orientation
-  useEffect(() => {
-    const checkScreenState = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      setIsMobile(width < 768);
-      setIsLandscape(width > height);
-    };
+  const checkScreenState = useCallback(() => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    setIsMobile(width < 768);
+    setIsLandscape(width > height);
+  }, []);
 
+  useEffect(() => {
     // Check on mount
     checkScreenState();
 
-    // Listen for resize and orientation change events
+    // Listen for resize events
     window.addEventListener('resize', checkScreenState);
-    window.addEventListener('orientationchange', checkScreenState);
+
+    // For iOS Safari, also listen to orientationchange with a delay
+    // because dimensions aren't immediately updated
+    const handleOrientationChange = () => {
+      // Force immediate check
+      checkScreenState();
+      // And check again after animation completes
+      setTimeout(() => {
+        checkScreenState();
+        forceUpdate(n => n + 1);
+      }, 100);
+      setTimeout(() => {
+        checkScreenState();
+        forceUpdate(n => n + 1);
+      }, 300);
+    };
+
+    window.addEventListener('orientationchange', handleOrientationChange);
+
+    // Also use matchMedia for more reliable orientation detection
+    const landscapeQuery = window.matchMedia('(orientation: landscape)');
+    const handleMediaChange = (e: MediaQueryListEvent) => {
+      setIsLandscape(e.matches);
+      forceUpdate(n => n + 1);
+    };
+    landscapeQuery.addEventListener('change', handleMediaChange);
 
     return () => {
       window.removeEventListener('resize', checkScreenState);
-      window.removeEventListener('orientationchange', checkScreenState);
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      landscapeQuery.removeEventListener('change', handleMediaChange);
     };
-  }, []);
+  }, [checkScreenState]);
 
   // If not in CustomizationProvider (e.g., landing page), use defaults
   const backgroundId = customization?.backgroundId || 'bg_default';
@@ -60,27 +87,39 @@ export default function Background() {
     ? {
         backgroundImage: `url(${preview})`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundPosition: 'center top',
         // Only use fixed attachment on desktop - iOS doesn't support it
         ...(isMobile ? {} : { backgroundAttachment: 'fixed' }),
       }
     : {};
 
-  const filterStyle: React.CSSProperties =
-    filter && filter.color !== 'transparent'
-      ? { backgroundColor: filter.color }
-      : {};
+  // Filter can be color-based or image-based
+  const filterStyle: React.CSSProperties = filter
+    ? filter.image
+      ? {
+          backgroundImage: `url(${filter.image})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'repeat',
+          opacity: 0.3,
+        }
+      : filter.color !== 'transparent'
+        ? { backgroundColor: filter.color }
+        : {}
+    : {};
 
   const hasCustomBg = backgroundId !== 'bg_default';
-  const hasFilter = filter && filter.color !== 'transparent' && filterId !== 'filter_none';
+  const hasFilter = filter && (filter.color !== 'transparent' || filter.image) && filterId !== 'filter_none';
+  // Only show cyan overlay on landing page (when not in CustomizationProvider)
+  const isLandingPage = customization === null;
 
-  // Extend beyond viewport to cover iOS Safari address bar
+  // Fill the viewport for custom backgrounds
   const extendedStyle: React.CSSProperties = {
     position: 'fixed',
-    top: isMobile ? '-150px' : '-100px',
+    top: 0,
     left: 0,
     right: 0,
-    bottom: isMobile ? '-150px' : '-100px',
+    bottom: 0,
   };
 
   return (
@@ -111,8 +150,8 @@ export default function Background() {
         />
       )}
 
-      {/* Default overlay for contrast */}
-      <div className="bg-overlay" />
+      {/* Default overlay for contrast - ONLY on landing page */}
+      {isLandingPage && <div className="bg-overlay" />}
     </>
   );
 }

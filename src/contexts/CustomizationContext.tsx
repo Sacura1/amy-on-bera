@@ -17,12 +17,23 @@ export const BACKGROUNDS: Record<string, {
   bg_6: { previewMobile: '/bg_mobile_6.jpg', previewMobileLandscape: '/bg_desktop_6.jpg', previewDesktop: '/bg_desktop_6.jpg' },
 };
 
-export const FILTERS: Record<string, { color: string }> = {
+export const FILTERS: Record<string, { color: string; image?: string }> = {
   filter_none: { color: 'transparent' },
   filter_grey: { color: 'rgba(107, 114, 128, 0.3)' },
   filter_blue: { color: 'rgba(59, 130, 246, 0.3)' },
   filter_pink: { color: 'rgba(236, 72, 153, 0.3)' },
   filter_yellow: { color: 'rgba(234, 179, 8, 0.3)' },
+  filter_green: { color: 'rgba(34, 197, 94, 0.3)' },
+  // Image-based texture filters
+  filter_crack: { color: 'transparent', image: '/crack.png' },
+  filter_dust: { color: 'transparent', image: '/dust.png' },
+  filter_film_grain: { color: 'transparent', image: '/film_grain.png' },
+  filter_film: { color: 'transparent', image: '/film.png' },
+  filter_halftone: { color: 'transparent', image: '/halfton.png' },
+  filter_noise: { color: 'transparent', image: '/noise_texture.png' },
+  filter_redacted: { color: 'transparent', image: '/redacted.png' },
+  filter_scanlines: { color: 'transparent', image: '/scanlines.png' },
+  filter_vhs: { color: 'transparent', image: '/vhs_effect.png' },
 };
 
 interface CustomizationContextType {

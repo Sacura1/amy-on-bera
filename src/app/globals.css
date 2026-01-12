@@ -15,9 +15,10 @@
   html {
     /* Ensure html covers the full viewport including safe areas */
     min-height: 100vh;
-    min-height: 100lvh; /* Large viewport height - assumes toolbar hidden */
+    min-height: 100dvh; /* Dynamic viewport height - adjusts with address bar */
     min-height: -webkit-fill-available;
-    background-color: #000;
+    /* Use a dark teal/cyan to match the app theme instead of black */
+    background: linear-gradient(180deg, #0a1a1f 0%, #0d2025 50%, #0a1a1f 100%);
   }
 
   body {
@@ -26,7 +27,7 @@
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    min-height: 100lvh;
+    min-height: 100dvh;
     min-height: -webkit-fill-available;
     position: relative;
     /* Add padding for iOS safe areas (notch, home indicator) */
@@ -40,11 +41,14 @@
 @layer components {
   .bg-pattern {
     position: fixed;
-    /* Extend beyond viewport to cover iOS Safari address bar area */
-    top: -100px;
+    /* Use inset 0 to fill viewport, extend only with padding for iOS Safari */
+    top: 0;
     left: 0;
     right: 0;
-    bottom: -100px;
+    bottom: 0;
+    /* Padding to extend behind iOS Safari address bar */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
     background-image: url('/image.png');
     background-size: cover;
     background-position: center top;
@@ -52,41 +56,15 @@
     z-index: -2;
   }
 
-  @media (max-width: 768px) {
-    .bg-pattern {
-      /* On mobile, extend even further to ensure coverage */
-      top: -150px;
-      bottom: -150px;
-      background-size: cover;
-      background-position: center center;
-    }
-  }
-
-  /* Mobile landscape orientation */
-  @media (max-width: 768px) and (orientation: landscape) {
-    .bg-pattern {
-      background-size: cover;
-      background-position: center center;
-    }
-  }
-
   .bg-overlay {
     position: fixed;
-    /* Extend beyond viewport to cover iOS Safari address bar area */
-    top: -100px;
+    top: 0;
     left: 0;
     right: 0;
-    bottom: -100px;
+    bottom: 0;
     background-color: var(--primary-cyan);
     mix-blend-mode: multiply;
     z-index: -1;
-  }
-
-  @media (max-width: 768px) {
-    .bg-overlay {
-      top: -150px;
-      bottom: -150px;
-    }
   }
 
   .text-shadow-strong {

@@ -170,7 +170,7 @@ export default function LeaderboardPage() {
   const loadPointsLeaderboard = async () => {
     setIsPointsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/points/leaderboard?limit=100`);
+      const response = await fetch(`${API_BASE_URL}/api/points/leaderboard?limit=25`);
       const result = await response.json();
 
       if (result.success) {
@@ -365,7 +365,7 @@ export default function LeaderboardPage() {
                 </div>
               ) : (
                 <div className="space-y-3 md:space-y-4">
-                  {displayEntries.map((entry, index) => {
+                  {displayEntries.slice(0, 25).map((entry, index) => {
                     const displayPosition = index + 1;
                     return (
                       <div
@@ -409,7 +409,7 @@ export default function LeaderboardPage() {
                 </div>
               ) : (
                 <div className="space-y-3 md:space-y-4">
-                  {pointsEntries.map((entry, index) => {
+                  {pointsEntries.slice(0, 25).map((entry, index) => {
                     const displayPosition = index + 1;
                     const displayName = entry.displayName || shortenWallet(entry.wallet);
                     return (

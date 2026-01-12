@@ -22,49 +22,46 @@ interface EarnData {
   lastUpdated: string;
 }
 
-// Fetch AMY/HONEY pool data from Bulla Exchange
+// Fetch AMY/HONEY pool data from GeckoTerminal API (more reliable than scraping)
 async function fetchBullaPoolData(): Promise<PoolData> {
   try {
-    // Bulla Exchange uses a GraphQL-like API, we'll fetch the pool page and extract data
-    const response = await fetch('https://www.bulla.exchange/pools/0xff716930eefb37b5b4ac55b1901dc5704b098d84', {
-      headers: {
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'User-Agent': 'Mozilla/5.0 (compatible; AmyBot/1.0)',
-      },
-      next: { revalidate: 3600 }
-    });
+    // Use GeckoTerminal API to get AMY/HONEY pool data
+    const response = await fetch(
+      'https://api.geckoterminal.com/api/v2/networks/berachain/pools/0xff716930eefb37b5b4ac55b1901dc5704b098d84',
+      {
+        headers: {
+          'Accept': 'application/json',
+        },
+        next: { revalidate: 300 } // Cache for 5 minutes
+      }
+    );
 
     if (!response.ok) {
-      throw new Error(`Bulla fetch failed: ${response.status}`);
+      throw new Error(`GeckoTerminal AMY/HONEY fetch failed: ${response.status}`);
     }
 
-    const html = await response.text();
+    const data = await response.json();
+    const poolData = data?.data?.attributes;
 
-    // Try to extract TVL from the page
-    // Look for patterns like "tvlUSD" or dollar amounts near TVL
-    const tvlMatch = html.match(/tvlUSD["\s:]+(\d+\.?\d*)/i) ||
-                     html.match(/"usdValue"["\s:]+(\d+\.?\d*)/i) ||
-                     html.match(/totalValueLockedUSD["\s:]+(\d+\.?\d*)/i);
+    if (poolData) {
+      const reserveUsd = parseFloat(poolData.reserve_in_usd || '0');
+      // GeckoTerminal provides volume data, we can estimate APR from fees
+      // For now, use a reasonable estimate based on pool activity
+      const volume24h = parseFloat(poolData.volume_usd?.h24 || '0');
+      // Estimate APR: (daily fees * 365) / TVL * 100
+      // Assuming 0.3% fee tier
+      const dailyFees = volume24h * 0.003;
+      const estimatedApr = reserveUsd > 0 ? (dailyFees * 365 / reserveUsd) * 100 : 0;
 
-    const aprMatch = html.match(/avgAPR["\s:]+(\d+\.?\d*)/i) ||
-                     html.match(/"apr"["\s:]+(\d+\.?\d*)/i);
-
-    let tvl = '$1.17K'; // Default
-    let apr = '2.68%'; // Default
-
-    if (tvlMatch && tvlMatch[1]) {
-      const tvlNum = parseFloat(tvlMatch[1]);
-      tvl = formatTvl(tvlNum);
+      return {
+        tvl: formatTvl(reserveUsd),
+        apr: estimatedApr > 0 ? `${estimatedApr.toFixed(2)}%` : '2.11%'
+      };
     }
 
-    if (aprMatch && aprMatch[1]) {
-      const aprNum = parseFloat(aprMatch[1]);
-      apr = `${aprNum.toFixed(2)}%`;
-    }
-
-    return { tvl, apr };
+    return { tvl: '$1.17K', apr: '2.11%' }; // Default
   } catch (error) {
-    console.error('Error fetching Bulla pool data:', error);
+    console.error('Error fetching AMY/HONEY pool data:', error);
     return { tvl: '$1.17K', apr: '2.11%' }; // Return defaults on error
   }
 }
