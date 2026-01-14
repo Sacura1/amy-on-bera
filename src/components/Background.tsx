@@ -113,13 +113,15 @@ export default function Background() {
   // Only show cyan overlay on landing page (when not in CustomizationProvider)
   const isLandingPage = customization === null;
 
-  // Fill the viewport for custom backgrounds
+  // Fill the viewport and extend beyond for iOS Safari address bar
   const extendedStyle: React.CSSProperties = {
     position: 'fixed',
-    top: 0,
+    top: 'calc(-1 * env(safe-area-inset-top, 0px))',
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: 'calc(-1 * env(safe-area-inset-bottom, 0px))',
+    // Ensure it covers the full viewport including safe areas
+    minHeight: 'calc(100vh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px))',
   };
 
   return (

@@ -41,14 +41,12 @@
 @layer components {
   .bg-pattern {
     position: fixed;
-    /* Use inset 0 to fill viewport, extend only with padding for iOS Safari */
-    top: 0;
+    /* Extend beyond viewport to cover iOS Safari address bar */
+    top: calc(-1 * env(safe-area-inset-top, 0px));
     left: 0;
     right: 0;
-    bottom: 0;
-    /* Padding to extend behind iOS Safari address bar */
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
+    min-height: calc(100vh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px));
     background-image: url('/image.png');
     background-size: cover;
     background-position: center top;
@@ -58,10 +56,12 @@
 
   .bg-overlay {
     position: fixed;
-    top: 0;
+    /* Extend beyond viewport to cover iOS Safari address bar */
+    top: calc(-1 * env(safe-area-inset-top, 0px));
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
+    min-height: calc(100vh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px));
     background-color: var(--primary-cyan);
     mix-blend-mode: multiply;
     z-index: -1;
