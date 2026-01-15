@@ -132,7 +132,7 @@ export default function PartnersPage() {
         </div>
 
         {/* Join the Community Section - Matching Home Page */}
-        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-10">
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-10 text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-black mb-4 md:mb-6" style={{ color: '#FFD700' }}>
             JOIN THE COMMUNITY
           </h2>

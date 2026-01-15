@@ -15,6 +15,7 @@ export const BACKGROUNDS: Record<string, {
   bg_4: { previewMobile: '/bg_mobile_4.jpg', previewMobileLandscape: '/bg_desktop_4.jpg', previewDesktop: '/bg_desktop_4.jpg' },
   bg_5: { previewMobile: '/bg_mobile_5.jpg', previewMobileLandscape: '/bg_desktop_5.jpg', previewDesktop: '/bg_desktop_5.jpg' },
   bg_6: { previewMobile: '/bg_mobile_6.jpg', previewMobileLandscape: '/bg_desktop_6.jpg', previewDesktop: '/bg_desktop_6.jpg' },
+  bg_fuzzy: { previewMobile: '/fuzzy_mobile.png', previewMobileLandscape: '/fuzzy_desktop.png', previewDesktop: '/fuzzy_desktop.png' },
 };
 
 export const FILTERS: Record<string, { color: string; image?: string }> = {
@@ -29,7 +30,7 @@ export const FILTERS: Record<string, { color: string; image?: string }> = {
   filter_dust: { color: 'transparent', image: '/dust.png' },
   filter_film_grain: { color: 'transparent', image: '/film_grain.png' },
   filter_film: { color: 'transparent', image: '/film.png' },
-  filter_halftone: { color: 'transparent', image: '/halfton.png' },
+  filter_halftone: { color: 'transparent', image: '/halftone.png' },
   filter_noise: { color: 'transparent', image: '/noise_texture.png' },
   filter_redacted: { color: 'transparent', image: '/redacted.png' },
   filter_scanlines: { color: 'transparent', image: '/scanlines.png' },

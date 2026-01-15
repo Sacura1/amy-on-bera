@@ -22,6 +22,7 @@ const BACKGROUNDS = [
   { id: 'bg_4', name: 'BG 4', previewMobile: '/bg_mobile_4.jpg', previewDesktop: '/bg_desktop_4.jpg', cost: 50 },
   { id: 'bg_5', name: 'BG 5', previewMobile: '/bg_mobile_5.jpg', previewDesktop: '/bg_desktop_5.jpg', cost: 100 },
   { id: 'bg_6', name: 'BG 6', previewMobile: '/bg_mobile_6.jpg', previewDesktop: '/bg_desktop_6.jpg', cost: 150 },
+  { id: 'bg_fuzzy', name: 'Fuzzy Hold', previewMobile: '/fuzzy_mobile.png', previewDesktop: '/fuzzy_desktop.png', cost: 500 },
 ];
 
 // Filters with colors/images and pricing
@@ -37,7 +38,7 @@ const FILTERS = [
   { id: 'filter_dust', name: 'Dust', image: '/dust.png', cost: 250 },
   { id: 'filter_film_grain', name: 'Film Grain', image: '/film_grain.png', cost: 250 },
   { id: 'filter_film', name: 'Film', image: '/film.png', cost: 250 },
-  { id: 'filter_halftone', name: 'Halftone', image: '/halfton.png', cost: 250 },
+  { id: 'filter_halftone', name: 'Halftone', image: '/halftone.png', cost: 250 },
   { id: 'filter_noise', name: 'Noise', image: '/noise_texture.png', cost: 250 },
   { id: 'filter_redacted', name: 'Redacted', image: '/redacted.png', cost: 250 },
   { id: 'filter_scanlines', name: 'Scanlines', image: '/scanlines.png', cost: 250 },
