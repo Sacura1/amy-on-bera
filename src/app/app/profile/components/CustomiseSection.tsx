@@ -22,7 +22,7 @@ const BACKGROUNDS = [
   { id: 'bg_4', name: 'BG 4', previewMobile: '/bg_mobile_4.jpg', previewDesktop: '/bg_desktop_4.jpg', cost: 50 },
   { id: 'bg_5', name: 'BG 5', previewMobile: '/bg_mobile_5.jpg', previewDesktop: '/bg_desktop_5.jpg', cost: 100 },
   { id: 'bg_6', name: 'BG 6', previewMobile: '/bg_mobile_6.jpg', previewDesktop: '/bg_desktop_6.jpg', cost: 150 },
-  { id: 'bg_fuzzy', name: 'Fuzzy Hold', previewMobile: '/fuzzy_mobile.png', previewDesktop: '/fuzzy_desktop.png', cost: 500 },
+  { id: 'bg_fuzzy', name: 'Fuzzy Hold', previewMobile: '/Fuzzy_mobile.png', previewDesktop: '/Fuzzy_desktop.png', cost: 500 },
 ];
 
 // Filters with colors/images and pricing

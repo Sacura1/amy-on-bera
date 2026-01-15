@@ -15,7 +15,7 @@ export const BACKGROUNDS: Record<string, {
   bg_4: { previewMobile: '/bg_mobile_4.jpg', previewMobileLandscape: '/bg_desktop_4.jpg', previewDesktop: '/bg_desktop_4.jpg' },
   bg_5: { previewMobile: '/bg_mobile_5.jpg', previewMobileLandscape: '/bg_desktop_5.jpg', previewDesktop: '/bg_desktop_5.jpg' },
   bg_6: { previewMobile: '/bg_mobile_6.jpg', previewMobileLandscape: '/bg_desktop_6.jpg', previewDesktop: '/bg_desktop_6.jpg' },
-  bg_fuzzy: { previewMobile: '/fuzzy_mobile.png', previewMobileLandscape: '/fuzzy_desktop.png', previewDesktop: '/fuzzy_desktop.png' },
+  bg_fuzzy: { previewMobile: '/Fuzzy_mobile.png', previewMobileLandscape: '/Fuzzy_desktop.png', previewDesktop: '/Fuzzy_desktop.png' },
 };
 
 export const FILTERS: Record<string, { color: string; image?: string }> = {
