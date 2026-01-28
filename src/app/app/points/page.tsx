@@ -1099,7 +1099,7 @@ export default function PointsPage() {
                 Amy Quests
               </h2>
               <p className="text-sm text-gray-300 text-left">
-                Connect with the community and earn 1,000 bonus points
+                Connect with the community and earn 900 bonus points
               </p>
               <p className="text-xs text-gray-500 text-left">
                 All users can participate!
