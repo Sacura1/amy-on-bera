@@ -6,3 +6,4 @@ export { default as NewUserView } from './NewUserView';
 export { default as CustomiseSection } from './CustomiseSection';
 export { default as EmailVerificationModal } from './EmailVerificationModal';
 export { default as TelegramLoginWidget } from './TelegramLoginWidget';
+export { default as DailyCheckIn } from './DailyCheckIn';

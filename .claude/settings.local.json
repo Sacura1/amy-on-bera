@@ -24,7 +24,15 @@
       "WebFetch(domain:blog.thirdweb.com)",
       "Bash(powershell -Command:*)",
       "WebFetch(domain:github.com)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "WebFetch(domain:app.wallchain.xyz)",
+      "mcp__ide__getDiagnostics",
+      "Bash(ls:*)",
+      "Bash(for wallet in \"0x4f5f9db14e195484cf7790fd3946cf6e66a166b0\" \"0x81c5409459d63fe4d3b358c781954b4b2a20db44\" \"0xab76e4268c7394440bd54d03460b9e549fd16c2a\" \"0x8a621f1b81f1b00fe401a3a8025794fa45df39a5\" \"0xdb458a96bb73c668e7e7fa288203d5003c5b4481\")",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(python3:*)"
     ]
   }
 }

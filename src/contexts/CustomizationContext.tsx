@@ -8,7 +8,8 @@ export const BACKGROUNDS: Record<string, {
   previewMobileLandscape: string | null;
   previewDesktop: string | null;
 }> = {
-  bg_default: { previewMobile: null, previewMobileLandscape: null, previewDesktop: null },
+  // Default now uses the poolside/sunset background (bg_1 images)
+  bg_default: { previewMobile: '/bg_mobile_1.jpg', previewMobileLandscape: '/bg_desktop_1.jpg', previewDesktop: '/bg_desktop_1.jpg' },
   bg_1: { previewMobile: '/bg_mobile_1.jpg', previewMobileLandscape: '/bg_desktop_1.jpg', previewDesktop: '/bg_desktop_1.jpg' },
   bg_2: { previewMobile: '/bg_mobile_2.jpg', previewMobileLandscape: '/bg_desktop_2.jpg', previewDesktop: '/bg_desktop_2.jpg' },
   bg_3: { previewMobile: '/bg_mobile_3.jpg', previewMobileLandscape: '/bg_desktop_3.jpg', previewDesktop: '/bg_desktop_3.jpg' },

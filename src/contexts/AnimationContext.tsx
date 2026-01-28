@@ -10,7 +10,8 @@ interface AnimationContextType {
 const AnimationContext = createContext<AnimationContextType | undefined>(undefined);
 
 export function AnimationProvider({ children }: { children: ReactNode }) {
-  const [animationsEnabled, setAnimationsEnabled] = useState(true);
+  // Animations disabled by default for new users
+  const [animationsEnabled, setAnimationsEnabled] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {

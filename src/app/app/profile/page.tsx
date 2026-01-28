@@ -15,6 +15,7 @@ import {
   NewUserView,
   CustomiseSection,
   TelegramLoginWidget,
+  DailyCheckIn,
   // EmailVerificationModal - Commented out until SendGrid implementation is ready
 } from './components';
 
@@ -72,6 +73,16 @@ function ProfilePageContent() {
   const [isAwardingBonus, setIsAwardingBonus] = useState(false);
   const [bonusStatus, setBonusStatus] = useState('');
 
+  // Badge management state (admin)
+  const [raidsharkInput, setRaidsharkInput] = useState('');
+  const [isUpdatingRaidshark, setIsUpdatingRaidshark] = useState(false);
+  const [raidsharkStatus, setRaidsharkStatus] = useState('');
+  const [raidsharkList, setRaidsharkList] = useState<Array<{ wallet: string; xUsername: string; multiplier: number }>>([]);
+  const [convictionWallet, setConvictionWallet] = useState('');
+  const [convictionMultiplier, setConvictionMultiplier] = useState('');
+  const [isUpdatingConviction, setIsUpdatingConviction] = useState(false);
+  const [convictionStatus, setConvictionStatus] = useState('');
+  const [convictionList, setConvictionList] = useState<Array<{ wallet: string; xUsername: string; multiplier: number }>>([]);
 
   // Check if current wallet is admin
   const isAdmin = walletAddress ? ADMIN_WALLETS.includes(walletAddress.toLowerCase()) : false;
@@ -202,6 +213,15 @@ function ProfilePageContent() {
     };
     updateBalance();
   }, [walletAddress, balance, xUsername]);
+
+  // Fetch badge lists for admin
+  useEffect(() => {
+    if (isAdmin && walletAddress) {
+      fetchRaidsharkList();
+      fetchConvictionList();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, walletAddress]);
 
   // Handle OAuth callback (X, Discord, Telegram)
   useEffect(() => {
@@ -514,6 +534,148 @@ function ProfilePageContent() {
     }
   };
 
+  // Fetch RaidShark badge list (admin)
+  const fetchRaidsharkList = async () => {
+    if (!walletAddress || !isAdmin) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/raidshark/list`, {
+        headers: { 'x-wallet-address': walletAddress }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setRaidsharkList(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching RaidShark list:', error);
+    }
+  };
+
+  // Fetch Onchain Conviction badge list (admin)
+  const fetchConvictionList = async () => {
+    if (!walletAddress || !isAdmin) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/conviction/list`, {
+        headers: { 'x-wallet-address': walletAddress }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setConvictionList(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching conviction list:', error);
+    }
+  };
+
+  // Update RaidShark badges from text input (admin)
+  // Format: @username tier (e.g., "@Paweł_1260🐾 7" means x7 multiplier)
+  const updateRaidsharkBadges = async () => {
+    if (!walletAddress || !isAdmin) return;
+    if (!raidsharkInput.trim()) {
+      setRaidsharkStatus('Please enter usernames and multipliers');
+      return;
+    }
+
+    setIsUpdatingRaidshark(true);
+    setRaidsharkStatus('');
+
+    try {
+      // Parse input: each line is "@username multiplier" or "username multiplier"
+      const lines = raidsharkInput.trim().split('\n').filter(l => l.trim());
+      const updates: Array<{ xUsername: string; multiplier: number }> = [];
+
+      for (const line of lines) {
+        // Match patterns like "@username 7" or "username 15" or "@username x7"
+        const match = line.trim().match(/^@?([^\s]+)\s+x?(\d+)$/i);
+        if (match) {
+          const xUsername = match[1];
+          const multiplier = parseInt(match[2]);
+          if ([3, 7, 15].includes(multiplier)) {
+            updates.push({ xUsername, multiplier });
+          }
+        }
+      }
+
+      if (updates.length === 0) {
+        setRaidsharkStatus('No valid entries found. Format: @username 3/7/15');
+        setIsUpdatingRaidshark(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/admin/raidshark/bulk-by-username`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': walletAddress
+        },
+        body: JSON.stringify({ updates }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        const failed = data.results?.filter((r: { success: boolean }) => !r.success) || [];
+        if (failed.length > 0) {
+          setRaidsharkStatus(`Updated ${data.updated} users. ${failed.length} not found: ${failed.map((f: { xUsername: string }) => '@' + f.xUsername).join(', ')}`);
+        } else {
+          setRaidsharkStatus(`Successfully updated ${data.updated} RaidShark badges!`);
+        }
+        setRaidsharkInput('');
+        fetchRaidsharkList();
+      } else {
+        setRaidsharkStatus(data.error || 'Failed to update badges');
+      }
+    } catch {
+      setRaidsharkStatus('Error updating RaidShark badges');
+    } finally {
+      setIsUpdatingRaidshark(false);
+    }
+  };
+
+  // Update Onchain Conviction badge (admin)
+  const updateConvictionBadge = async () => {
+    if (!walletAddress || !isAdmin) return;
+    if (!convictionWallet.trim() || !convictionMultiplier.trim()) {
+      setConvictionStatus('Please enter wallet address and multiplier');
+      return;
+    }
+
+    const multiplier = parseInt(convictionMultiplier);
+    if (![1, 3, 5, 10].includes(multiplier)) {
+      setConvictionStatus('Multiplier must be 1, 3, 5, or 10');
+      return;
+    }
+
+    setIsUpdatingConviction(true);
+    setConvictionStatus('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/conviction/update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': walletAddress
+        },
+        body: JSON.stringify({
+          wallet: convictionWallet.trim(),
+          multiplier
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setConvictionStatus(`Successfully set ${multiplier}x multiplier!`);
+        setConvictionWallet('');
+        setConvictionMultiplier('');
+        fetchConvictionList();
+      } else {
+        setConvictionStatus(data.error || 'Failed to update badge');
+      }
+    } catch {
+      setConvictionStatus('Error updating conviction badge');
+    } finally {
+      setIsUpdatingConviction(false);
+    }
+  };
+
   // Show NewUserView if no wallet connected
   if (!account) {
     return (
@@ -569,6 +731,16 @@ function ProfilePageContent() {
             onDiscordConnect={connectDiscord}
             onTelegramConnect={connectTelegram}
             onEmailConnect={connectEmail}
+          />
+        )}
+
+        {/* Daily Check-In Section */}
+        {xConnected && (
+          <DailyCheckIn
+            walletAddress={walletAddress || null}
+            amyBalance={balance}
+            isHolder={isEligible}
+            onPointsEarned={(points) => setUserPoints(prev => prev + points)}
           />
         )}
 
@@ -839,6 +1011,162 @@ function ProfilePageContent() {
                 <p className={`text-sm mt-3 ${leaderboardStatus.includes('Successfully') ? 'text-green-400' : 'text-red-400'}`}>
                   {leaderboardStatus}
                 </p>
+              )}
+            </div>
+
+            {/* RaidShark Badge Management */}
+            <div className="p-4 md:p-6 border-t border-gray-700/50">
+              <div className="mb-4">
+                <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1 flex items-center gap-2">
+                  <span>🦈</span> RaidShark Badges
+                </h4>
+                <p className="text-xs text-gray-400">
+                  Paste X usernames with multipliers. Format: @username 3/7/15
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  x3 = Raid Enthusiast (75+ pts), x7 = Raid Master (250+ pts), x15 = Raid Legend (600+ pts)
+                </p>
+              </div>
+
+              <textarea
+                value={raidsharkInput}
+                onChange={(e) => setRaidsharkInput(e.target.value)}
+                placeholder={"@Paweł_1260🐾 7\n@senpai_Xpr 7\n@CheekyPert 3\n@Biggreatweb3 3"}
+                rows={5}
+                className="w-full px-4 py-3 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm font-mono focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 resize-none"
+              />
+
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                <div className="text-xs text-gray-400">
+                  {raidsharkInput.trim()
+                    ? `${raidsharkInput.trim().split('\n').filter(l => l.trim()).length} entries`
+                    : 'Paste usernames above'}
+                </div>
+                <button
+                  onClick={updateRaidsharkBadges}
+                  disabled={isUpdatingRaidshark || !raidsharkInput.trim()}
+                  className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-full text-sm font-bold uppercase disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isUpdatingRaidshark ? (
+                    <>
+                      <span className="loading-spinner w-4 h-4" />
+                      <span>UPDATING...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🦈</span>
+                      <span>UPDATE BADGES</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {raidsharkStatus && (
+                <p className={`text-sm mt-3 ${raidsharkStatus.includes('Successfully') ? 'text-green-400' : raidsharkStatus.includes('Updated') ? 'text-yellow-400' : 'text-red-400'}`}>
+                  {raidsharkStatus}
+                </p>
+              )}
+
+              {/* Current RaidShark badge holders */}
+              {raidsharkList.length > 0 && (
+                <div className="mt-4 p-3 bg-black/30 rounded-xl">
+                  <p className="text-xs text-gray-400 mb-2">Current badge holders ({raidsharkList.length}):</p>
+                  <div className="flex flex-wrap gap-2">
+                    {raidsharkList.map((user, i) => (
+                      <span key={i} className="text-xs bg-blue-900/50 text-blue-300 px-2 py-1 rounded-lg">
+                        @{user.xUsername} ({user.multiplier}x)
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Onchain Conviction Badge Management */}
+            <div className="p-4 md:p-6 border-t border-gray-700/50">
+              <div className="mb-4">
+                <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1 flex items-center gap-2">
+                  <span>⛓️</span> Onchain Conviction Badges
+                </h4>
+                <p className="text-xs text-gray-400">
+                  Assign conviction badges by wallet address
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Level 1 = x3, Level 2 = x5, Level 3 = x10
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Wallet Address</label>
+                  <input
+                    type="text"
+                    value={convictionWallet}
+                    onChange={(e) => setConvictionWallet(e.target.value)}
+                    placeholder="0x..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Multiplier</label>
+                  <select
+                    value={convictionMultiplier}
+                    onChange={(e) => setConvictionMultiplier(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all"
+                  >
+                    <option value="">Select level...</option>
+                    <option value="3">Level 1 (x3)</option>
+                    <option value="5">Level 2 (x5)</option>
+                    <option value="10">Level 3 (x10)</option>
+                    <option value="1">Remove (x1)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                <div className="text-xs text-gray-400">
+                  {convictionWallet && convictionMultiplier
+                    ? `Set ${convictionMultiplier}x for ${convictionWallet.slice(0, 6)}...${convictionWallet.slice(-4)}`
+                    : 'Enter wallet and select level'}
+                </div>
+                <button
+                  onClick={updateConvictionBadge}
+                  disabled={isUpdatingConviction || !convictionWallet.trim() || !convictionMultiplier}
+                  className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2.5 rounded-full text-sm font-bold uppercase disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isUpdatingConviction ? (
+                    <>
+                      <span className="loading-spinner w-4 h-4" />
+                      <span>UPDATING...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>⛓️</span>
+                      <span>SET BADGE</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {convictionStatus && (
+                <p className={`text-sm mt-3 ${convictionStatus.includes('Successfully') ? 'text-green-400' : 'text-red-400'}`}>
+                  {convictionStatus}
+                </p>
+              )}
+
+              {/* Current Onchain Conviction badge holders */}
+              {convictionList.length > 0 && (
+                <div className="mt-4 p-3 bg-black/30 rounded-xl">
+                  <p className="text-xs text-gray-400 mb-2">Current badge holders ({convictionList.length}):</p>
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {convictionList.map((user, i) => (
+                      <div key={i} className="text-xs flex justify-between items-center bg-purple-900/30 text-purple-300 px-2 py-1 rounded">
+                        <span className="font-mono">{user.wallet.slice(0, 6)}...{user.wallet.slice(-4)}</span>
+                        <span className="bg-purple-700/50 px-2 rounded">{user.multiplier}x</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </div>

@@ -51,6 +51,7 @@ interface SocialConnectionsProps {
   onDiscordConnect?: () => void;
   onTelegramConnect?: () => void;
   onEmailConnect?: () => void;
+  onDisconnect?: (platform: string) => void;
 }
 
 export default function SocialConnections({
@@ -66,7 +67,8 @@ export default function SocialConnections({
   onXConnect,
   onDiscordConnect,
   onTelegramConnect,
-  onEmailConnect
+  onEmailConnect,
+  onDisconnect
 }: SocialConnectionsProps) {
   const [socialData, setSocialData] = useState<{
     xUsername: string | null;
@@ -75,6 +77,41 @@ export default function SocialConnections({
     email: string | null;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDisconnectConfirm, setShowDisconnectConfirm] = useState<string | null>(null);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+
+  const handleDisconnect = async (platformId: string) => {
+    if (!wallet) return;
+
+    setIsDisconnecting(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/social/${wallet}/disconnect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform: platformId }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        // Update local state
+        if (socialData) {
+          setSocialData({
+            ...socialData,
+            [`${platformId}Username`]: null,
+          });
+        }
+        // Notify parent component
+        if (onDisconnect) {
+          onDisconnect(platformId);
+        }
+      }
+    } catch (error) {
+      console.error('Error disconnecting:', error);
+    } finally {
+      setIsDisconnecting(false);
+      setShowDisconnectConfirm(null);
+    }
+  };
 
   useEffect(() => {
     if (!wallet) return;
@@ -192,10 +229,34 @@ export default function SocialConnections({
             </div>
 
             {platform.connected ? (
-              <div className="flex items-center gap-2">
-                <span className="text-green-400 text-sm">Connected</span>
-                <span className="w-2 h-2 rounded-full bg-green-400"></span>
-              </div>
+              showDisconnectConfirm === platform.id ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleDisconnect(platform.id)}
+                    disabled={isDisconnecting}
+                    className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+                  >
+                    {isDisconnecting ? 'Disconnecting...' : 'Confirm'}
+                  </button>
+                  <button
+                    onClick={() => setShowDisconnectConfirm(null)}
+                    className="px-3 py-1.5 rounded-lg bg-gray-600 hover:bg-gray-700 text-white text-xs font-semibold transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 group">
+                  <span className="text-green-400 text-sm group-hover:hidden">Connected</span>
+                  <span className="w-2 h-2 rounded-full bg-green-400 group-hover:hidden"></span>
+                  <button
+                    onClick={() => setShowDisconnectConfirm(platform.id)}
+                    className="hidden group-hover:block px-3 py-1.5 rounded-lg bg-gray-600 hover:bg-red-600 text-white text-xs font-semibold transition-colors"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              )
             ) : (
               <button
                 onClick={platform.onConnect}

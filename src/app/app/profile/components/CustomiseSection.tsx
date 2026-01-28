@@ -15,14 +15,13 @@ interface CustomiseSectionProps {
 
 // Backgrounds with actual images and pricing (mobile/desktop variants)
 const BACKGROUNDS = [
-  { id: 'bg_default', name: 'Default', previewMobile: null, previewDesktop: null, cost: 0 },
-  { id: 'bg_1', name: 'BG 1', previewMobile: '/bg_mobile_1.jpg', previewDesktop: '/bg_desktop_1.jpg', cost: 50 },
-  { id: 'bg_2', name: 'BG 2', previewMobile: '/bg_mobile_2.jpg', previewDesktop: '/bg_desktop_2.jpg', cost: 50 },
-  { id: 'bg_3', name: 'BG 3', previewMobile: '/bg_mobile_3.jpg', previewDesktop: '/bg_desktop_3.jpg', cost: 50 },
-  { id: 'bg_4', name: 'BG 4', previewMobile: '/bg_mobile_4.jpg', previewDesktop: '/bg_desktop_4.jpg', cost: 50 },
-  { id: 'bg_5', name: 'BG 5', previewMobile: '/bg_mobile_5.jpg', previewDesktop: '/bg_desktop_5.jpg', cost: 100 },
-  { id: 'bg_6', name: 'BG 6', previewMobile: '/bg_mobile_6.jpg', previewDesktop: '/bg_desktop_6.jpg', cost: 150 },
-  { id: 'bg_fuzzy', name: 'Fuzzy Hold', previewMobile: '/Fuzzy_mobile.png', previewDesktop: '/Fuzzy_desktop.png', cost: 500 },
+  { id: 'bg_default', name: 'Default', label: null, previewMobile: '/bg_mobile_1.jpg', previewDesktop: '/bg_desktop_1.jpg', cost: 0 },
+  { id: 'bg_2', name: 'Urban Sunset', label: 'Urban Sunset', previewMobile: '/bg_mobile_2.jpg', previewDesktop: '/bg_desktop_2.jpg', cost: 50 },
+  { id: 'bg_3', name: 'Road Trip', label: 'Road Trip', previewMobile: '/bg_mobile_3.jpg', previewDesktop: '/bg_desktop_3.jpg', cost: 50 },
+  { id: 'bg_4', name: 'Temple Prayer', label: 'Temple Prayer', previewMobile: '/bg_mobile_4.jpg', previewDesktop: '/bg_desktop_4.jpg', cost: 50 },
+  { id: 'bg_5', name: 'Green Queen', label: 'Green Queen', previewMobile: '/bg_mobile_5.jpg', previewDesktop: '/bg_desktop_5.jpg', cost: 100 },
+  { id: 'bg_6', name: 'Get In', label: 'Get In', previewMobile: '/bg_mobile_6.jpg', previewDesktop: '/bg_desktop_6.jpg', cost: 150 },
+  { id: 'bg_fuzzy', name: 'Fuzzy Hold', label: 'Fuzzy Hold', previewMobile: '/Fuzzy_mobile.png', previewDesktop: '/Fuzzy_desktop.png', cost: 500 },
 ];
 
 // Filters with colors/images and pricing
@@ -238,7 +237,7 @@ export default function CustomiseSection({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
-          <div ref={backgroundScrollRef} className="flex gap-3 overflow-x-auto pt-2 pb-2 px-8 md:px-6 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div ref={backgroundScrollRef} className="flex gap-4 overflow-x-auto pt-2 pb-4 px-10 md:px-8 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {BACKGROUNDS.map((bg) => {
             const isSelected = selectedBackground === bg.id;
             const isOwned = ownedItems.includes(bg.id);
@@ -247,43 +246,49 @@ export default function CustomiseSection({
             return (
               <div
                 key={bg.id}
-                onClick={() => !isApplying && !isPurchasing && handleItemClick('background', bg.id, bg.cost, bg.name)}
-                className={`relative flex-shrink-0 w-24 h-16 md:w-28 md:h-[72px] rounded-lg overflow-hidden cursor-pointer transition-all ${
-                  isSelected ? 'ring-2 ring-yellow-400 scale-105' : 'ring-1 ring-gray-600 hover:ring-gray-500'
-                }`}
+                className="flex flex-col items-center gap-1 flex-shrink-0"
               >
-                {/* Content that gets blurred */}
-                <div className={`w-full h-full ${isLocked ? 'blur-[2px]' : ''}`}>
-                  {bg.previewDesktop ? (
-                    <img
-                      src={bg.previewDesktop}
-                      alt={bg.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
-                      <span className="text-xs text-gray-400">Default</span>
+                <div
+                  onClick={() => !isApplying && !isPurchasing && handleItemClick('background', bg.id, bg.cost, bg.name)}
+                  className={`relative w-24 h-16 md:w-28 md:h-[72px] rounded-lg overflow-hidden cursor-pointer transition-all ${
+                    isSelected ? 'ring-2 ring-yellow-400 scale-105' : 'ring-1 ring-gray-600 hover:ring-gray-500'
+                  }`}
+                >
+                  {/* Content that gets blurred */}
+                  <div className={`w-full h-full ${isLocked ? 'blur-[2px]' : ''}`}>
+                    {bg.previewDesktop ? (
+                      <img
+                        src={bg.previewDesktop}
+                        alt={bg.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                        <span className="text-xs text-gray-400">Default</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Price badge for locked items - outside blur */}
+                  {isLocked && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <div className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">
+                        {bg.cost} pts
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Selected indicator */}
+                  {isSelected && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center z-10">
+                      <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
                     </div>
                   )}
                 </div>
-
-                {/* Price badge for locked items - outside blur */}
-                {isLocked && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <div className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">
-                      {bg.cost} pts
-                    </div>
-                  </div>
-                )}
-
-                {/* Selected indicator */}
-                {isSelected && (
-                  <div className="absolute top-1 right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
-                    <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                )}
+                {/* Label below thumbnail - only show if label exists */}
+                <span className="text-[10px] text-gray-400">{bg.label || 'Default'}</span>
               </div>
             );
           })}

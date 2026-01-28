@@ -108,7 +108,8 @@ export default function Background() {
         : {}
     : {};
 
-  const hasCustomBg = backgroundId !== 'bg_default';
+  // Show background image if we have valid preview images (including bg_default)
+  const hasCustomBg = !!(bg?.previewMobile || bg?.previewDesktop);
   const hasFilter = filter && (filter.color !== 'transparent' || filter.image) && filterId !== 'filter_none';
   // Only show cyan overlay on landing page (when not in CustomizationProvider)
   const isLandingPage = customization === null;

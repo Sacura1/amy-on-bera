@@ -22,7 +22,59 @@ interface EnrichedEntry {
   eligible: boolean;
   originalRank?: number;
   isFromLeaderboard: boolean;
+  profileImage?: string;
+  mindshareScore?: number;
 }
+
+// Get tier based on AMY balance
+const getTierFromBalance = (balance: number): { name: string; ringColor: string } => {
+  if (balance >= 100000) {
+    return { name: 'platinum', ringColor: 'ring-cyan-400' };
+  } else if (balance >= 10000) {
+    return { name: 'gold', ringColor: 'ring-yellow-400' };
+  } else if (balance >= 1000) {
+    return { name: 'silver', ringColor: 'ring-slate-400' };
+  } else if (balance >= 300) {
+    return { name: 'bronze', ringColor: 'ring-orange-500' };
+  }
+  return { name: 'none', ringColor: 'ring-gray-600' };
+};
+
+// Profile picture with tier ring component
+const TierRingAvatar = ({
+  xUsername,
+  amyBalance = 0,
+  profileImage,
+  size = 'md'
+}: {
+  xUsername: string;
+  amyBalance?: number;
+  profileImage?: string;
+  size?: 'sm' | 'md' | 'lg';
+}) => {
+  const tier = getTierFromBalance(amyBalance);
+  const sizeClasses = {
+    sm: 'w-8 h-8',
+    md: 'w-10 h-10 md:w-12 md:h-12',
+    lg: 'w-14 h-14'
+  };
+
+  return (
+    <div className={`${sizeClasses[size]} rounded-full ring-2 ${tier.ringColor} overflow-hidden flex-shrink-0 bg-gray-700`}>
+      {profileImage ? (
+        <img
+          src={profileImage}
+          alt={xUsername}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-bold">
+          {xUsername.charAt(0).toUpperCase()}
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface PointsEntry {
   wallet: string;
@@ -30,6 +82,8 @@ interface PointsEntry {
   totalPoints: number;
   currentTier: string;
   displayName?: string;
+  amyBalance?: number;
+  profileImage?: string;
 }
 
 type TabType = 'weekly' | 'points';
@@ -328,8 +382,8 @@ export default function LeaderboardPage() {
           <div className="px-4 md:px-6 py-4 bg-gray-800/50 border-b border-gray-700/50 flex items-center justify-between">
             <p className="text-xs uppercase tracking-wider text-gray-400 font-bold">
               {activeTab === 'weekly'
-                ? 'Eligible Users (300+ AMY + X Connected)'
-                : 'Eligible Users (300+ AMY)'}
+                ? '7 Day'
+                : 'Amy Points'}
             </p>
             {lastUpdated && activeTab === 'weekly' && (
               <div className="flex items-center gap-2">
@@ -377,6 +431,12 @@ export default function LeaderboardPage() {
                           <div className={getPositionBadgeClass(displayPosition)}>
                             {displayPosition}
                           </div>
+                          {/* Profile picture with tier ring */}
+                          <TierRingAvatar
+                            xUsername={entry.xUsername}
+                            amyBalance={entry.amyBalance}
+                            profileImage={entry.profileImage}
+                          />
                           <div className="flex-1 min-w-0">
                             <a
                               href={`https://x.com/${entry.xUsername}`}
@@ -387,6 +447,14 @@ export default function LeaderboardPage() {
                               @{entry.xUsername}
                             </a>
                           </div>
+                          {/* Mindshare score if available */}
+                          {entry.mindshareScore !== undefined && (
+                            <div className="text-right flex-shrink-0">
+                              <span className="text-sm md:text-base font-bold text-green-400">
+                                {entry.mindshareScore.toFixed(2)}%
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -412,6 +480,13 @@ export default function LeaderboardPage() {
                   {pointsEntries.slice(0, 25).map((entry, index) => {
                     const displayPosition = index + 1;
                     const displayName = entry.displayName || shortenWallet(entry.wallet);
+                    // Get tier from currentTier string or amyBalance
+                    const tierBalance = entry.amyBalance || (
+                      entry.currentTier === 'platinum' ? 100000 :
+                      entry.currentTier === 'gold' ? 10000 :
+                      entry.currentTier === 'silver' ? 1000 :
+                      entry.currentTier === 'bronze' ? 300 : 0
+                    );
                     return (
                       <div
                         key={`${entry.wallet}-${index}`}
@@ -423,6 +498,12 @@ export default function LeaderboardPage() {
                             <div className={getPositionBadgeClass(displayPosition)}>
                               {displayPosition}
                             </div>
+                            {/* Profile picture with tier ring */}
+                            <TierRingAvatar
+                              xUsername={entry.xUsername || displayName}
+                              amyBalance={tierBalance}
+                              profileImage={entry.profileImage}
+                            />
                             <div className="flex-1 min-w-0">
                               <span className="text-base md:text-lg font-bold text-white truncate block">
                                 {displayName}

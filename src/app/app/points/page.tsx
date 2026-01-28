@@ -24,6 +24,9 @@ interface PointsData {
   lastPointsUpdate?: string;
   lpValueUsd?: number;
   lpMultiplier?: number;
+  raidsharkMultiplier?: number;
+  onchainConvictionMultiplier?: number;
+  referralMultiplier?: number;
 }
 
 interface LpData {
@@ -59,6 +62,14 @@ const TIERS: Record<string, TierInfo> = {
   bronze: { minBalance: 300, pointsPerHour: 1, name: 'Bronze', emoji: '🥉' },
   none: { minBalance: 0, pointsPerHour: 0, name: 'None', emoji: '⚪' }
 };
+
+// Onchain Conviction Badge - Now stored in database and fetched via API
+// Level 3 = x10, Level 2 = x5, Level 1 = x3
+// Admin can update via POST /api/admin/conviction/update or /api/admin/conviction/bulk
+
+// RaidShark Badge - Now stored in database and fetched via API (updated monthly)
+// Raid Legend (600+ pts) = x15, Raid Master (250+ pts) = x7, Raid Enthusiast (75+ pts) = x3
+// Admin can update via POST /api/admin/raidshark/update or /api/admin/raidshark/bulk
 
 // TEST MODE - set to true to see the page with mock data (no wallet needed)
 const TEST_MODE = false;
@@ -441,6 +452,45 @@ export default function PointsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingLp, setIsLoadingLp] = useState(false);
   const [displayPoints, setDisplayPoints] = useState(TEST_MODE ? MOCK_POINTS_DATA.totalPoints : 0);
+  const [xUsername, setXUsername] = useState<string | null>(null);
+
+  // Quest/Social state
+  const [xConnected, setXConnected] = useState(false);
+  const [discordConnected, setDiscordConnected] = useState(false);
+  const [telegramConnected, setTelegramConnected] = useState(false);
+  const [questsExpanded, setQuestsExpanded] = useState(true);
+  const [questsData, setQuestsData] = useState<{
+    followAmyX: boolean;
+    joinAmyDiscord: boolean;
+    joinAmyTelegram: boolean;
+    followAmyInstagram: boolean;
+    questPointsEarned: number;
+  }>({
+    followAmyX: false,
+    joinAmyDiscord: false,
+    joinAmyTelegram: false,
+    followAmyInstagram: false,
+    questPointsEarned: 0,
+  });
+  const [completingQuest, setCompletingQuest] = useState<string | null>(null);
+
+  // Calculate Onchain Conviction badge status from API
+  const onchainConvictionMultiplier = pointsData?.onchainConvictionMultiplier || 0;
+  const onchainConviction = onchainConvictionMultiplier > 0
+    ? {
+        level: onchainConvictionMultiplier >= 10 ? 3 : onchainConvictionMultiplier >= 5 ? 2 : 1,
+        multiplier: onchainConvictionMultiplier
+      }
+    : null;
+
+  // Calculate RaidShark badge status from API
+  const raidsharkMultiplier = pointsData?.raidsharkMultiplier || 0;
+  const raidsharkBadge = raidsharkMultiplier > 0
+    ? {
+        tier: raidsharkMultiplier >= 15 ? 'Raid Legend' : raidsharkMultiplier >= 7 ? 'Raid Master' : 'Raid Enthusiast',
+        multiplier: raidsharkMultiplier
+      }
+    : null;
 
   // Fetch points data
   const fetchPointsData = useCallback(async () => {
@@ -526,14 +576,92 @@ export default function PointsPage() {
     }
   }, [walletAddress]);
 
-  // Fetch points, LP data, and token data when wallet connects
+  // Fetch X username for RaidShark badge and connection status
+  const fetchXUsername = useCallback(async () => {
+    if (!walletAddress || TEST_MODE) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/status/${walletAddress}`);
+      const data = await response.json();
+
+      if (data.verified && data.data?.xUsername) {
+        setXUsername(data.data.xUsername);
+        setXConnected(true);
+      }
+    } catch (error) {
+      console.error('Error fetching X username:', error);
+    }
+  }, [walletAddress]);
+
+  // Fetch social connections and quests data
+  const fetchSocialData = useCallback(async () => {
+    if (!walletAddress || TEST_MODE) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/social/${walletAddress}`);
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        setDiscordConnected(!!data.data.discord || !!data.data.discordUsername);
+        setTelegramConnected(!!data.data.telegram || !!data.data.telegramUsername);
+      }
+    } catch (error) {
+      console.error('Error fetching social data:', error);
+    }
+
+    // Fetch quests data
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/quests/${walletAddress}`);
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        setQuestsData({
+          followAmyX: data.data.followAmyX || false,
+          joinAmyDiscord: data.data.joinAmyDiscord || false,
+          joinAmyTelegram: data.data.joinAmyTelegram || false,
+          followAmyInstagram: data.data.followAmyInstagram || false,
+          questPointsEarned: data.data.questPointsEarned || 0,
+        });
+      }
+    } catch (error) {
+      // Quests endpoint may not exist yet - that's okay
+    }
+  }, [walletAddress]);
+
+  // Handle completing a community quest
+  const handleCompleteQuest = async (questId: string, url: string) => {
+    // Open the URL in new tab
+    window.open(url, '_blank');
+
+    // Start completion tracking
+    setCompletingQuest(questId);
+
+    // After 60 seconds, mark as complete (backend will verify)
+    setTimeout(async () => {
+      try {
+        await fetch(`${API_BASE_URL}/api/quests/${walletAddress}/complete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questId }),
+        });
+        fetchSocialData(); // Refresh quest data
+      } catch (error) {
+        console.error('Error completing quest:', error);
+      }
+      setCompletingQuest(null);
+    }, 60000); // 1 minute delay
+  };
+
+  // Fetch points, LP data, token data, X username, and social data when wallet connects
   useEffect(() => {
     if (walletAddress) {
       fetchPointsData();
       fetchLpData();
       fetchTokenData();
+      fetchXUsername();
+      fetchSocialData();
     }
-  }, [walletAddress, fetchPointsData, fetchLpData, fetchTokenData]);
+  }, [walletAddress, fetchPointsData, fetchLpData, fetchTokenData, fetchXUsername, fetchSocialData]);
 
   // Animate points counter (increment based on points per hour)
   useEffect(() => {
@@ -906,13 +1034,14 @@ export default function PointsPage() {
               name="Dawn Referral"
               title="Season"
               image="/ref.jpg"
-              description="Invite new users to Amy during the Dawn referral season. Ends 12 January 2025."
+              description="Invite new users to Amy and earn multipliers! Referrals count when your invitees hold 300+ $AMY."
               multipliers={[
-                { requirement: 'Level 1', multiplier: 'TBC' },
-                { requirement: 'Level 2', multiplier: 'TBC' },
-                { requirement: 'Level 3', multiplier: 'TBC' },
+                { requirement: '1 referral', multiplier: 'x3' },
+                { requirement: '2 referrals', multiplier: 'x5' },
+                { requirement: '3+ referrals', multiplier: 'x10' },
               ]}
-              isActive={false}
+              isActive={(pointsData?.referralMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.referralMultiplier || 0) > 0 ? `x${pointsData?.referralMultiplier}` : undefined}
             />
 
             {/* 9. Amy Onchain Conviction */}
@@ -920,17 +1049,33 @@ export default function PointsPage() {
               name="Amy Onchain"
               title="Conviction"
               image="/convic.jpg"
-              description="Rewarding users who actively deploy capital on Berachain. This badge reflects ongoing onchain activity and may change over time."
+              description="Rewarding users who actively deploy capital on Berachain. This badge reflects ongoing onchain activity and applies a points multiplier."
               multipliers={[
                 { requirement: 'Level 1', multiplier: 'x3' },
                 { requirement: 'Level 2', multiplier: 'x5' },
                 { requirement: 'Level 3', multiplier: 'x10' },
               ]}
-              isActive={false}
+              isActive={!!onchainConviction}
+              currentMultiplier={onchainConviction ? `${onchainConviction.multiplier}x` : undefined}
+            />
+
+            {/* 10. RaidShark Bot */}
+            <MultiplierBadge
+              name="RaidShark"
+              title="Bot"
+              image="/shark.jpg"
+              description="Rewarding users who actively raid and promote Amy across X (Twitter). This badge reflects monthly raid participation and grants ongoing point multipliers to top raiders."
+              multipliers={[
+                { requirement: 'Raid Enthusiast (75+ pts)', multiplier: 'x3' },
+                { requirement: 'Raid Master (250+ pts)', multiplier: 'x7' },
+                { requirement: 'Raid Legend (600+ pts)', multiplier: 'x15' },
+              ]}
+              isActive={!!raidsharkBadge}
+              currentMultiplier={raidsharkBadge ? `${raidsharkBadge.multiplier}x` : undefined}
             />
 
             {/* All other badges - Coming Soon */}
-            {Array.from({ length: 6 }).map((_, index) => (
+            {Array.from({ length: 5 }).map((_, index) => (
               <MultiplierBadge
                 key={index}
                 name=""
@@ -940,6 +1085,312 @@ export default function PointsPage() {
               />
             ))}
           </div>
+        </div>
+
+        {/* Amy Quests Section */}
+        <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden mb-6 md:mb-8">
+          {/* Header - Collapsible */}
+          <button
+            onClick={() => setQuestsExpanded(!questsExpanded)}
+            className="w-full p-4 md:p-6 flex items-center justify-between hover:bg-gray-800/30 transition-colors"
+          >
+            <div>
+              <h2 className="text-xl md:text-2xl font-black text-yellow-400 text-left">
+                Amy Quests
+              </h2>
+              <p className="text-sm text-gray-300 text-left">
+                Connect with the community and earn 1,000 bonus points
+              </p>
+              <p className="text-xs text-gray-500 text-left">
+                All users can participate!
+              </p>
+            </div>
+            <svg
+              className={`w-6 h-6 text-gray-400 transition-transform flex-shrink-0 ${questsExpanded ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {questsExpanded && (
+            <div className="px-4 md:px-6 pb-4 md:pb-6">
+              {/* Quest Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+                {/* Connection Quests (100 pts each) */}
+                {/* Connect X */}
+                <div className={`rounded-xl border p-3 transition-all ${
+                  xConnected
+                    ? 'bg-green-900/20 border-green-500/50'
+                    : 'bg-gray-800/50 border-gray-700/50'
+                }`}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                      xConnected ? 'bg-green-500/20' : 'bg-gray-700'
+                    }`}>
+                      <svg className={`w-5 h-5 ${xConnected ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                    </div>
+                    <p className="text-xs font-medium text-gray-300 mb-1">Connect X</p>
+                    <p className="text-[10px] text-yellow-400 font-bold mb-2">100 pts</p>
+                    {xConnected ? (
+                      <div className="text-[10px] text-green-400 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Complete
+                      </div>
+                    ) : (
+                      <a
+                        href="/app/profile"
+                        className="text-[10px] bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-3 py-1 rounded-full"
+                      >
+                        Connect
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* Connect Discord */}
+                <div className={`rounded-xl border p-3 transition-all ${
+                  discordConnected
+                    ? 'bg-green-900/20 border-green-500/50'
+                    : 'bg-gray-800/50 border-gray-700/50'
+                }`}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                      discordConnected ? 'bg-green-500/20' : 'bg-gray-700'
+                    }`}>
+                      <svg className={`w-5 h-5 ${discordConnected ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>
+                      </svg>
+                    </div>
+                    <p className="text-xs font-medium text-gray-300 mb-1">Connect Discord</p>
+                    <p className="text-[10px] text-yellow-400 font-bold mb-2">100 pts</p>
+                    {discordConnected ? (
+                      <div className="text-[10px] text-green-400 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Complete
+                      </div>
+                    ) : (
+                      <a
+                        href="/app/profile"
+                        className="text-[10px] bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-3 py-1 rounded-full"
+                      >
+                        Connect
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* Connect Telegram */}
+                <div className={`rounded-xl border p-3 transition-all ${
+                  telegramConnected
+                    ? 'bg-green-900/20 border-green-500/50'
+                    : 'bg-gray-800/50 border-gray-700/50'
+                }`}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                      telegramConnected ? 'bg-green-500/20' : 'bg-gray-700'
+                    }`}>
+                      <svg className={`w-5 h-5 ${telegramConnected ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                      </svg>
+                    </div>
+                    <p className="text-xs font-medium text-gray-300 mb-1">Connect Telegram</p>
+                    <p className="text-[10px] text-yellow-400 font-bold mb-2">100 pts</p>
+                    {telegramConnected ? (
+                      <div className="text-[10px] text-green-400 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Complete
+                      </div>
+                    ) : (
+                      <a
+                        href="/app/profile"
+                        className="text-[10px] bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-3 py-1 rounded-full"
+                      >
+                        Connect
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* Community Quests (150 pts each) */}
+                {/* Follow Amy on X */}
+                <div className={`rounded-xl border p-3 transition-all ${
+                  questsData.followAmyX
+                    ? 'bg-green-900/20 border-green-500/50'
+                    : 'bg-gray-800/50 border-gray-700/50'
+                }`}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                      questsData.followAmyX ? 'bg-green-500/20' : 'bg-gray-700'
+                    }`}>
+                      <svg className={`w-5 h-5 ${questsData.followAmyX ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                    </div>
+                    <p className="text-xs font-medium text-gray-300 mb-1">Follow Amy on X</p>
+                    <p className="text-[10px] text-yellow-400 font-bold mb-2">150 pts</p>
+                    {questsData.followAmyX ? (
+                      <div className="text-[10px] text-green-400 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Complete
+                      </div>
+                    ) : completingQuest === 'followAmyX' ? (
+                      <span className="text-[10px] text-yellow-400">Verifying...</span>
+                    ) : (
+                      <button
+                        onClick={() => handleCompleteQuest('followAmyX', 'https://x.com/amy_on_bera')}
+                        className="text-[10px] bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-3 py-1 rounded-full"
+                      >
+                        Complete
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Join Amy Discord */}
+                <div className={`rounded-xl border p-3 transition-all ${
+                  questsData.joinAmyDiscord
+                    ? 'bg-green-900/20 border-green-500/50'
+                    : 'bg-gray-800/50 border-gray-700/50'
+                }`}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                      questsData.joinAmyDiscord ? 'bg-green-500/20' : 'bg-gray-700'
+                    }`}>
+                      <svg className={`w-5 h-5 ${questsData.joinAmyDiscord ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>
+                      </svg>
+                    </div>
+                    <p className="text-xs font-medium text-gray-300 mb-1">Join Amy Discord</p>
+                    <p className="text-[10px] text-yellow-400 font-bold mb-2">150 pts</p>
+                    {questsData.joinAmyDiscord ? (
+                      <div className="text-[10px] text-green-400 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Complete
+                      </div>
+                    ) : completingQuest === 'joinAmyDiscord' ? (
+                      <span className="text-[10px] text-yellow-400">Verifying...</span>
+                    ) : (
+                      <button
+                        onClick={() => handleCompleteQuest('joinAmyDiscord', 'https://discord.gg/9Y3UzP93r3')}
+                        className="text-[10px] bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-3 py-1 rounded-full"
+                      >
+                        Complete
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Join Amy Telegram */}
+                <div className={`rounded-xl border p-3 transition-all ${
+                  questsData.joinAmyTelegram
+                    ? 'bg-green-900/20 border-green-500/50'
+                    : 'bg-gray-800/50 border-gray-700/50'
+                }`}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                      questsData.joinAmyTelegram ? 'bg-green-500/20' : 'bg-gray-700'
+                    }`}>
+                      <svg className={`w-5 h-5 ${questsData.joinAmyTelegram ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                      </svg>
+                    </div>
+                    <p className="text-xs font-medium text-gray-300 mb-1">Join Amy Telegram</p>
+                    <p className="text-[10px] text-yellow-400 font-bold mb-2">150 pts</p>
+                    {questsData.joinAmyTelegram ? (
+                      <div className="text-[10px] text-green-400 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Complete
+                      </div>
+                    ) : completingQuest === 'joinAmyTelegram' ? (
+                      <span className="text-[10px] text-yellow-400">Verifying...</span>
+                    ) : (
+                      <button
+                        onClick={() => handleCompleteQuest('joinAmyTelegram', 'https://t.me/amy_on_bera')}
+                        className="text-[10px] bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-3 py-1 rounded-full"
+                      >
+                        Complete
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Follow Amy on Instagram */}
+                <div className={`rounded-xl border p-3 transition-all ${
+                  questsData.followAmyInstagram
+                    ? 'bg-green-900/20 border-green-500/50'
+                    : 'bg-gray-800/50 border-gray-700/50'
+                }`}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                      questsData.followAmyInstagram ? 'bg-green-500/20' : 'bg-gray-700'
+                    }`}>
+                      <svg className={`w-5 h-5 ${questsData.followAmyInstagram ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      </svg>
+                    </div>
+                    <p className="text-xs font-medium text-gray-300 mb-1">Follow on Instagram</p>
+                    <p className="text-[10px] text-yellow-400 font-bold mb-2">150 pts</p>
+                    {questsData.followAmyInstagram ? (
+                      <div className="text-[10px] text-green-400 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Complete
+                      </div>
+                    ) : completingQuest === 'followAmyInstagram' ? (
+                      <span className="text-[10px] text-yellow-400">Verifying...</span>
+                    ) : (
+                      <button
+                        onClick={() => handleCompleteQuest('followAmyInstagram', 'https://www.instagram.com/amyonbera/')}
+                        className="text-[10px] bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-3 py-1 rounded-full"
+                      >
+                        Complete
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Coming Soon placeholders */}
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="rounded-xl border border-gray-800/50 bg-gray-900/30 p-3 opacity-40">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-10 h-10 rounded-full bg-gray-800/50 flex items-center justify-center mb-2">
+                        <div className="w-5 h-5 rounded bg-gray-700/50" />
+                      </div>
+                      <p className="text-xs font-medium text-gray-700 mb-1">Coming Soon</p>
+                      <p className="text-[10px] text-gray-700 mb-2">---</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Points Earned */}
+              <div className="mt-4 pt-4 border-t border-gray-700/50 text-center">
+                <span className="text-lg font-bold text-yellow-400">
+                  {(xConnected ? 100 : 0) + (discordConnected ? 100 : 0) + (telegramConnected ? 100 : 0) +
+                   (questsData.followAmyX ? 150 : 0) + (questsData.joinAmyDiscord ? 150 : 0) + (questsData.joinAmyTelegram ? 150 : 0) + (questsData.followAmyInstagram ? 150 : 0)} pts
+                </span>
+                <span className="text-gray-400 text-sm ml-2">Earned so far</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* What Points Can Be Used For */}
