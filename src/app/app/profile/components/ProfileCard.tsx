@@ -21,6 +21,12 @@ interface TokenHoldingsData {
   plsbera: TokenHolding;
 }
 
+interface PointsData {
+  raidsharkMultiplier?: number;
+  onchainConvictionMultiplier?: number;
+  referralMultiplier?: number;
+}
+
 interface EquippedBadge {
   slotNumber: number;
   badgeId: string;
@@ -108,6 +114,27 @@ function getPlsberaBadgeId(valueUsd: number): string | null {
   return null;
 }
 
+function getRaidsharkBadgeId(multiplier: number): string | null {
+  if (multiplier >= 15) return 'raidshark_x15';
+  if (multiplier >= 7) return 'raidshark_x7';
+  if (multiplier >= 3) return 'raidshark_x3';
+  return null;
+}
+
+function getConvictionBadgeId(multiplier: number): string | null {
+  if (multiplier >= 10) return 'conviction_x10';
+  if (multiplier >= 5) return 'conviction_x5';
+  if (multiplier >= 3) return 'conviction_x3';
+  return null;
+}
+
+function getReferralBadgeId(multiplier: number): string | null {
+  if (multiplier >= 10) return 'referral_x10';
+  if (multiplier >= 5) return 'referral_x5';
+  if (multiplier >= 3) return 'referral_x3';
+  return null;
+}
+
 export default function ProfileCard({
   wallet,
   xUsername,
@@ -127,6 +154,7 @@ export default function ProfileCard({
   const [equippedBadges, setEquippedBadges] = useState<EquippedBadge[]>([]);
   const [lpData, setLpData] = useState<LpData | null>(null);
   const [tokenData, setTokenData] = useState<TokenHoldingsData | null>(null);
+  const [pointsData, setPointsData] = useState<PointsData | null>(null);
   const [socialData, setSocialData] = useState<SocialData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -163,6 +191,17 @@ export default function ProfileCard({
         const tokenDataResponse = await tokenRes.json();
         if (tokenDataResponse.success && tokenDataResponse.data) {
           setTokenData(tokenDataResponse.data);
+        }
+
+        // Fetch points data for RaidShark, Conviction, and Referral badges
+        const pointsRes = await fetch(`${API_BASE_URL}/api/points/${wallet}`);
+        const pointsDataResponse = await pointsRes.json();
+        if (pointsDataResponse.success && pointsDataResponse.data) {
+          setPointsData({
+            raidsharkMultiplier: pointsDataResponse.data.raidsharkMultiplier,
+            onchainConvictionMultiplier: pointsDataResponse.data.onchainConvictionMultiplier,
+            referralMultiplier: pointsDataResponse.data.referralMultiplier
+          });
         }
       } catch (error) {
         console.error('Error fetching profile data:', error);
@@ -233,6 +272,48 @@ export default function ProfileCard({
           name: 'plsBERA',
           title: 'Staking',
           image: '/plsbera.jpg'
+        });
+      }
+    }
+
+    // RaidShark badge
+    if (pointsData && pointsData.raidsharkMultiplier && pointsData.raidsharkMultiplier > 0) {
+      const badgeId = getRaidsharkBadgeId(pointsData.raidsharkMultiplier);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: pointsData.raidsharkMultiplier,
+          name: 'RaidShark',
+          title: 'Raider',
+          image: '/shark.jpg'
+        });
+      }
+    }
+
+    // Conviction badge
+    if (pointsData && pointsData.onchainConvictionMultiplier && pointsData.onchainConvictionMultiplier > 0) {
+      const badgeId = getConvictionBadgeId(pointsData.onchainConvictionMultiplier);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: pointsData.onchainConvictionMultiplier,
+          name: 'Conviction',
+          title: 'Holder',
+          image: '/convic.jpg'
+        });
+      }
+    }
+
+    // Referral badge
+    if (pointsData && pointsData.referralMultiplier && pointsData.referralMultiplier > 0) {
+      const badgeId = getReferralBadgeId(pointsData.referralMultiplier);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: pointsData.referralMultiplier,
+          name: 'Referral',
+          title: 'Ambassador',
+          image: '/ref.jpg'
         });
       }
     }
