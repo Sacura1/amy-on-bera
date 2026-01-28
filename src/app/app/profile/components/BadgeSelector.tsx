@@ -21,6 +21,12 @@ interface TokenHoldingsData {
   plsbera: TokenHolding;
 }
 
+interface PointsData {
+  raidsharkMultiplier?: number;
+  onchainConvictionMultiplier?: number;
+  referralMultiplier?: number;
+}
+
 interface EquippedBadge {
   slotNumber: number;
   badgeId: string;
@@ -70,6 +76,27 @@ function getPlsberaBadgeId(valueUsd: number): string | null {
   return null;
 }
 
+function getRaidsharkBadgeId(multiplier: number): string | null {
+  if (multiplier >= 15) return 'raidshark_x15';
+  if (multiplier >= 7) return 'raidshark_x7';
+  if (multiplier >= 3) return 'raidshark_x3';
+  return null;
+}
+
+function getConvictionBadgeId(multiplier: number): string | null {
+  if (multiplier >= 10) return 'conviction_x10';
+  if (multiplier >= 5) return 'conviction_x5';
+  if (multiplier >= 3) return 'conviction_x3';
+  return null;
+}
+
+function getReferralBadgeId(multiplier: number): string | null {
+  if (multiplier >= 10) return 'referral_x10';
+  if (multiplier >= 5) return 'referral_x5';
+  if (multiplier >= 3) return 'referral_x3';
+  return null;
+}
+
 export default function BadgeSelector({
   wallet,
   isOpen,
@@ -79,6 +106,7 @@ export default function BadgeSelector({
   const [equippedBadges, setEquippedBadges] = useState<EquippedBadge[]>([]);
   const [lpData, setLpData] = useState<LpData | null>(null);
   const [tokenData, setTokenData] = useState<TokenHoldingsData | null>(null);
+  const [pointsData, setPointsData] = useState<PointsData | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [selectedBadge, setSelectedBadge] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,6 +134,17 @@ export default function BadgeSelector({
         const tokenDataResponse = await tokenRes.json();
         if (tokenDataResponse.success && tokenDataResponse.data) {
           setTokenData(tokenDataResponse.data);
+        }
+
+        // Fetch points data for RaidShark, Conviction, and Referral badges
+        const pointsRes = await fetch(`${API_BASE_URL}/api/points/${wallet}`);
+        const pointsDataResponse = await pointsRes.json();
+        if (pointsDataResponse.success && pointsDataResponse.data) {
+          setPointsData({
+            raidsharkMultiplier: pointsDataResponse.data.raidsharkMultiplier,
+            onchainConvictionMultiplier: pointsDataResponse.data.onchainConvictionMultiplier,
+            referralMultiplier: pointsDataResponse.data.referralMultiplier
+          });
         }
       } catch (error) {
         console.error('Error fetching badges:', error);
@@ -183,6 +222,51 @@ export default function BadgeSelector({
           title: 'Staking',
           image: '/plsbera.jpg',
           multiplier: tokenData.plsbera.multiplier
+        });
+      }
+    }
+
+    // RaidShark badge
+    if (pointsData && pointsData.raidsharkMultiplier && pointsData.raidsharkMultiplier > 0) {
+      const badgeId = getRaidsharkBadgeId(pointsData.raidsharkMultiplier);
+      if (badgeId) {
+        const tierName = pointsData.raidsharkMultiplier >= 15 ? 'Raid Legend' : pointsData.raidsharkMultiplier >= 7 ? 'Raid Master' : 'Raid Enthusiast';
+        active.push({
+          id: badgeId,
+          name: 'RaidShark',
+          title: tierName,
+          image: '/shark.jpg',
+          multiplier: pointsData.raidsharkMultiplier
+        });
+      }
+    }
+
+    // Onchain Conviction badge
+    if (pointsData && pointsData.onchainConvictionMultiplier && pointsData.onchainConvictionMultiplier > 0) {
+      const badgeId = getConvictionBadgeId(pointsData.onchainConvictionMultiplier);
+      if (badgeId) {
+        const level = pointsData.onchainConvictionMultiplier >= 10 ? 3 : pointsData.onchainConvictionMultiplier >= 5 ? 2 : 1;
+        active.push({
+          id: badgeId,
+          name: 'Onchain Conviction',
+          title: `Level ${level}`,
+          image: '/convic.jpg',
+          multiplier: pointsData.onchainConvictionMultiplier
+        });
+      }
+    }
+
+    // Referral badge
+    if (pointsData && pointsData.referralMultiplier && pointsData.referralMultiplier > 0) {
+      const badgeId = getReferralBadgeId(pointsData.referralMultiplier);
+      if (badgeId) {
+        const tierName = pointsData.referralMultiplier >= 10 ? '3+ Referrals' : pointsData.referralMultiplier >= 5 ? '2 Referrals' : '1 Referral';
+        active.push({
+          id: badgeId,
+          name: 'Dawn Referral',
+          title: tierName,
+          image: '/ref.jpg',
+          multiplier: pointsData.referralMultiplier
         });
       }
     }
@@ -334,7 +418,7 @@ export default function BadgeSelector({
                 {activeBadges.length === 0 ? (
                   <div className="text-center py-4">
                     <p className="text-gray-500 mb-2">No active multiplier badges yet.</p>
-                    <p className="text-gray-600 text-sm">Earn badges by providing LP on Bulla Exchange, or holding SAIL.r, plvHEDGE, or plsBERA.</p>
+                    <p className="text-gray-600 text-sm">Earn badges by providing LP, holding tokens, referring friends, or earning RaidShark & Conviction badges.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-3">
