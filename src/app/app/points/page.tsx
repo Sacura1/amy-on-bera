@@ -27,6 +27,7 @@ interface PointsData {
   raidsharkMultiplier?: number;
   onchainConvictionMultiplier?: number;
   referralMultiplier?: number;
+  swapperMultiplier?: number;
 }
 
 interface LpData {
