@@ -83,6 +83,11 @@ function ProfilePageContent() {
   const [isUpdatingConviction, setIsUpdatingConviction] = useState(false);
   const [convictionStatus, setConvictionStatus] = useState('');
   const [convictionList, setConvictionList] = useState<Array<{ wallet: string; xUsername: string; multiplier: number }>>([]);
+  const [swapperWallet, setSwapperWallet] = useState('');
+  const [swapperMultiplier, setSwapperMultiplier] = useState('');
+  const [isUpdatingSwapper, setIsUpdatingSwapper] = useState(false);
+  const [swapperStatus, setSwapperStatus] = useState('');
+  const [swapperList, setSwapperList] = useState<Array<{ wallet: string; xUsername: string; multiplier: number }>>([]);
 
   // Check if current wallet is admin
   const isAdmin = walletAddress ? ADMIN_WALLETS.includes(walletAddress.toLowerCase()) : false;
@@ -219,6 +224,7 @@ function ProfilePageContent() {
     if (isAdmin && walletAddress) {
       fetchRaidsharkList();
       fetchConvictionList();
+      fetchSwapperList();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, walletAddress]);
@@ -453,16 +459,39 @@ function ProfilePageContent() {
     setLeaderboardStatus('');
 
     try {
-      const entries: { position: number; xUsername: string }[] = [];
+      const entries: { position: number; xUsername: string; mindshare: number }[] = [];
       for (const line of lines) {
+        // Try to extract username and mindshare
+        // Formats supported:
+        // "@username 12.5" or "@username, 12.5" or "@username | 12.5"
+        // "1 @username 12.5" or "1. @username 12.5"
+        // "username 12.5"
+
         const atMatch = line.match(/@([a-zA-Z0-9_]+)/);
+        let xUsername = '';
+        let mindshare = 0;
+
         if (atMatch) {
-          entries.push({ position: entries.length + 1, xUsername: atMatch[1].trim() });
-        } else {
-          const cleaned = line.replace(/^\d+\s*/, '').trim();
-          if (cleaned.length > 0) {
-            entries.push({ position: entries.length + 1, xUsername: cleaned });
+          xUsername = atMatch[1].trim();
+          // Look for a number after the username (mindshare)
+          const afterUsername = line.substring(line.indexOf(atMatch[0]) + atMatch[0].length);
+          const mindshareMatch = afterUsername.match(/[\s,|]+(\d+\.?\d*)/);
+          if (mindshareMatch) {
+            mindshare = parseFloat(mindshareMatch[1]) || 0;
           }
+        } else {
+          // No @ symbol, try to parse "username number" format
+          const parts = line.replace(/^\d+\.?\s*/, '').trim().split(/[\s,|]+/);
+          if (parts.length >= 1) {
+            xUsername = parts[0].trim();
+            if (parts.length >= 2) {
+              mindshare = parseFloat(parts[parts.length - 1]) || 0;
+            }
+          }
+        }
+
+        if (xUsername.length > 0) {
+          entries.push({ position: entries.length + 1, xUsername, mindshare });
         }
       }
 
@@ -474,7 +503,7 @@ function ProfilePageContent() {
       const data = await response.json();
 
       if (data.success) {
-        setLeaderboardStatus(`Successfully uploaded ${entries.length} X usernames!`);
+        setLeaderboardStatus(`Successfully uploaded ${entries.length} entries with mindshare!`);
         setLeaderboardInput('');
       } else {
         setLeaderboardStatus(data.error || 'Failed to upload leaderboard');
@@ -563,6 +592,22 @@ function ProfilePageContent() {
       }
     } catch (error) {
       console.error('Error fetching conviction list:', error);
+    }
+  };
+
+  // Fetch swapper badge holders (admin)
+  const fetchSwapperList = async () => {
+    if (!walletAddress || !isAdmin) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/swapper/list?wallet=${walletAddress.toString()}`, {
+        headers: { 'x-wallet-address': walletAddress.toString() }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSwapperList(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching swapper list:', error);
     }
   };
 
@@ -676,6 +721,56 @@ function ProfilePageContent() {
     }
   };
 
+  // Update swapper badge for a single wallet (admin)
+  const updateSwapperBadge = async () => {
+    if (!walletAddress || !isAdmin) {
+      setSwapperStatus('Admin wallet not connected');
+      return;
+    }
+    if (!swapperWallet.trim() || !swapperMultiplier.trim()) {
+      setSwapperStatus('Please enter wallet address and multiplier');
+      return;
+    }
+
+    const multiplier = parseInt(swapperMultiplier);
+    if (![0, 3, 5, 10].includes(multiplier)) {
+      setSwapperStatus('Multiplier must be 0, 3, 5, or 10');
+      return;
+    }
+
+    setIsUpdatingSwapper(true);
+    setSwapperStatus('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/swapper/update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': walletAddress.toString()
+        },
+        body: JSON.stringify({
+          wallet: swapperWallet.trim(),
+          multiplier,
+          adminWallet: walletAddress.toString()
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setSwapperStatus(`Successfully set ${multiplier}x multiplier!`);
+        setSwapperWallet('');
+        setSwapperMultiplier('');
+        fetchSwapperList();
+      } else {
+        setSwapperStatus(data.error || 'Failed to update badge');
+      }
+    } catch {
+      setSwapperStatus('Error updating swapper badge');
+    } finally {
+      setIsUpdatingSwapper(false);
+    }
+  };
+
   // Show NewUserView if no wallet connected
   if (!account) {
     return (
@@ -716,23 +811,34 @@ function ProfilePageContent() {
           />
         )}
 
-        {/* Social Connections - Show only if X not connected */}
-        {!xConnected && (
-          <SocialConnections
-            wallet={walletAddress || ''}
-            xConnected={xConnected}
-            xUsername={xUsername}
-            discordConnected={discordConnected}
-            discordUsername={discordUsername || undefined}
-            telegramConnected={telegramConnected}
-            telegramUsername={telegramUsername || undefined}
-            emailConnected={emailConnected}
-            onXConnect={connectX}
-            onDiscordConnect={connectDiscord}
-            onTelegramConnect={connectTelegram}
-            onEmailConnect={connectEmail}
-          />
-        )}
+        {/* Social Connections */}
+        <SocialConnections
+          wallet={walletAddress || ''}
+          xConnected={xConnected}
+          xUsername={xUsername}
+          discordConnected={discordConnected}
+          discordUsername={discordUsername || undefined}
+          telegramConnected={telegramConnected}
+          telegramUsername={telegramUsername || undefined}
+          emailConnected={emailConnected}
+          onXConnect={connectX}
+          onDiscordConnect={connectDiscord}
+          onTelegramConnect={connectTelegram}
+          onEmailConnect={connectEmail}
+          onDisconnect={(platform) => {
+            // Refresh state when a social is disconnected
+            if (platform === 'x') {
+              setXConnected(false);
+              setXUsername('');
+            } else if (platform === 'discord') {
+              setDiscordConnected(false);
+              setDiscordUsername(null);
+            } else if (platform === 'telegram') {
+              setTelegramConnected(false);
+              setTelegramUsername(null);
+            }
+          }}
+        />
 
         {/* Daily Check-In Section */}
         {xConnected && (
@@ -974,20 +1080,20 @@ function ProfilePageContent() {
             <div className="p-4 md:p-6">
               <div className="mb-4">
                 <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-2">
-                  Upload Leaderboard Data
+                  Upload Weekly Focus Leaderboard
                 </h4>
                 <p className="text-xs md:text-sm text-gray-300 mb-2">
-                  Paste the leaderboard data below. Supports formats like:
+                  Paste the leaderboard data with mindshare values. Supports formats:
                 </p>
                 <p className="text-xs text-gray-500 mb-4 font-mono">
-                  &quot;1 JoeDark - @Joedark01&quot; or &quot;@username&quot; or just &quot;username&quot;
+                  &quot;@username 12.5&quot; or &quot;1 @username 12.5&quot; or &quot;username 12.5&quot;
                 </p>
               </div>
 
               <textarea
                 value={leaderboardInput}
                 onChange={(e) => setLeaderboardInput(e.target.value)}
-                placeholder={"1 JoeDark - @Joedark01\n2 JUJAKÏ - @Jujaki_01\n3 doru - @doruOlt\n@username\nusername"}
+                placeholder={"@Joedark01 15.2\n@Jujaki_01 12.8\n@doruOlt 10.5\n@username 8.3"}
                 rows={10}
                 className="w-full px-4 py-3 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm font-mono focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 resize-none"
               />
@@ -995,8 +1101,8 @@ function ProfilePageContent() {
               <div className="mt-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                 <div className="text-xs text-gray-400">
                   {leaderboardInput.trim()
-                    ? `${leaderboardInput.trim().split('\n').filter((l: string) => l.trim() && l.match(/@[a-zA-Z0-9_]+/)).length} X usernames detected`
-                    : 'Paste leaderboard data above'}
+                    ? `${leaderboardInput.trim().split('\n').filter((l: string) => l.trim()).length} entries detected`
+                    : 'Paste leaderboard data above (format: @username mindshare)'}
                 </div>
                 <button
                   onClick={uploadLeaderboard}
@@ -1163,6 +1269,94 @@ function ProfilePageContent() {
                       <div key={i} className="text-xs flex justify-between items-center bg-purple-900/30 text-purple-300 px-2 py-1 rounded">
                         <span className="font-mono">{user.wallet.slice(0, 6)}...{user.wallet.slice(-4)}</span>
                         <span className="bg-purple-700/50 px-2 rounded">{user.multiplier}x</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Seasoned Swapper Badge Management */}
+            <div className="p-4 md:p-6 border-t border-gray-700/50">
+              <div className="mb-4">
+                <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1 flex items-center gap-2">
+                  <span>🔄</span> Seasoned Swapper Badges
+                </h4>
+                <p className="text-xs text-gray-400">
+                  Assign swapper badges by wallet address (monthly swap volume)
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Engaged ($250+) = x3, Committed ($1,000+) = x5, Elite ($3,000+) = x10
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Wallet Address</label>
+                  <input
+                    type="text"
+                    value={swapperWallet}
+                    onChange={(e) => setSwapperWallet(e.target.value)}
+                    placeholder="0x..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Tier</label>
+                  <select
+                    value={swapperMultiplier}
+                    onChange={(e) => setSwapperMultiplier(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all"
+                  >
+                    <option value="">Select tier...</option>
+                    <option value="3">Engaged (x3)</option>
+                    <option value="5">Committed (x5)</option>
+                    <option value="10">Elite (x10)</option>
+                    <option value="0">Remove (x0)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                <div className="text-xs text-gray-400">
+                  {swapperWallet && swapperMultiplier
+                    ? `Set ${swapperMultiplier}x for ${swapperWallet.slice(0, 6)}...${swapperWallet.slice(-4)}`
+                    : 'Enter wallet and select tier'}
+                </div>
+                <button
+                  onClick={updateSwapperBadge}
+                  disabled={isUpdatingSwapper || !swapperWallet.trim() || !swapperMultiplier}
+                  className="bg-green-600 hover:bg-green-500 text-white px-6 py-2.5 rounded-full text-sm font-bold uppercase disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isUpdatingSwapper ? (
+                    <>
+                      <span className="loading-spinner w-4 h-4" />
+                      <span>UPDATING...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🔄</span>
+                      <span>SET BADGE</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {swapperStatus && (
+                <p className={`text-sm mt-3 ${swapperStatus.includes('Successfully') ? 'text-green-400' : 'text-red-400'}`}>
+                  {swapperStatus}
+                </p>
+              )}
+
+              {/* Current Swapper badge holders */}
+              {swapperList.length > 0 && (
+                <div className="mt-4 p-3 bg-black/30 rounded-xl">
+                  <p className="text-xs text-gray-400 mb-2">Current badge holders ({swapperList.length}):</p>
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {swapperList.map((user, i) => (
+                      <div key={i} className="text-xs flex justify-between items-center bg-green-900/30 text-green-300 px-2 py-1 rounded">
+                        <span className="font-mono">{user.wallet.slice(0, 6)}...{user.wallet.slice(-4)}</span>
+                        <span className="bg-green-700/50 px-2 rounded">{user.multiplier}x</span>
                       </div>
                     ))}
                   </div>

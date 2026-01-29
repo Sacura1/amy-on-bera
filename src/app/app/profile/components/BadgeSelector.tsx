@@ -25,6 +25,7 @@ interface PointsData {
   raidsharkMultiplier?: number;
   onchainConvictionMultiplier?: number;
   referralMultiplier?: number;
+  swapperMultiplier?: number;
 }
 
 interface EquippedBadge {
@@ -97,6 +98,13 @@ function getReferralBadgeId(multiplier: number): string | null {
   return null;
 }
 
+function getSwapperBadgeId(multiplier: number): string | null {
+  if (multiplier >= 10) return 'swapper_x10';
+  if (multiplier >= 5) return 'swapper_x5';
+  if (multiplier >= 3) return 'swapper_x3';
+  return null;
+}
+
 export default function BadgeSelector({
   wallet,
   isOpen,
@@ -136,14 +144,15 @@ export default function BadgeSelector({
           setTokenData(tokenDataResponse.data);
         }
 
-        // Fetch points data for RaidShark, Conviction, and Referral badges
+        // Fetch points data for RaidShark, Conviction, Referral, and Swapper badges
         const pointsRes = await fetch(`${API_BASE_URL}/api/points/${wallet}`);
         const pointsDataResponse = await pointsRes.json();
         if (pointsDataResponse.success && pointsDataResponse.data) {
           setPointsData({
             raidsharkMultiplier: pointsDataResponse.data.raidsharkMultiplier,
             onchainConvictionMultiplier: pointsDataResponse.data.onchainConvictionMultiplier,
-            referralMultiplier: pointsDataResponse.data.referralMultiplier
+            referralMultiplier: pointsDataResponse.data.referralMultiplier,
+            swapperMultiplier: pointsDataResponse.data.swapperMultiplier
           });
         }
       } catch (error) {
@@ -267,6 +276,21 @@ export default function BadgeSelector({
           title: tierName,
           image: '/ref.jpg',
           multiplier: pointsData.referralMultiplier
+        });
+      }
+    }
+
+    // Swapper badge
+    if (pointsData && pointsData.swapperMultiplier && pointsData.swapperMultiplier > 0) {
+      const badgeId = getSwapperBadgeId(pointsData.swapperMultiplier);
+      if (badgeId) {
+        const tierName = pointsData.swapperMultiplier >= 10 ? 'Elite' : pointsData.swapperMultiplier >= 5 ? 'Committed' : 'Engaged';
+        active.push({
+          id: badgeId,
+          name: 'Seasoned Swapper',
+          title: tierName,
+          image: '/swapper.jpg',
+          multiplier: pointsData.swapperMultiplier
         });
       }
     }

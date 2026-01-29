@@ -213,34 +213,40 @@ export default function DailyCheckIn({ walletAddress, amyBalance, isHolder, onPo
             <>
               {/* Explanation */}
               <p className="text-gray-400 text-xs mb-4">
-                Check in every day to build your streak and earn points. Miss a day and your streak resets to Day 1.
+                Check in every day to build your streak and earn points. Days 1-4 earn 50 points each. Day 5-6 earn 75 points. Day 7 earns 150 points (500 total). Miss a day and your streak resets to Day 1.
               </p>
 
-              {/* Streak Progress - 7 boxes */}
+              {/* Streak Progress - 7 boxes with point values */}
               <div className="flex justify-between gap-1 mb-4">
                 {[1, 2, 3, 4, 5, 6, 7].map((day) => {
                   const isCompleted = day <= currentDay;
                   const isCurrent = day === displayDay;
                   const isFuture = day > displayDay;
+                  const pointsForDay = day <= 4 ? 50 : day <= 6 ? 75 : 150;
 
                   return (
                     <div
                       key={day}
-                      className={`flex-1 aspect-square max-w-[40px] rounded-lg flex items-center justify-center text-sm font-bold transition-all ${
-                        isCompleted
-                          ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-black'
-                          : isCurrent
-                          ? 'bg-yellow-500/20 border-2 border-yellow-400 text-yellow-400 animate-pulse'
-                          : 'bg-gray-800 border border-gray-700 text-gray-500'
-                      }`}
+                      className="flex flex-col items-center gap-0.5 flex-1"
                     >
-                      {isCompleted ? (
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      ) : (
-                        day
-                      )}
+                      <div
+                        className={`w-full aspect-square max-w-[40px] rounded-lg flex items-center justify-center text-sm font-bold transition-all ${
+                          isCompleted
+                            ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-black'
+                            : isCurrent
+                            ? 'bg-yellow-500/20 border-2 border-yellow-400 text-yellow-400 animate-pulse'
+                            : 'bg-gray-800 border border-gray-700 text-gray-500'
+                        }`}
+                      >
+                        {isCompleted ? (
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          day
+                        )}
+                      </div>
+                      <span className="text-[9px] text-gray-500">{pointsForDay}pts</span>
                     </div>
                   );
                 })}

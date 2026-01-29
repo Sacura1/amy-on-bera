@@ -130,19 +130,17 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
       {/* Collapsible Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 md:p-6 hover:bg-gray-800/50 transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-800/50 transition-colors"
       >
-        <div className="flex items-center gap-3">
-          <div className="text-2xl md:text-3xl">
-            {isExpanded ? '▼' : '▶'}
-          </div>
-          <h2 className="text-lg md:text-xl font-bold text-yellow-400">
-            Points History
-          </h2>
-        </div>
-        <div className="text-sm text-gray-400">
-          {isExpanded ? 'Click to collapse' : 'Click to expand'}
-        </div>
+        <h2 className="text-base font-bold text-yellow-400">Points History</h2>
+        <svg
+          className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
       </button>
 
       {/* Expandable Content */}

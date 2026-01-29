@@ -464,12 +464,18 @@ export default function PointsPage() {
     joinAmyDiscord: boolean;
     joinAmyTelegram: boolean;
     followAmyInstagram: boolean;
+    connectX: boolean;
+    connectDiscord: boolean;
+    connectTelegram: boolean;
     questPointsEarned: number;
   }>({
     followAmyX: false,
     joinAmyDiscord: false,
     joinAmyTelegram: false,
     followAmyInstagram: false,
+    connectX: false,
+    connectDiscord: false,
+    connectTelegram: false,
     questPointsEarned: 0,
   });
   const [completingQuest, setCompletingQuest] = useState<string | null>(null);
@@ -620,6 +626,9 @@ export default function PointsPage() {
           joinAmyDiscord: data.data.joinAmyDiscord || false,
           joinAmyTelegram: data.data.joinAmyTelegram || false,
           followAmyInstagram: data.data.followAmyInstagram || false,
+          connectX: data.data.connectX || false,
+          connectDiscord: data.data.connectDiscord || false,
+          connectTelegram: data.data.connectTelegram || false,
           questPointsEarned: data.data.questPointsEarned || 0,
         });
       }
@@ -744,7 +753,11 @@ export default function PointsPage() {
                         const sailrMult = tokenData && tokenData.sailr?.multiplier > 1 ? tokenData.sailr.multiplier : 0;
                         const plvhedgeMult = tokenData && tokenData.plvhedge?.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
                         const plsberaMult = tokenData && tokenData.plsbera?.multiplier > 1 ? tokenData.plsbera.multiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult);
+                        const raidMult = pointsData?.raidsharkMultiplier && pointsData.raidsharkMultiplier > 0 ? pointsData.raidsharkMultiplier : 0;
+                        const convMult = pointsData?.onchainConvictionMultiplier && pointsData.onchainConvictionMultiplier > 0 ? pointsData.onchainConvictionMultiplier : 0;
+                        const refMult = pointsData?.referralMultiplier && pointsData.referralMultiplier > 0 ? pointsData.referralMultiplier : 0;
+                        const swapMult = pointsData?.swapperMultiplier && pointsData.swapperMultiplier > 0 ? pointsData.swapperMultiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + raidMult + convMult + refMult + swapMult);
 
                         let badgeGradient = 'bg-gray-600'; // default for 1x
                         if (totalMultiplier >= 100) {
@@ -775,7 +788,11 @@ export default function PointsPage() {
                         const sailrMult = tokenData && tokenData.sailr?.multiplier > 1 ? tokenData.sailr.multiplier : 0;
                         const plvhedgeMult = tokenData && tokenData.plvhedge?.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
                         const plsberaMult = tokenData && tokenData.plsbera?.multiplier > 1 ? tokenData.plsbera.multiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult);
+                        const raidMult = pointsData?.raidsharkMultiplier && pointsData.raidsharkMultiplier > 0 ? pointsData.raidsharkMultiplier : 0;
+                        const convMult = pointsData?.onchainConvictionMultiplier && pointsData.onchainConvictionMultiplier > 0 ? pointsData.onchainConvictionMultiplier : 0;
+                        const refMult = pointsData?.referralMultiplier && pointsData.referralMultiplier > 0 ? pointsData.referralMultiplier : 0;
+                        const swapMult = pointsData?.swapperMultiplier && pointsData.swapperMultiplier > 0 ? pointsData.swapperMultiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + raidMult + convMult + refMult + swapMult);
                         const pointsPerHour = currentTier.pointsPerHour * totalMultiplier;
                         return (
                           <div className="flex flex-col items-center">
@@ -1074,8 +1091,23 @@ export default function PointsPage() {
               currentMultiplier={raidsharkBadge ? `${raidsharkBadge.multiplier}x` : undefined}
             />
 
+            {/* 11. Seasoned Swapper */}
+            <MultiplierBadge
+              name="Seasoned"
+              title="Swapper"
+              image="/swapper.jpg"
+              description="Rewarding users who actively swap through Amy's interface. This monthly badge recognizes your swap volume and applies ongoing point multipliers to your rewards."
+              multipliers={[
+                { requirement: 'Engaged ($250+)', multiplier: 'x3' },
+                { requirement: 'Committed ($1,000+)', multiplier: 'x5' },
+                { requirement: 'Elite ($3,000+)', multiplier: 'x10' },
+              ]}
+              isActive={(pointsData?.swapperMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.swapperMultiplier || 0) > 0 ? `x${pointsData?.swapperMultiplier}` : undefined}
+            />
+
             {/* All other badges - Coming Soon */}
-            {Array.from({ length: 5 }).map((_, index) => (
+            {Array.from({ length: 4 }).map((_, index) => (
               <MultiplierBadge
                 key={index}
                 name=""
@@ -1122,21 +1154,21 @@ export default function PointsPage() {
                 {/* Connection Quests (100 pts each) */}
                 {/* Connect X */}
                 <div className={`rounded-xl border p-3 transition-all ${
-                  xConnected
+                  questsData.connectX
                     ? 'bg-green-900/20 border-green-500/50'
                     : 'bg-gray-800/50 border-gray-700/50'
                 }`}>
                   <div className="flex flex-col items-center text-center">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                      xConnected ? 'bg-green-500/20' : 'bg-gray-700'
+                      questsData.connectX ? 'bg-green-500/20' : 'bg-gray-700'
                     }`}>
-                      <svg className={`w-5 h-5 ${xConnected ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-5 h-5 ${questsData.connectX ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                       </svg>
                     </div>
                     <p className="text-xs font-medium text-gray-300 mb-1">Connect X</p>
                     <p className="text-[10px] text-yellow-400 font-bold mb-2">100 pts</p>
-                    {xConnected ? (
+                    {questsData.connectX ? (
                       <div className="text-[10px] text-green-400 flex items-center gap-1">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -1156,21 +1188,21 @@ export default function PointsPage() {
 
                 {/* Connect Discord */}
                 <div className={`rounded-xl border p-3 transition-all ${
-                  discordConnected
+                  questsData.connectDiscord
                     ? 'bg-green-900/20 border-green-500/50'
                     : 'bg-gray-800/50 border-gray-700/50'
                 }`}>
                   <div className="flex flex-col items-center text-center">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                      discordConnected ? 'bg-green-500/20' : 'bg-gray-700'
+                      questsData.connectDiscord ? 'bg-green-500/20' : 'bg-gray-700'
                     }`}>
-                      <svg className={`w-5 h-5 ${discordConnected ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-5 h-5 ${questsData.connectDiscord ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
                         <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>
                       </svg>
                     </div>
                     <p className="text-xs font-medium text-gray-300 mb-1">Connect Discord</p>
                     <p className="text-[10px] text-yellow-400 font-bold mb-2">100 pts</p>
-                    {discordConnected ? (
+                    {questsData.connectDiscord ? (
                       <div className="text-[10px] text-green-400 flex items-center gap-1">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -1190,21 +1222,21 @@ export default function PointsPage() {
 
                 {/* Connect Telegram */}
                 <div className={`rounded-xl border p-3 transition-all ${
-                  telegramConnected
+                  questsData.connectTelegram
                     ? 'bg-green-900/20 border-green-500/50'
                     : 'bg-gray-800/50 border-gray-700/50'
                 }`}>
                   <div className="flex flex-col items-center text-center">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                      telegramConnected ? 'bg-green-500/20' : 'bg-gray-700'
+                      questsData.connectTelegram ? 'bg-green-500/20' : 'bg-gray-700'
                     }`}>
-                      <svg className={`w-5 h-5 ${telegramConnected ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-5 h-5 ${questsData.connectTelegram ? 'text-green-400' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
                         <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                       </svg>
                     </div>
                     <p className="text-xs font-medium text-gray-300 mb-1">Connect Telegram</p>
                     <p className="text-[10px] text-yellow-400 font-bold mb-2">100 pts</p>
-                    {telegramConnected ? (
+                    {questsData.connectTelegram ? (
                       <div className="text-[10px] text-green-400 flex items-center gap-1">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -1384,7 +1416,7 @@ export default function PointsPage() {
               {/* Points Earned */}
               <div className="mt-4 pt-4 border-t border-gray-700/50 text-center">
                 <span className="text-lg font-bold text-yellow-400">
-                  {(xConnected ? 100 : 0) + (discordConnected ? 100 : 0) + (telegramConnected ? 100 : 0) +
+                  {(questsData.connectX ? 100 : 0) + (questsData.connectDiscord ? 100 : 0) + (questsData.connectTelegram ? 100 : 0) +
                    (questsData.followAmyX ? 150 : 0) + (questsData.joinAmyDiscord ? 150 : 0) + (questsData.joinAmyTelegram ? 150 : 0) + (questsData.followAmyInstagram ? 150 : 0)} pts
                 </span>
                 <span className="text-gray-400 text-sm ml-2">Earned so far</span>

@@ -25,6 +25,7 @@ interface PointsData {
   raidsharkMultiplier?: number;
   onchainConvictionMultiplier?: number;
   referralMultiplier?: number;
+  swapperMultiplier?: number;
 }
 
 interface EquippedBadge {
@@ -135,6 +136,13 @@ function getReferralBadgeId(multiplier: number): string | null {
   return null;
 }
 
+function getSwapperBadgeId(multiplier: number): string | null {
+  if (multiplier >= 10) return 'swapper_x10';
+  if (multiplier >= 5) return 'swapper_x5';
+  if (multiplier >= 3) return 'swapper_x3';
+  return null;
+}
+
 export default function ProfileCard({
   wallet,
   xUsername,
@@ -193,14 +201,15 @@ export default function ProfileCard({
           setTokenData(tokenDataResponse.data);
         }
 
-        // Fetch points data for RaidShark, Conviction, and Referral badges
+        // Fetch points data for RaidShark, Conviction, Referral, and Swapper badges
         const pointsRes = await fetch(`${API_BASE_URL}/api/points/${wallet}`);
         const pointsDataResponse = await pointsRes.json();
         if (pointsDataResponse.success && pointsDataResponse.data) {
           setPointsData({
             raidsharkMultiplier: pointsDataResponse.data.raidsharkMultiplier,
             onchainConvictionMultiplier: pointsDataResponse.data.onchainConvictionMultiplier,
-            referralMultiplier: pointsDataResponse.data.referralMultiplier
+            referralMultiplier: pointsDataResponse.data.referralMultiplier,
+            swapperMultiplier: pointsDataResponse.data.swapperMultiplier
           });
         }
       } catch (error) {
@@ -314,6 +323,20 @@ export default function ProfileCard({
           name: 'Referral',
           title: 'Ambassador',
           image: '/ref.jpg'
+        });
+      }
+    }
+
+    // Swapper badge
+    if (pointsData && pointsData.swapperMultiplier && pointsData.swapperMultiplier > 0) {
+      const badgeId = getSwapperBadgeId(pointsData.swapperMultiplier);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: pointsData.swapperMultiplier,
+          name: 'Swapper',
+          title: 'Seasoned',
+          image: '/swapper.jpg'
         });
       }
     }

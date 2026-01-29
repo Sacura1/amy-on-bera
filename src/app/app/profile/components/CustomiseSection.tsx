@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { API_BASE_URL } from '@/lib/constants';
 import { useAnimations, useCustomization } from '@/contexts';
 
@@ -61,6 +61,24 @@ export default function CustomiseSection({
 }: CustomiseSectionProps) {
   const { animationsEnabled, setAnimationsEnabled } = useAnimations();
   const { backgroundId, filterId, setBackgroundId, setFilterId } = useCustomization();
+
+  // Collapse/expand state
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  // Load expanded state from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('customiseSectionExpanded');
+    if (saved !== null) {
+      setIsExpanded(saved === 'true');
+    }
+  }, []);
+
+  // Save expanded state to localStorage
+  const toggleExpanded = useCallback(() => {
+    const newState = !isExpanded;
+    setIsExpanded(newState);
+    localStorage.setItem('customiseSectionExpanded', String(newState));
+  }, [isExpanded]);
 
   // Use context values for initial selection (they persist via localStorage)
   const [selectedBackground, setSelectedBackground] = useState(backgroundId || currentBackground || 'bg_default');
@@ -201,22 +219,38 @@ export default function CustomiseSection({
   };
 
   return (
-    <div className="bg-gray-900/90 rounded-2xl border border-gray-700/50 p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
-        <h2 className="text-xl md:text-2xl font-bold text-yellow-400">Customise</h2>
-        <div className="text-sm text-gray-400">
-          Your Points: <span className="text-yellow-400 font-bold">{userPoints.toLocaleString()}</span>
+    <div className="bg-gray-900/90 rounded-2xl border border-gray-700/50 overflow-hidden">
+      {/* Collapsible Header */}
+      <button
+        onClick={toggleExpanded}
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-800/50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <h2 className="text-base font-bold text-yellow-400">Customise</h2>
+          <span className="text-sm text-gray-400">
+            ({userPoints.toLocaleString()} pts)
+          </span>
         </div>
-      </div>
+        <svg
+          className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-900/30 border border-red-500/50 rounded-lg text-red-400 text-sm">
-          {error}
-        </div>
-      )}
+      {isExpanded && (
+        <div className="px-4 pb-4 md:px-6 md:pb-6">
+          {error && (
+            <div className="mb-4 p-3 bg-red-900/30 border border-red-500/50 rounded-lg text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
-      {/* Background Section - Horizontally Swipeable with Arrows */}
-      <div className="mb-6">
+          {/* Background Section - Horizontally Swipeable with Arrows */}
+          <div className="mb-6">
         <h3 className="text-white font-semibold mb-3">Background</h3>
         <div className="relative">
           {/* Left Arrow */}
@@ -376,62 +410,64 @@ export default function CustomiseSection({
         </div>
       </div>
 
-      {/* Animations Section */}
-      <div>
-        <h3 className="text-white font-semibold mb-3">Animations</h3>
-        <div className="grid grid-cols-3 gap-3">
-          {ANIMATIONS.map((anim) => {
-            const isSelected = selectedAnimation === anim.id;
-            const isOwned = ownedItems.includes(anim.id);
-            const isLocked = !isOwned && anim.cost > 0;
-            const isComingSoon = (anim as any).comingSoon;
+          {/* Animations Section */}
+          <div>
+            <h3 className="text-white font-semibold mb-3">Animations</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {ANIMATIONS.map((anim) => {
+                const isSelected = selectedAnimation === anim.id;
+                const isOwned = ownedItems.includes(anim.id);
+                const isLocked = !isOwned && anim.cost > 0;
+                const isComingSoon = (anim as any).comingSoon;
 
-            return (
-              <div
-                key={anim.id}
-                onClick={() => {
-                  if (!isApplying && !isPurchasing && !isComingSoon) {
-                    handleItemClick('animation', anim.id, anim.cost, anim.name);
-                  }
-                }}
-                className={`relative px-4 py-3 rounded-lg bg-gray-800 transition-all flex items-center justify-center cursor-pointer ${
-                  isSelected && !isComingSoon ? 'ring-2 ring-yellow-400 bg-gray-700' : 'ring-1 ring-gray-600 hover:ring-gray-500'
-                } ${isComingSoon ? 'cursor-not-allowed' : ''}`}
-              >
-                {/* Content that gets blurred for coming soon */}
-                <span className={`text-sm text-gray-300 whitespace-nowrap ${isComingSoon ? 'blur-[2px]' : ''}`}>{anim.name}</span>
+                return (
+                  <div
+                    key={anim.id}
+                    onClick={() => {
+                      if (!isApplying && !isPurchasing && !isComingSoon) {
+                        handleItemClick('animation', anim.id, anim.cost, anim.name);
+                      }
+                    }}
+                    className={`relative px-4 py-3 rounded-lg bg-gray-800 transition-all flex items-center justify-center cursor-pointer ${
+                      isSelected && !isComingSoon ? 'ring-2 ring-yellow-400 bg-gray-700' : 'ring-1 ring-gray-600 hover:ring-gray-500'
+                    } ${isComingSoon ? 'cursor-not-allowed' : ''}`}
+                  >
+                    {/* Content that gets blurred for coming soon */}
+                    <span className={`text-sm text-gray-300 whitespace-nowrap ${isComingSoon ? 'blur-[2px]' : ''}`}>{anim.name}</span>
 
-                {/* Coming Soon badge - outside blur */}
-                {isComingSoon && (
-                  <div className="absolute -top-2 -right-2 bg-gray-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded z-10">
-                    Soon
+                    {/* Coming Soon badge - outside blur */}
+                    {isComingSoon && (
+                      <div className="absolute -top-2 -right-2 bg-gray-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded z-10">
+                        Soon
+                      </div>
+                    )}
+
+                    {/* Price badge for locked items */}
+                    {isLocked && !isComingSoon && (
+                      <div className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs font-bold px-1.5 py-0.5 rounded">
+                        {anim.cost}
+                      </div>
+                    )}
+
+                    {/* Selected indicator */}
+                    {isSelected && !isComingSoon && (
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
+                        <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
-                )}
+                );
+              })}
+            </div>
+          </div>
 
-                {/* Price badge for locked items */}
-                {isLocked && !isComingSoon && (
-                  <div className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs font-bold px-1.5 py-0.5 rounded">
-                    {anim.cost}
-                  </div>
-                )}
-
-                {/* Selected indicator */}
-                {isSelected && !isComingSoon && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
-                    <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          <p className="text-xs text-gray-500 mt-4 text-center">
+            Click on locked items to purchase with Amy Points
+          </p>
         </div>
-      </div>
-
-      <p className="text-xs text-gray-500 mt-4 text-center">
-        Click on locked items to purchase with Amy Points
-      </p>
+      )}
 
       {/* Purchase Confirmation Modal */}
       {confirmPurchase && (

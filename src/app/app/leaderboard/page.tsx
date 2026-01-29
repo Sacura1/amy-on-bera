@@ -6,6 +6,7 @@ import { API_BASE_URL, MINIMUM_AMY_BALANCE } from '@/lib/constants';
 interface LeaderboardEntry {
   position: number;
   xUsername: string;
+  mindshare?: number;
 }
 
 interface HolderEntry {
@@ -82,6 +83,7 @@ interface PointsEntry {
   totalPoints: number;
   currentTier: string;
   displayName?: string;
+  bio?: string;
   amyBalance?: number;
   profileImage?: string;
 }
@@ -136,6 +138,18 @@ export default function LeaderboardPage() {
               const userData = await userResponse.json();
 
               if (userData.success && userData.verified && userData.data) {
+                // Fetch profile data for avatar
+                let profileImage: string | undefined;
+                try {
+                  const profileRes = await fetch(`${API_BASE_URL}/api/profile/${userData.data.walletAddress}`);
+                  const profileData = await profileRes.json();
+                  if (profileData.success && profileData.data?.profile) {
+                    profileImage = profileData.data.profile.avatarData || profileData.data.profile.avatarUrl;
+                  }
+                } catch {
+                  // Profile fetch failed, continue without profile image
+                }
+
                 // User has verified their wallet + X on the website
                 return {
                   xUsername: entry.xUsername,
@@ -144,7 +158,9 @@ export default function LeaderboardPage() {
                   verified: true,
                   eligible: userData.data.amyBalance >= MINIMUM_AMY_BALANCE,
                   originalRank: entry.position,
-                  isFromLeaderboard: true
+                  isFromLeaderboard: true,
+                  mindshareScore: entry.mindshare != null ? parseFloat(String(entry.mindshare)) : undefined,
+                  profileImage
                 };
               } else {
                 // User is on leaderboard but hasn't verified on the website
@@ -153,7 +169,8 @@ export default function LeaderboardPage() {
                   verified: false,
                   eligible: false,
                   originalRank: entry.position,
-                  isFromLeaderboard: true
+                  isFromLeaderboard: true,
+                  mindshareScore: entry.mindshare != null ? parseFloat(String(entry.mindshare)) : undefined
                 };
               }
             } catch {
@@ -162,7 +179,8 @@ export default function LeaderboardPage() {
                 verified: false,
                 eligible: false,
                 originalRank: entry.position,
-                isFromLeaderboard: true
+                isFromLeaderboard: true,
+                mindshareScore: entry.mindshare != null ? parseFloat(String(entry.mindshare)) : undefined
               };
             }
           })
@@ -239,7 +257,7 @@ export default function LeaderboardPage() {
           return;
         }
 
-        // Fetch profile display names for each user (in batches to avoid overwhelming proxy)
+        // Fetch profile data for each user (in batches to avoid overwhelming proxy)
         const entriesWithProfiles: PointsEntry[] = [];
         const batchSize = 20;
 
@@ -250,12 +268,16 @@ export default function LeaderboardPage() {
               try {
                 const profileResponse = await fetch(`${API_BASE_URL}/api/profile/${entry.wallet}`);
                 const profileData = await profileResponse.json();
-                return {
-                  ...entry,
-                  displayName: profileData.success && profileData.data?.profile?.displayName
-                    ? profileData.data.profile.displayName
-                    : null
-                };
+                if (profileData.success && profileData.data?.profile) {
+                  const profile = profileData.data.profile;
+                  return {
+                    ...entry,
+                    displayName: profile.displayName || null,
+                    bio: profile.bio || null,
+                    profileImage: profile.avatarData || profile.avatarUrl || null
+                  };
+                }
+                return entry;
               } catch {
                 return entry;
               }
@@ -448,7 +470,7 @@ export default function LeaderboardPage() {
                             </a>
                           </div>
                           {/* Mindshare score if available */}
-                          {entry.mindshareScore !== undefined && (
+                          {entry.mindshareScore != null && typeof entry.mindshareScore === 'number' && !isNaN(entry.mindshareScore) && (
                             <div className="text-right flex-shrink-0">
                               <span className="text-sm md:text-base font-bold text-green-400">
                                 {entry.mindshareScore.toFixed(2)}%
@@ -508,6 +530,11 @@ export default function LeaderboardPage() {
                               <span className="text-base md:text-lg font-bold text-white truncate block">
                                 {displayName}
                               </span>
+                              {entry.bio && (
+                                <span className="text-xs text-gray-400 truncate block mt-0.5">
+                                  {entry.bio.length > 50 ? `${entry.bio.slice(0, 50)}...` : entry.bio}
+                                </span>
+                              )}
                             </div>
                           </div>
                           <div className="text-right flex-shrink-0">
