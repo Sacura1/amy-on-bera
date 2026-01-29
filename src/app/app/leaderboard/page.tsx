@@ -46,13 +46,16 @@ const TierRingAvatar = ({
   xUsername,
   amyBalance = 0,
   profileImage,
-  size = 'md'
+  size = 'md',
+  useXProfile = false
 }: {
   xUsername: string;
   amyBalance?: number;
   profileImage?: string;
   size?: 'sm' | 'md' | 'lg';
+  useXProfile?: boolean; // true = fetch from X, false = use uploaded profile image
 }) => {
+  const [imgError, setImgError] = useState(false);
   const tier = getTierFromBalance(amyBalance);
   const sizeClasses = {
     sm: 'w-8 h-8',
@@ -60,17 +63,24 @@ const TierRingAvatar = ({
     lg: 'w-14 h-14'
   };
 
+  // For X leaderboard: always use X profile picture
+  // For Amy Points: use uploaded profile image, fallback to letter
+  const imageSrc = useXProfile
+    ? (xUsername ? `https://unavatar.io/twitter/${xUsername}` : null)
+    : profileImage;
+
   return (
-    <div className={`${sizeClasses[size]} rounded-full ring-2 ${tier.ringColor} overflow-hidden flex-shrink-0 bg-gray-700`}>
-      {profileImage ? (
+    <div className={`${sizeClasses[size]} rounded-full ring-2 ring-offset-1 ring-offset-gray-900 ${tier.ringColor} overflow-hidden flex-shrink-0 bg-gray-700`}>
+      {imageSrc && !imgError ? (
         <img
-          src={profileImage}
+          src={imageSrc}
           alt={xUsername}
           className="w-full h-full object-cover"
+          onError={() => setImgError(true)}
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-bold">
-          {xUsername.charAt(0).toUpperCase()}
+          {xUsername?.charAt(0).toUpperCase() || '?'}
         </div>
       )}
     </div>
@@ -450,16 +460,18 @@ export default function LeaderboardPage() {
                         style={{ animationDelay: `${Math.min(index * 0.1, 0.5)}s` }}
                       >
                         <div className="flex items-center justify-between gap-2 md:gap-4">
-                          <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
+                          <div className="flex items-center gap-2 md:gap-4 min-w-0">
                             <div className={`${getPositionBadgeClass(displayPosition)} flex-shrink-0`}>
                               {displayPosition}
                             </div>
                             {/* Profile picture with tier ring */}
-                            <TierRingAvatar
-                              xUsername={entry.xUsername}
-                              amyBalance={entry.amyBalance}
-                              profileImage={entry.profileImage}
-                            />
+                            <div className="flex-shrink-0">
+                              <TierRingAvatar
+                                xUsername={entry.xUsername}
+                                amyBalance={entry.amyBalance}
+                                useXProfile={true}
+                              />
+                            </div>
                             <a
                               href={`https://x.com/${entry.xUsername}`}
                               target="_blank"

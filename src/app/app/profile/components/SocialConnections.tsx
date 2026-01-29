@@ -79,7 +79,19 @@ export default function SocialConnections({
   const [isLoading, setIsLoading] = useState(true);
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState<string | null>(null);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(() => {
+    // Check localStorage for saved state, default to true if not set
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('socialConnectionsExpanded');
+      return saved !== null ? saved === 'true' : true;
+    }
+    return true;
+  });
+
+  // Save expanded state to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('socialConnectionsExpanded', String(isExpanded));
+  }, [isExpanded]);
 
   const handleDisconnect = async (platformId: string) => {
     if (!wallet) return;

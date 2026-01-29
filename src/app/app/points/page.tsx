@@ -646,20 +646,31 @@ export default function PointsPage() {
     // Start completion tracking
     setCompletingQuest(questId);
 
-    // After 60 seconds, mark as complete (backend will verify)
+    // After 30 seconds, mark as complete (backend will verify)
     setTimeout(async () => {
       try {
-        await fetch(`${API_BASE_URL}/api/quests/${walletAddress}/complete`, {
+        const response = await fetch(`${API_BASE_URL}/api/quests/${walletAddress}/complete`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ questId }),
         });
-        fetchSocialData(); // Refresh quest data
+        const data = await response.json();
+
+        if (data.success) {
+          // Update local state immediately
+          setQuestsData(prev => ({
+            ...prev,
+            [questId]: true
+          }));
+        }
+        // Also refresh from server to ensure sync
+        await fetchSocialData();
       } catch (error) {
         console.error('Error completing quest:', error);
+      } finally {
+        setCompletingQuest(null);
       }
-      setCompletingQuest(null);
-    }, 60000); // 1 minute delay
+    }, 30000); // 30 second delay
   };
 
   // Fetch points, LP data, token data, X username, and social data when wallet connects
