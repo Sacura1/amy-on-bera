@@ -497,8 +497,11 @@ function ProfilePageContent() {
 
       const response = await fetch(`${API_BASE_URL}/api/leaderboard/bulk`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet: walletAddress, entries }),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': walletAddress.toString()
+        },
+        body: JSON.stringify({ entries }),
       });
       const data = await response.json();
 

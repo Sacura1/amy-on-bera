@@ -79,6 +79,7 @@ export default function SocialConnections({
   const [isLoading, setIsLoading] = useState(true);
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState<string | null>(null);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const handleDisconnect = async (platformId: string) => {
     if (!wallet) return;
@@ -191,10 +192,24 @@ export default function SocialConnections({
   }
 
   return (
-    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-6">
-      <h3 className="text-lg font-bold text-yellow-400 mb-4">Social Connections</h3>
+    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full p-4 md:p-6 flex items-center justify-between"
+      >
+        <h3 className="text-lg font-bold text-yellow-400">Social Connections</h3>
+        <svg
+          className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
 
-      <div className="space-y-3">
+      {isExpanded && (
+        <div className="px-4 md:px-6 pb-4 md:pb-6 space-y-3">
         {platforms.map((platform) => (
           <div
             key={platform.id}
@@ -268,11 +283,12 @@ export default function SocialConnections({
             )}
           </div>
         ))}
-      </div>
 
-      <p className="text-xs text-gray-500 mt-4 text-center">
-        Connect your social accounts to unlock additional features and badges
-      </p>
+        <p className="text-xs text-gray-500 mt-4 text-center">
+          Connect your social accounts to unlock additional features and badges
+        </p>
+        </div>
+      )}
     </div>
   );
 }
