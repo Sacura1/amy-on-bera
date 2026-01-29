@@ -449,33 +449,31 @@ export default function LeaderboardPage() {
                         className="leaderboard-row"
                         style={{ animationDelay: `${Math.min(index * 0.1, 0.5)}s` }}
                       >
-                        <div className="flex items-center gap-3 md:gap-4">
-                          <div className={getPositionBadgeClass(displayPosition)}>
-                            {displayPosition}
-                          </div>
-                          {/* Profile picture with tier ring */}
-                          <TierRingAvatar
-                            xUsername={entry.xUsername}
-                            amyBalance={entry.amyBalance}
-                            profileImage={entry.profileImage}
-                          />
-                          <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 md:gap-4">
+                          <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
+                            <div className={`${getPositionBadgeClass(displayPosition)} flex-shrink-0`}>
+                              {displayPosition}
+                            </div>
+                            {/* Profile picture with tier ring */}
+                            <TierRingAvatar
+                              xUsername={entry.xUsername}
+                              amyBalance={entry.amyBalance}
+                              profileImage={entry.profileImage}
+                            />
                             <a
                               href={`https://x.com/${entry.xUsername}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-base md:text-lg font-bold text-yellow-400 hover:text-yellow-300 transition-colors"
+                              className="text-sm md:text-lg font-bold text-yellow-400 hover:text-yellow-300 transition-colors truncate"
                             >
                               @{entry.xUsername}
                             </a>
                           </div>
                           {/* Mindshare score if available */}
                           {entry.mindshareScore != null && typeof entry.mindshareScore === 'number' && !isNaN(entry.mindshareScore) && (
-                            <div className="text-right flex-shrink-0">
-                              <span className="text-sm md:text-base font-bold text-green-400">
-                                {entry.mindshareScore.toFixed(2)}%
-                              </span>
-                            </div>
+                            <span className="text-sm md:text-base font-bold text-green-400 flex-shrink-0">
+                              {entry.mindshareScore.toFixed(2)}%
+                            </span>
                           )}
                         </div>
                       </div>
@@ -515,33 +513,33 @@ export default function LeaderboardPage() {
                         className="leaderboard-row"
                         style={{ animationDelay: `${Math.min(index * 0.1, 0.5)}s` }}
                       >
-                        <div className="flex items-center justify-between gap-3 md:gap-4">
-                          <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                            <div className={getPositionBadgeClass(displayPosition)}>
+                        <div className="flex items-start justify-between gap-2 md:gap-4">
+                          <div className="flex items-start gap-2 md:gap-4 flex-1 min-w-0">
+                            <div className={`${getPositionBadgeClass(displayPosition)} flex-shrink-0 mt-1`}>
                               {displayPosition}
                             </div>
                             {/* Profile picture with tier ring */}
-                            <TierRingAvatar
-                              xUsername={entry.xUsername || displayName}
-                              amyBalance={tierBalance}
-                              profileImage={entry.profileImage}
-                            />
+                            <div className="flex-shrink-0 mt-1">
+                              <TierRingAvatar
+                                xUsername={entry.xUsername || displayName}
+                                amyBalance={tierBalance}
+                                profileImage={entry.profileImage}
+                              />
+                            </div>
                             <div className="flex-1 min-w-0">
-                              <span className="text-base md:text-lg font-bold text-white truncate block">
+                              <span className="text-sm md:text-lg font-bold text-white block break-words">
                                 {displayName}
                               </span>
                               {entry.bio && (
-                                <span className="text-xs text-gray-400 truncate block mt-0.5">
-                                  {entry.bio.length > 50 ? `${entry.bio.slice(0, 50)}...` : entry.bio}
-                                </span>
+                                <p className="text-xs text-gray-400 mt-1 break-words line-clamp-2">
+                                  {entry.bio}
+                                </p>
                               )}
                             </div>
                           </div>
-                          <div className="text-right flex-shrink-0">
-                            <span className="text-base md:text-lg font-bold text-yellow-400">
-                              {formatPoints(entry.totalPoints)}
-                            </span>
-                          </div>
+                          <span className="text-sm md:text-lg font-bold text-yellow-400 flex-shrink-0 mt-1">
+                            {formatPoints(entry.totalPoints)}
+                          </span>
                         </div>
                       </div>
                     );
