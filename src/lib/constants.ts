@@ -58,7 +58,7 @@ export const ERC20_ABI = [
 // Navigation Links
 export const NAV_LINKS = [
   { href: '/app/profile', label: 'PROFILE' },
-  { href: '/app/leaderboard', label: 'LEADERBOARD' },
+  { href: '/app/leaderboard', label: 'LEADERBOARDS' },
   { href: '/app/earn', label: 'EARN WITH AMY' },
   { href: '/app/points', label: 'AMY POINTS' },
   { href: '/app/trade', label: 'TRADE' },

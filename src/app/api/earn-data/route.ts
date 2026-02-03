@@ -19,6 +19,8 @@ interface EarnData {
   'jnrusd': PoolData;
   'plvhedge': PoolData;
   'plsbera': PoolData;
+  'honeybend': PoolData;
+  'stakedbera': PoolData;
   lastUpdated: string;
 }
 
@@ -266,6 +268,82 @@ async function fetchJnrUsdData(): Promise<PoolData> {
   }
 }
 
+// Fetch HONEY Bend data from on-chain
+// Contract: 0x30BbA9CD9Eb8c95824aa42Faa1Bb397b07545bc1 (HONEY-Bend receipt token)
+async function fetchHoneyBendData(): Promise<PoolData> {
+  try {
+    // HONEY-Bend receipt token totalSupply represents total deposited HONEY
+    const totalSupply = await callContract(
+      '0x30BbA9CD9Eb8c95824aa42Faa1Bb397b07545bc1',
+      '0x18160ddd' // totalSupply()
+    );
+
+    if (totalSupply) {
+      // HONEY is a stablecoin pegged to ~$1
+      const tvl = Number(totalSupply) / 1e18;
+      return {
+        tvl: formatTvl(tvl),
+        apr: '8%' // Variable lending APR
+      };
+    }
+
+    return { tvl: '$12.5M', apr: '8%' };
+  } catch (error) {
+    console.error('Error fetching HONEY Bend data:', error);
+    return { tvl: '$12.5M', apr: '8%' };
+  }
+}
+
+// Fetch Staked BERA (stBERA) data from on-chain
+// Contract: 0x118D2cEeE9785eaf70C15Cd74CD84c9f8c3EeC9a
+async function fetchStakedBeraData(): Promise<PoolData> {
+  try {
+    // Get stBERA total supply
+    const totalSupply = await callContract(
+      '0x118D2cEeE9785eaf70C15Cd74CD84c9f8c3EeC9a',
+      '0x18160ddd' // totalSupply()
+    );
+
+    let tvl = '$85M';
+    if (totalSupply) {
+      // Fetch BERA price from GeckoTerminal using WBERA token info
+      const priceResponse = await fetch(
+        'https://api.geckoterminal.com/api/v2/networks/berachain/tokens/0x6969696969696969696969696969696969696969',
+        { headers: { 'Accept': 'application/json' } }
+      );
+
+      let beraPrice = 0;
+      if (priceResponse.ok) {
+        const priceData = await priceResponse.json();
+        beraPrice = parseFloat(priceData?.data?.attributes?.price_usd || '0');
+      }
+
+      // Fallback: try BERA/HONEY pool for price
+      if (beraPrice === 0) {
+        const poolResponse = await fetch(
+          'https://api.geckoterminal.com/api/v2/networks/berachain/pools/0x7507c1dc16935b82698e4c63f2746a2fcf994df8',
+          { headers: { 'Accept': 'application/json' } }
+        );
+        if (poolResponse.ok) {
+          const poolData = await poolResponse.json();
+          beraPrice = parseFloat(poolData?.data?.attributes?.base_token_price_usd || '0');
+        }
+      }
+
+      if (beraPrice > 0) {
+        const totalStaked = Number(totalSupply) / 1e18;
+        const tvlValue = totalStaked * beraPrice;
+        tvl = formatTvl(tvlValue);
+      }
+    }
+
+    return { tvl, apr: '21%' }; // Staking APR estimate
+  } catch (error) {
+    console.error('Error fetching stBERA data:', error);
+    return { tvl: '$85M', apr: '21%' };
+  }
+}
+
 export async function GET() {
   const now = Date.now();
 
@@ -280,13 +358,15 @@ export async function GET() {
 
   try {
     // Fetch data from all sources in parallel
-    const [bullaData, sailrData, snrUsdData, jnrUsdData, plvhedgeData, plsberaData] = await Promise.all([
+    const [bullaData, sailrData, snrUsdData, jnrUsdData, plvhedgeData, plsberaData, honeybendData, stakedberaData] = await Promise.all([
       fetchBullaPoolData(),
       fetchSailrPoolData(),
       fetchSnrUsdData(),
       fetchJnrUsdData(),
       fetchPlvHedgeData(),
-      fetchPlsBeraData()
+      fetchPlsBeraData(),
+      fetchHoneyBendData(),
+      fetchStakedBeraData()
     ]);
 
     const earnData: EarnData = {
@@ -296,6 +376,8 @@ export async function GET() {
       'jnrusd': jnrUsdData,
       'plvhedge': plvhedgeData,
       'plsbera': plsberaData,
+      'honeybend': honeybendData,
+      'stakedbera': stakedberaData,
       lastUpdated: new Date().toISOString()
     };
 
@@ -331,6 +413,8 @@ export async function GET() {
         'jnrusd': { tvl: '$2.12M', apr: '93%' },
         'plvhedge': { tvl: '$271.91K', apr: '22.25%' },
         'plsbera': { tvl: '$22K', apr: '31.91%' },
+        'honeybend': { tvl: '$12.5M', apr: '8%' },
+        'stakedbera': { tvl: '$85M', apr: '21%' },
         lastUpdated: new Date().toISOString()
       },
       error: 'Using default values'

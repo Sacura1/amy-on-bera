@@ -30,6 +30,11 @@ interface TokenHoldingsData {
   sailr: TokenHolding;
   plvhedge: TokenHolding;
   plsbera: TokenHolding;
+  honeybend: TokenHolding;
+  stakedbera: TokenHolding;
+  bgt: TokenHolding;
+  snrusd: TokenHolding;
+  jnrusd: TokenHolding;
 }
 interface DynamicPoolData {
   tvl: string;
@@ -43,6 +48,8 @@ interface DynamicEarnData {
   'jnrusd': DynamicPoolData;
   'plvhedge': DynamicPoolData;
   'plsbera': DynamicPoolData;
+  'honeybend': DynamicPoolData;
+  'stakedbera': DynamicPoolData;
   lastUpdated: string;
 }
 
@@ -88,6 +95,10 @@ const STRATEGIES: Strategy[] = [
     description: 'Provide liquidity to the AMY / HONEY pool on Bulla Exchange. Earn trading fees plus Amy Points multipliers based on your LP value.',
     infoButtonLabel: 'AMY Pool',
     dynamicDataKey: 'amy-honey',
+    buyUnderlying: {
+      token: '0x098a75baeddec78f9a8d0830d6b86eac5cc8894e', // AMY token
+      fromToken: 'HONEY',
+    },
   },
   // 2. plsBERA
   {
@@ -181,6 +192,38 @@ const STRATEGIES: Strategy[] = [
       fromToken: 'HONEY',
     },
     dynamicDataKey: 'jnrusd',
+  },
+  // 7. HONEY Bend
+  {
+    id: 'honeybend',
+    name: 'HONEY – Bend',
+    subtitle: 'Bend Protocol',
+    image: '/honey.jpg',
+    tvl: '$12.5M',
+    apr: '8%',
+    amyPoints: 'Earn up to 10x',
+    riskCategory: 'stable',
+    actionType: 'deposit',
+    actionUrl: 'https://bend.berachain.com/',
+    description: 'Lend HONEY on Bend Protocol to earn interest while supporting the Berachain lending ecosystem. Your HONEY-Bend position earns Amy Points multipliers based on your deposit value.',
+    protocolUrl: 'https://bend.berachain.com/',
+    dynamicDataKey: 'honeybend',
+  },
+  // 8. Staked BERA
+  {
+    id: 'stakedbera',
+    name: 'Staked – BERA',
+    subtitle: 'Berachain Staking',
+    image: '/BERA.png',
+    tvl: '$85M',
+    apr: '21%',
+    amyPoints: 'Earn up to 10x',
+    riskCategory: 'balanced',
+    actionType: 'deposit',
+    actionUrl: 'https://stake.berachain.com/',
+    description: 'Stake BERA for stBERA to secure the network while earning staking rewards. Your liquid staking position earns Amy Points multipliers based on your staked value.',
+    protocolUrl: 'https://stake.berachain.com/',
+    dynamicDataKey: 'stakedbera',
   },
 ];
 
@@ -297,9 +340,48 @@ const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicDa
           <div className="px-4 pb-3 flex gap-2">
             {/* Show Amy Points badge for strategies with multipliers */}
             {strategy.amyPoints && strategy.amyPoints !== 'TBC' && (
-              <div className="flex-1 bg-gray-800/80 rounded-lg px-3 py-2">
+              <div className="flex-1 bg-gray-800/80 rounded-lg px-3 py-2 relative group cursor-pointer">
                 <div className="text-xs font-semibold text-white">Amy Points</div>
-                <div className="text-xs text-yellow-400 font-medium">{strategy.amyPoints}</div>
+                {/* Hover tooltip with multiplier levels */}
+                <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-50">
+                  <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl min-w-[160px]">
+                    <div className="text-xs font-semibold text-white mb-2">MULTIPLIERS</div>
+                    {strategy.id === 'amy-honey' ? (
+                      <>
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="text-gray-400">$10+ LP</span>
+                          <span className="text-yellow-400 font-semibold">→ x5</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="text-gray-400">$100+ LP</span>
+                          <span className="text-yellow-400 font-semibold">→ x10</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-400">$500+ LP</span>
+                          <span className="text-yellow-400 font-semibold">→ x100</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="text-gray-400">$10+</span>
+                          <span className="text-yellow-400 font-semibold">→ x3</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="text-gray-400">$100+</span>
+                          <span className="text-yellow-400 font-semibold">→ x5</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-400">$500+</span>
+                          <span className="text-yellow-400 font-semibold">→ x10</span>
+                        </div>
+                      </>
+                    )}
+                    <div className="absolute bottom-0 left-4 transform translate-y-full">
+                      <div className="border-8 border-transparent border-t-gray-700"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
             <div className={`flex-1 ${risk.bg} rounded-lg px-3 py-2 flex items-center justify-between`}>
@@ -464,7 +546,7 @@ const MOCK_LP_DATA: LpData = {
 type SortOption = 'default' | 'tvl-high' | 'tvl-low' | 'apr-high' | 'apr-low' | 'points-high' | 'points-low';
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: 'default', label: 'Default' },
+  { value: 'default', label: 'Featured' },
   { value: 'tvl-high', label: 'TVL (highest first)' },
   { value: 'tvl-low', label: 'TVL (lowest first)' },
   { value: 'apr-high', label: 'APR (highest first)' },
@@ -786,7 +868,11 @@ export default function EarnPage() {
               <span className="w-2 h-2 rounded-full bg-gray-500"></span>
               ALL
             </button>
-            <div className="relative">
+            <div className="relative flex items-center gap-2">
+              {/* Current sort selection display */}
+              <span className="bg-gray-800 px-4 py-2 rounded-full text-sm text-white">
+                {SORT_OPTIONS.find(opt => opt.value === sortBy)?.label || 'Featured'}
+              </span>
               <button
                 onClick={(e) => {
                   e.stopPropagation();

@@ -361,7 +361,7 @@ export default function LeaderboardPage() {
         {/* Information Box - Different content per tab */}
         <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-4 md:p-8 mb-6 md:mb-8">
           {activeTab === 'weekly' ? (
-            <div className="space-y-3 md:space-y-4 text-yellow-300">
+            <div className="space-y-3 md:space-y-4 text-white">
               <p className="text-sm md:text-base font-semibold">
                 To appear here, you&apos;ll need to:
               </p>
@@ -384,7 +384,7 @@ export default function LeaderboardPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3 md:space-y-4 text-yellow-300">
+            <div className="space-y-3 md:space-y-4 text-white">
               <p className="text-sm md:text-base leading-relaxed">
                 Ranks are based on your total Amy Points.
               </p>

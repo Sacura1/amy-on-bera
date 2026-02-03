@@ -88,6 +88,9 @@ function ProfilePageContent() {
   const [isUpdatingSwapper, setIsUpdatingSwapper] = useState(false);
   const [swapperStatus, setSwapperStatus] = useState('');
   const [swapperList, setSwapperList] = useState<Array<{ wallet: string; xUsername: string; multiplier: number }>>([]);
+  // Dawn referral archive
+  const [isArchivingDawn, setIsArchivingDawn] = useState(false);
+  const [dawnArchiveStatus, setDawnArchiveStatus] = useState('');
 
   // Check if current wallet is admin
   const isAdmin = walletAddress ? ADMIN_WALLETS.includes(walletAddress.toLowerCase()) : false;
@@ -774,6 +777,39 @@ function ProfilePageContent() {
     }
   };
 
+  // Archive Dawn referral season (admin only)
+  const archiveDawnSeason = async () => {
+    if (!walletAddress || !isAdmin) return;
+
+    setIsArchivingDawn(true);
+    setDawnArchiveStatus('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/referrals/archive-dawn`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': walletAddress.toString()
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        const summary = data.summary;
+        setDawnArchiveStatus(
+          `Successfully archived Dawn season! ${summary.users_with_referrals} users with referrals, ` +
+          `${summary.tier1_users} at x3, ${summary.tier2_users} at x5, ${summary.tier3_users} at x10`
+        );
+      } else {
+        setDawnArchiveStatus(data.error || 'Failed to archive Dawn season');
+      }
+    } catch {
+      setDawnArchiveStatus('Error archiving Dawn season');
+    } finally {
+      setIsArchivingDawn(false);
+    }
+  };
+
   // Show NewUserView if no wallet connected
   if (!account) {
     return (
@@ -1364,6 +1400,45 @@ function ProfilePageContent() {
                     ))}
                   </div>
                 </div>
+              )}
+            </div>
+
+            {/* Dawn Referral Season Archive */}
+            <div className="p-4 md:p-6 border-t border-gray-700/50">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  {/* <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1 flex items-center gap-2">
+                    <span>📦</span> Archive Dawn Referral Season
+                  </h4> */}
+                  {/* <p className="text-xs text-gray-400">
+                    Archive current referral counts to dawn_referral_count and reset for Season 2
+                  </p> */}
+                  {/* <p className="text-xs text-red-400 mt-1">
+                    ⚠️ This action cannot be undone. Only run once when ending Dawn season.
+                  </p> */}
+                </div>
+                {/* <button
+                  onClick={archiveDawnSeason}
+                  disabled={isArchivingDawn}
+                  className="bg-orange-600 hover:bg-orange-500 text-white px-5 py-2.5 rounded-full text-sm font-bold uppercase disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isArchivingDawn ? (
+                    <>
+                      <span className="loading-spinner w-4 h-4" />
+                      <span>ARCHIVING...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📦</span>
+                      <span>ARCHIVE DAWN</span>
+                    </>
+                  )}
+                </button> */}
+              </div>
+              {dawnArchiveStatus && (
+                <p className={`text-sm mt-3 ${dawnArchiveStatus.includes('Successfully') ? 'text-green-400' : 'text-red-400'}`}>
+                  {dawnArchiveStatus}
+                </p>
               )}
             </div>
           </div>

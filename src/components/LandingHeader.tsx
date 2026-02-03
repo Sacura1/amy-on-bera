@@ -9,7 +9,7 @@ const MENU_ITEMS = [
   { href: '/app/earn', label: 'EARN' },
   { href: '/app/points', label: 'AMY POINTS' },
   { href: '/app/trade', label: 'TRADE' },
-  { href: '/app/leaderboard', label: 'LEADERBOARD' },
+  { href: '/app/leaderboard', label: 'LEADERBOARDS' },
   { href: '/app/partners', label: 'PARTNERS & INVESTORS' },
 ];
 

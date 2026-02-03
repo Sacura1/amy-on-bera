@@ -28,6 +28,9 @@ interface PointsData {
   onchainConvictionMultiplier?: number;
   referralMultiplier?: number;
   swapperMultiplier?: number;
+  // Dawn season (historical)
+  dawnReferralCount?: number;
+  dawnReferralMultiplier?: number;
 }
 
 interface LpData {
@@ -54,6 +57,11 @@ interface TokenHoldingsData {
   sailr: TokenHolding;
   plvhedge: TokenHolding;
   plsbera: TokenHolding;
+  honeybend: TokenHolding;
+  stakedbera: TokenHolding;
+  bgt: TokenHolding;
+  snrusd: TokenHolding;
+  jnrusd: TokenHolding;
 }
 
 const TIERS: Record<string, TierInfo> = {
@@ -119,6 +127,51 @@ const MOCK_TOKEN_DATA: TokenHoldingsData = {
     priceUsd: 5.0,
     valueUsd: 500,
     multiplier: 10,
+    isActive: true,
+  },
+  honeybend: {
+    token: 'HONEY-Bend',
+    address: '0x30BbA9CD9Eb8c95824aa42Faa1Bb397b07545bc1',
+    balance: 100,
+    priceUsd: 1.0,
+    valueUsd: 100,
+    multiplier: 5,
+    isActive: true,
+  },
+  stakedbera: {
+    token: 'stBERA',
+    address: '0x118D2cEeE9785eaf70C15Cd74CD84c9f8c3EeC9a',
+    balance: 50,
+    priceUsd: 5.0,
+    valueUsd: 250,
+    multiplier: 5,
+    isActive: true,
+  },
+  bgt: {
+    token: 'BGT',
+    address: '0x656b95e550c07a9ffe548bd4085c72418ceb1dba',
+    balance: 10,
+    priceUsd: 0,
+    valueUsd: 0,
+    multiplier: 3,
+    isActive: true,
+  },
+  snrusd: {
+    token: 'snrUSD',
+    address: '0x49298F4314eb127041b814A2616c25687Db6b650',
+    balance: 500,
+    priceUsd: 1.0,
+    valueUsd: 500,
+    multiplier: 10,
+    isActive: true,
+  },
+  jnrusd: {
+    token: 'jnrUSD',
+    address: '0x3a0A97DcA5e6CaCC258490d5ece453412f8E1883',
+    balance: 100,
+    priceUsd: 1.0,
+    valueUsd: 100,
+    multiplier: 5,
     isActive: true,
   },
 };
@@ -765,11 +818,16 @@ export default function PointsPage() {
                         const sailrMult = tokenData && tokenData.sailr?.multiplier > 1 ? tokenData.sailr.multiplier : 0;
                         const plvhedgeMult = tokenData && tokenData.plvhedge?.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
                         const plsberaMult = tokenData && tokenData.plsbera?.multiplier > 1 ? tokenData.plsbera.multiplier : 0;
+                        const honeybendMult = tokenData && tokenData.honeybend?.multiplier > 1 ? tokenData.honeybend.multiplier : 0;
+                        const stakedberaMult = tokenData && tokenData.stakedbera?.multiplier > 1 ? tokenData.stakedbera.multiplier : 0;
+                        const bgtMult = tokenData && tokenData.bgt?.multiplier > 1 ? tokenData.bgt.multiplier : 0;
+                        const snrusdMult = tokenData && tokenData.snrusd?.multiplier > 1 ? tokenData.snrusd.multiplier : 0;
+                        const jnrusdMult = tokenData && tokenData.jnrusd?.multiplier > 1 ? tokenData.jnrusd.multiplier : 0;
                         const raidMult = pointsData?.raidsharkMultiplier && pointsData.raidsharkMultiplier > 0 ? pointsData.raidsharkMultiplier : 0;
                         const convMult = pointsData?.onchainConvictionMultiplier && pointsData.onchainConvictionMultiplier > 0 ? pointsData.onchainConvictionMultiplier : 0;
                         const refMult = pointsData?.referralMultiplier && pointsData.referralMultiplier > 0 ? pointsData.referralMultiplier : 0;
                         const swapMult = pointsData?.swapperMultiplier && pointsData.swapperMultiplier > 0 ? pointsData.swapperMultiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + raidMult + convMult + refMult + swapMult);
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult);
 
                         let badgeGradient = 'bg-gray-600'; // default for 1x
                         if (totalMultiplier >= 100) {
@@ -800,11 +858,16 @@ export default function PointsPage() {
                         const sailrMult = tokenData && tokenData.sailr?.multiplier > 1 ? tokenData.sailr.multiplier : 0;
                         const plvhedgeMult = tokenData && tokenData.plvhedge?.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
                         const plsberaMult = tokenData && tokenData.plsbera?.multiplier > 1 ? tokenData.plsbera.multiplier : 0;
+                        const honeybendMult = tokenData && tokenData.honeybend?.multiplier > 1 ? tokenData.honeybend.multiplier : 0;
+                        const stakedberaMult = tokenData && tokenData.stakedbera?.multiplier > 1 ? tokenData.stakedbera.multiplier : 0;
+                        const bgtMult = tokenData && tokenData.bgt?.multiplier > 1 ? tokenData.bgt.multiplier : 0;
+                        const snrusdMult = tokenData && tokenData.snrusd?.multiplier > 1 ? tokenData.snrusd.multiplier : 0;
+                        const jnrusdMult = tokenData && tokenData.jnrusd?.multiplier > 1 ? tokenData.jnrusd.multiplier : 0;
                         const raidMult = pointsData?.raidsharkMultiplier && pointsData.raidsharkMultiplier > 0 ? pointsData.raidsharkMultiplier : 0;
                         const convMult = pointsData?.onchainConvictionMultiplier && pointsData.onchainConvictionMultiplier > 0 ? pointsData.onchainConvictionMultiplier : 0;
                         const refMult = pointsData?.referralMultiplier && pointsData.referralMultiplier > 0 ? pointsData.referralMultiplier : 0;
                         const swapMult = pointsData?.swapperMultiplier && pointsData.swapperMultiplier > 0 ? pointsData.swapperMultiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + raidMult + convMult + refMult + swapMult);
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult);
                         const pointsPerHour = currentTier.pointsPerHour * totalMultiplier;
                         return (
                           <div className="flex flex-col items-center">
@@ -867,48 +930,76 @@ export default function PointsPage() {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-4">
-            <div className="bg-gradient-to-br from-orange-900/40 to-amber-900/20 p-4 rounded-xl border-2 border-orange-500/30">
+            <div className={`bg-gradient-to-br from-orange-900/40 to-amber-900/20 rounded-xl border-2 transition-all ${
+              pointsData?.currentTier === 'bronze'
+                ? 'border-orange-400 p-5 scale-[1.02] shadow-lg shadow-orange-500/20'
+                : 'border-orange-500/30 p-4 opacity-60'
+            }`}>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">🥉</span>
+                <span className={pointsData?.currentTier === 'bronze' ? 'text-3xl' : 'text-2xl'}>🥉</span>
                 <div>
-                  <span className="font-bold text-orange-400">Bronze</span>
+                  <span className={`font-bold text-orange-400 ${pointsData?.currentTier === 'bronze' ? 'text-lg' : ''}`}>Bronze</span>
                   <span className="text-gray-300 text-sm ml-2">– 300+ AMY</span>
                 </div>
               </div>
               <p className="text-gray-400 text-sm mt-1">→ 1 Amy Point per hour</p>
+              {pointsData?.currentTier === 'bronze' && (
+                <p className="text-orange-400 text-xs mt-2 font-semibold">✓ Your current tier</p>
+              )}
             </div>
 
-            <div className="bg-gradient-to-br from-slate-600/40 to-gray-700/20 p-4 rounded-xl border-2 border-slate-400/30">
+            <div className={`bg-gradient-to-br from-slate-600/40 to-gray-700/20 rounded-xl border-2 transition-all ${
+              pointsData?.currentTier === 'silver'
+                ? 'border-slate-300 p-5 scale-[1.02] shadow-lg shadow-slate-400/20'
+                : 'border-slate-400/30 p-4 opacity-60'
+            }`}>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">🥈</span>
+                <span className={pointsData?.currentTier === 'silver' ? 'text-3xl' : 'text-2xl'}>🥈</span>
                 <div>
-                  <span className="font-bold text-slate-300">Silver</span>
+                  <span className={`font-bold text-slate-300 ${pointsData?.currentTier === 'silver' ? 'text-lg' : ''}`}>Silver</span>
                   <span className="text-gray-300 text-sm ml-2">– 1,000+ AMY</span>
                 </div>
               </div>
               <p className="text-gray-400 text-sm mt-1">→ 3 Amy Points per hour</p>
+              {pointsData?.currentTier === 'silver' && (
+                <p className="text-slate-300 text-xs mt-2 font-semibold">✓ Your current tier</p>
+              )}
             </div>
 
-            <div className="bg-gradient-to-br from-yellow-700/40 to-amber-800/20 p-4 rounded-xl border-2 border-yellow-500/30">
+            <div className={`bg-gradient-to-br from-yellow-700/40 to-amber-800/20 rounded-xl border-2 transition-all ${
+              pointsData?.currentTier === 'gold'
+                ? 'border-yellow-400 p-5 scale-[1.02] shadow-lg shadow-yellow-500/20'
+                : 'border-yellow-500/30 p-4 opacity-60'
+            }`}>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">🥇</span>
+                <span className={pointsData?.currentTier === 'gold' ? 'text-3xl' : 'text-2xl'}>🥇</span>
                 <div>
-                  <span className="font-bold text-yellow-400">Gold</span>
+                  <span className={`font-bold text-yellow-400 ${pointsData?.currentTier === 'gold' ? 'text-lg' : ''}`}>Gold</span>
                   <span className="text-gray-300 text-sm ml-2">– 10,000+ AMY</span>
                 </div>
               </div>
               <p className="text-gray-400 text-sm mt-1">→ 5 Amy Points per hour</p>
+              {pointsData?.currentTier === 'gold' && (
+                <p className="text-yellow-400 text-xs mt-2 font-semibold">✓ Your current tier</p>
+              )}
             </div>
 
-            <div className="bg-gradient-to-br from-cyan-700/40 to-blue-800/20 p-4 rounded-xl border-2 border-cyan-400/30">
+            <div className={`bg-gradient-to-br from-cyan-700/40 to-blue-800/20 rounded-xl border-2 transition-all ${
+              pointsData?.currentTier === 'platinum'
+                ? 'border-cyan-400 p-5 scale-[1.02] shadow-lg shadow-cyan-400/20'
+                : 'border-cyan-400/30 p-4 opacity-60'
+            }`}>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">💎</span>
+                <span className={pointsData?.currentTier === 'platinum' ? 'text-3xl' : 'text-2xl'}>💎</span>
                 <div>
-                  <span className="font-bold text-cyan-300">Platinum</span>
+                  <span className={`font-bold text-cyan-300 ${pointsData?.currentTier === 'platinum' ? 'text-lg' : ''}`}>Platinum</span>
                   <span className="text-gray-300 text-sm ml-2">– 100,000+ AMY</span>
                 </div>
               </div>
               <p className="text-gray-400 text-sm mt-1">→ 10 Amy Points per hour</p>
+              {pointsData?.currentTier === 'platinum' && (
+                <p className="text-cyan-400 text-xs mt-2 font-semibold">✓ Your current tier</p>
+              )}
             </div>
           </div>
 
@@ -951,7 +1042,7 @@ export default function PointsPage() {
               image="/bulla.jpg"
               description="Provide liquidity to the AMY / HONEY pool on Bulla Exchange."
               multipliers={[
-                { requirement: '$10+ LP', multiplier: 'x3' },
+                { requirement: '$10+ LP', multiplier: 'x5' },
                 { requirement: '$100+ LP', multiplier: 'x10' },
                 { requirement: '$500+ LP', multiplier: 'x100' },
               ]}
@@ -1019,11 +1110,12 @@ export default function PointsPage() {
               image="/snr.jpg"
               description="Rewarding users who hold or deploy capital into snrUSD, a senior tranche stable yield product. snrUSD is designed to maintain a stable $1 value while generating yield, backed by over-collateralisation and senior position within the strategy. Powered by Liquid Royalty."
               multipliers={[
-                { requirement: 'Level 1', multiplier: 'TBC' },
-                { requirement: 'Level 2', multiplier: 'TBC' },
-                { requirement: 'Level 3', multiplier: 'TBC' },
+                { requirement: '$10+ holdings', multiplier: 'x3' },
+                { requirement: '$100+ holdings', multiplier: 'x5' },
+                { requirement: '$500+ holdings', multiplier: 'x10' },
               ]}
-              isActive={false}
+              isActive={tokenData ? tokenData.snrusd?.isActive : false}
+              currentMultiplier={tokenData && tokenData.snrusd?.multiplier > 1 ? `${tokenData.snrusd.multiplier}x` : undefined}
               actionUrl="https://www.liquidroyalty.com/vaults"
               actionLabel="View Vaults"
             />
@@ -1035,16 +1127,68 @@ export default function PointsPage() {
               image="/jnr.jpg"
               description="Rewarding users who deploy capital into jnrUSD, the junior tranche designed to capture excess yield. jnrUSD sits below the senior tranche and is exposed to variable returns, offering higher potential yield in exchange for higher risk. Powered by Liquid Royalty."
               multipliers={[
-                { requirement: 'Level 1', multiplier: 'TBC' },
-                { requirement: 'Level 2', multiplier: 'TBC' },
-                { requirement: 'Level 3', multiplier: 'TBC' },
+                { requirement: '$10+ holdings', multiplier: 'x3' },
+                { requirement: '$100+ holdings', multiplier: 'x5' },
+                { requirement: '$500+ holdings', multiplier: 'x10' },
               ]}
-              isActive={false}
+              isActive={tokenData ? tokenData.jnrusd?.isActive : false}
+              currentMultiplier={tokenData && tokenData.jnrusd?.multiplier > 1 ? `${tokenData.jnrusd.multiplier}x` : undefined}
               actionUrl="https://www.liquidroyalty.com/vaults"
               actionLabel="View Vaults"
             />
 
-            {/* 7. Amy × Kodiak Perps */}
+            {/* 7. HONEY Bend */}
+            <MultiplierBadge
+              name="HONEY"
+              title="Bend"
+              image="/honey.jpg"
+              description="Rewarding users who lend HONEY on Bend. HONEY-Bend represents your lending position, earning interest while supporting the Berachain lending ecosystem. Powered by Bend."
+              multipliers={[
+                { requirement: '$10+ deposited', multiplier: 'x3' },
+                { requirement: '$100+ deposited', multiplier: 'x5' },
+                { requirement: '$500+ deposited', multiplier: 'x10' },
+              ]}
+              isActive={tokenData ? tokenData.honeybend?.isActive : false}
+              currentMultiplier={tokenData && tokenData.honeybend?.multiplier > 1 ? `${tokenData.honeybend.multiplier}x` : undefined}
+              actionUrl="https://bend.berachain.com/"
+              actionLabel="Lend HONEY"
+            />
+
+            {/* 8. Staked BERA */}
+            <MultiplierBadge
+              name="Staked"
+              title="BERA"
+              image="/BERA.png"
+              description="Rewarding users who stake BERA for stBERA. Staked BERA secures the network while earning staking rewards. This badge tracks your liquid staking position."
+              multipliers={[
+                { requirement: '$10+ staked', multiplier: 'x3' },
+                { requirement: '$100+ staked', multiplier: 'x5' },
+                { requirement: '$500+ staked', multiplier: 'x10' },
+              ]}
+              isActive={tokenData ? tokenData.stakedbera?.isActive : false}
+              currentMultiplier={tokenData && tokenData.stakedbera?.multiplier > 1 ? `${tokenData.stakedbera.multiplier}x` : undefined}
+              actionUrl="https://stake.berachain.com/"
+              actionLabel="Stake BERA"
+            />
+
+            {/* 9. BGT */}
+            <MultiplierBadge
+              name="BGT"
+              title="Holder"
+              image="/bgt.jpg"
+              description="Rewarding users who hold BGT (Bera Governance Token). BGT is earned through providing liquidity and participating in Berachain's Proof of Liquidity consensus. This badge tracks your BGT holdings regardless of USD value."
+              multipliers={[
+                { requirement: '0.01+ BGT', multiplier: 'x3' },
+                { requirement: '0.1+ BGT', multiplier: 'x5' },
+                { requirement: '1+ BGT', multiplier: 'x10' },
+              ]}
+              isActive={tokenData ? tokenData.bgt?.isActive : false}
+              currentMultiplier={tokenData && tokenData.bgt?.multiplier > 1 ? `${tokenData.bgt.multiplier}x` : undefined}
+              actionUrl="https://bartio.station.berachain.com/"
+              actionLabel="Get BGT"
+            />
+
+            {/* 10. Amy × Kodiak Perps */}
             <MultiplierBadge
               name="Amy × Kodiak"
               title="Perps"
@@ -1058,12 +1202,27 @@ export default function PointsPage() {
               isActive={false}
             />
 
-            {/* 8. Dawn Referral Season */}
+            {/* 8. Dawn Referral Season (Historical - no longer gives active bonus) */}
             <MultiplierBadge
               name="Dawn Referral"
-              title="Season"
+              title="(Ended)"
               image="/ref.jpg"
-              description="Invite new users to Amy and earn multipliers! Referrals count when your invitees hold 300+ $AMY."
+              description="Season 1 referral badge. This season has ended - the badge is preserved but no longer gives an active multiplier bonus."
+              multipliers={[
+                { requirement: '1 referral', multiplier: 'x3' },
+                { requirement: '2 referrals', multiplier: 'x5' },
+                { requirement: '3+ referrals', multiplier: 'x10' },
+              ]}
+              isActive={(pointsData?.dawnReferralMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.dawnReferralMultiplier || 0) > 0 ? `x${pointsData?.dawnReferralMultiplier} (ended)` : undefined}
+            />
+
+            {/* 8b. Season 2 Referral (Active) */}
+            <MultiplierBadge
+              name="Season 2"
+              title="Referral"
+              image="/ref.jpg"
+              description="Invite new users to Amy and earn multipliers! Referrals count when your invitees hold 300+ $AMY. This is the active referral season."
               multipliers={[
                 { requirement: '1 referral', multiplier: 'x3' },
                 { requirement: '2 referrals', multiplier: 'x5' },

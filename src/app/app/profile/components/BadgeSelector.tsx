@@ -13,12 +13,18 @@ interface TokenHolding {
   multiplier: number;
   isActive: boolean;
   valueUsd?: number;
+  balance?: number;
 }
 
 interface TokenHoldingsData {
   sailr: TokenHolding;
   plvhedge: TokenHolding;
   plsbera: TokenHolding;
+  honeybend: TokenHolding;
+  stakedbera: TokenHolding;
+  bgt: TokenHolding;
+  snrusd: TokenHolding;
+  jnrusd: TokenHolding;
 }
 
 interface PointsData {
@@ -102,6 +108,41 @@ function getSwapperBadgeId(multiplier: number): string | null {
   if (multiplier >= 10) return 'swapper_x10';
   if (multiplier >= 5) return 'swapper_x5';
   if (multiplier >= 3) return 'swapper_x3';
+  return null;
+}
+
+function getHoneybendBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'honeybend_x10';
+  if (valueUsd >= 100) return 'honeybend_x5';
+  if (valueUsd >= 10) return 'honeybend_x3';
+  return null;
+}
+
+function getStakedberaBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'stakedbera_x10';
+  if (valueUsd >= 100) return 'stakedbera_x5';
+  if (valueUsd >= 10) return 'stakedbera_x3';
+  return null;
+}
+
+function getBgtBadgeId(balance: number): string | null {
+  if (balance >= 1) return 'bgt_x10';
+  if (balance >= 0.1) return 'bgt_x5';
+  if (balance >= 0.01) return 'bgt_x3';
+  return null;
+}
+
+function getSnrusdBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'snrusd_x10';
+  if (valueUsd >= 100) return 'snrusd_x5';
+  if (valueUsd >= 10) return 'snrusd_x3';
+  return null;
+}
+
+function getJnrusdBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'jnrusd_x10';
+  if (valueUsd >= 100) return 'jnrusd_x5';
+  if (valueUsd >= 10) return 'jnrusd_x3';
   return null;
 }
 
@@ -235,6 +276,81 @@ export default function BadgeSelector({
       }
     }
 
+    // HONEY Bend badge
+    if (tokenData && tokenData.honeybend && tokenData.honeybend.isActive && tokenData.honeybend.multiplier > 1) {
+      const valueUsd = tokenData.honeybend.valueUsd || (tokenData.honeybend.multiplier >= 10 ? 500 : tokenData.honeybend.multiplier >= 5 ? 100 : 10);
+      const badgeId = getHoneybendBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          name: 'HONEY Bend',
+          title: 'Lending',
+          image: '/honey.jpg',
+          multiplier: tokenData.honeybend.multiplier
+        });
+      }
+    }
+
+    // Staked BERA badge
+    if (tokenData && tokenData.stakedbera && tokenData.stakedbera.isActive && tokenData.stakedbera.multiplier > 1) {
+      const valueUsd = tokenData.stakedbera.valueUsd || (tokenData.stakedbera.multiplier >= 10 ? 500 : tokenData.stakedbera.multiplier >= 5 ? 100 : 10);
+      const badgeId = getStakedberaBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          name: 'Staked BERA',
+          title: 'stBERA',
+          image: '/BERA.png',
+          multiplier: tokenData.stakedbera.multiplier
+        });
+      }
+    }
+
+    // BGT badge (uses balance thresholds, not USD value)
+    if (tokenData && tokenData.bgt && tokenData.bgt.isActive && tokenData.bgt.multiplier > 1) {
+      const balance = tokenData.bgt.balance || (tokenData.bgt.multiplier >= 10 ? 1 : tokenData.bgt.multiplier >= 5 ? 0.1 : 0.01);
+      const badgeId = getBgtBadgeId(balance);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          name: 'BGT',
+          title: 'Holder',
+          image: '/bgt.jpg',
+          multiplier: tokenData.bgt.multiplier
+        });
+      }
+    }
+
+    // snrUSD badge
+    if (tokenData && tokenData.snrusd && tokenData.snrusd.isActive && tokenData.snrusd.multiplier > 1) {
+      const valueUsd = tokenData.snrusd.valueUsd || (tokenData.snrusd.multiplier >= 10 ? 500 : tokenData.snrusd.multiplier >= 5 ? 100 : 10);
+      const badgeId = getSnrusdBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          name: 'snrUSD',
+          title: 'Senior',
+          image: '/snr.jpg',
+          multiplier: tokenData.snrusd.multiplier
+        });
+      }
+    }
+
+    // jnrUSD badge
+    if (tokenData && tokenData.jnrusd && tokenData.jnrusd.isActive && tokenData.jnrusd.multiplier > 1) {
+      const valueUsd = tokenData.jnrusd.valueUsd || (tokenData.jnrusd.multiplier >= 10 ? 500 : tokenData.jnrusd.multiplier >= 5 ? 100 : 10);
+      const badgeId = getJnrusdBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          name: 'jnrUSD',
+          title: 'Junior',
+          image: '/jnr.jpg',
+          multiplier: tokenData.jnrusd.multiplier
+        });
+      }
+    }
+
     // RaidShark badge
     if (pointsData && pointsData.raidsharkMultiplier && pointsData.raidsharkMultiplier > 0) {
       const badgeId = getRaidsharkBadgeId(pointsData.raidsharkMultiplier);
@@ -309,9 +425,18 @@ export default function BadgeSelector({
   const isBadgeEquipped = (badgeId: string) => equippedBadges.some(b => b.badgeId === badgeId);
 
   const getMultiplierColors = (multiplier: number) => {
-    if (multiplier >= 100) return 'bg-yellow-500 text-yellow-950 border-yellow-300';
-    if (multiplier >= 10) return 'bg-slate-400 text-slate-900 border-slate-200';
-    return 'bg-amber-700 text-amber-200 border-amber-500';
+    if (multiplier >= 100) return 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-yellow-950';
+    if (multiplier >= 10) return 'bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900';
+    if (multiplier >= 5) return 'bg-gradient-to-br from-slate-400 to-slate-600 text-slate-100';
+    return 'bg-gradient-to-br from-amber-600 to-amber-800 text-amber-100';
+  };
+
+  // Get tier ring color based on multiplier
+  const getTierRingColor = (multiplier: number) => {
+    if (multiplier >= 100) return 'ring-yellow-400';
+    if (multiplier >= 10) return 'ring-slate-400';
+    if (multiplier >= 5) return 'ring-slate-500';
+    return 'ring-amber-600';
   };
 
   const equipBadge = async () => {
@@ -392,36 +517,43 @@ export default function BadgeSelector({
                 <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
                   1. Select a slot
                 </h3>
-                <div className="flex justify-center gap-3">
+                <div className="flex justify-center gap-4">
                   {[1, 2, 3, 4, 5].map((slotNumber) => {
                     const badge = getBadgeForSlot(slotNumber);
                     const isSelected = selectedSlot === slotNumber;
                     return (
-                      <div
-                        key={slotNumber}
-                        className={`relative w-14 h-14 rounded-xl border-2 flex items-center justify-center cursor-pointer transition-all overflow-hidden ${
-                          isSelected
-                            ? 'border-yellow-400 bg-yellow-900/30 scale-110'
-                            : badge
-                            ? 'border-yellow-400/50 bg-white hover:border-yellow-400'
-                            : 'border-gray-600/50 bg-gray-800/50 border-dashed hover:border-gray-500'
-                        }`}
-                        onClick={() => setSelectedSlot(slotNumber)}
-                      >
-                        {badge ? (
-                          <>
-                            <img src={badge.image} alt={badge.name} className="w-10 h-10 object-contain" />
-                            <div className={`absolute -top-1 -left-1 text-[8px] font-black px-1 py-0.5 rounded z-10 border ${getMultiplierColors(badge.multiplier)}`}>
-                              x{badge.multiplier}
-                            </div>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); unequipBadge(slotNumber); }}
-                              className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white hover:bg-red-600"
-                              disabled={isSaving}
-                            >×</button>
-                          </>
-                        ) : (
-                          <span className={`text-sm ${isSelected ? 'text-yellow-400 font-bold' : 'text-gray-500'}`}>{slotNumber}</span>
+                      <div key={slotNumber} className="relative">
+                        <div
+                          className={`relative w-14 h-14 rounded-xl border-2 flex items-center justify-center cursor-pointer transition-all overflow-hidden ${
+                            isSelected
+                              ? 'border-yellow-400 bg-yellow-900/30 scale-110'
+                              : badge
+                              ? `ring-2 ${getTierRingColor(badge.multiplier)} bg-white hover:scale-105`
+                              : 'border-gray-600/50 bg-gray-800/50 border-dashed hover:border-gray-500'
+                          }`}
+                          onClick={() => setSelectedSlot(slotNumber)}
+                        >
+                          {badge ? (
+                            <>
+                              <img src={badge.image} alt={badge.name} className="w-full h-full object-cover" />
+                              {/* Banner triangle in bottom left corner */}
+                              <div className={`absolute bottom-0 left-0 ${getMultiplierColors(badge.multiplier)}`}>
+                                <div className="text-[10px] font-black px-1.5 py-0.5 rounded-tr-lg">
+                                  x{badge.multiplier}
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <span className={`text-sm ${isSelected ? 'text-yellow-400 font-bold' : 'text-gray-500'}`}>{slotNumber}</span>
+                          )}
+                        </div>
+                        {/* Red X outside the badge */}
+                        {badge && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); unequipBadge(slotNumber); }}
+                            className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white hover:bg-red-600 shadow-lg z-10"
+                            disabled={isSaving}
+                          >×</button>
                         )}
                       </div>
                     );
@@ -459,17 +591,20 @@ export default function BadgeSelector({
                           }}
                           className={`p-3 rounded-xl border-2 transition-all ${
                             isEquipped
-                              ? 'border-green-500/50 bg-green-900/30 cursor-not-allowed opacity-60'
+                              ? 'border-green-500/50 bg-green-900/20 cursor-not-allowed'
                               : isSelected
                               ? 'border-yellow-400 bg-yellow-900/30 cursor-pointer'
                               : 'border-gray-600 bg-gray-800 hover:border-gray-500 cursor-pointer'
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white flex items-center justify-center flex-shrink-0">
-                              <img src={badge.image} alt={badge.name} className="w-10 h-10 object-contain" />
-                              <div className={`absolute -top-1 -left-1 text-[8px] font-black px-1 py-0.5 rounded z-10 border ${getMultiplierColors(badge.multiplier)}`}>
-                                x{badge.multiplier}
+                            <div className={`relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 ring-2 ${getTierRingColor(badge.multiplier)}`}>
+                              <img src={badge.image} alt={badge.name} className="w-full h-full object-cover" />
+                              {/* Banner in bottom left corner */}
+                              <div className={`absolute bottom-0 left-0 ${getMultiplierColors(badge.multiplier)}`}>
+                                <div className="text-xs font-black px-2 py-0.5 rounded-tr-lg">
+                                  x{badge.multiplier}
+                                </div>
                               </div>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -477,9 +612,9 @@ export default function BadgeSelector({
                               <p className="text-xs text-gray-400 truncate">{badge.title}</p>
                             </div>
                             {isEquipped ? (
-                              <span className="text-green-400 text-xs font-bold">Already equipped</span>
+                              <span className="text-green-400 text-sm font-bold whitespace-nowrap">Already equipped</span>
                             ) : isSelected ? (
-                              <span className="text-yellow-400 text-xs font-bold">Selected</span>
+                              <span className="text-yellow-400 text-sm font-bold">Selected</span>
                             ) : null}
                           </div>
                         </div>

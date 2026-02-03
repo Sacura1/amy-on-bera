@@ -90,7 +90,7 @@ export default function AppPage() {
                   href="/app/leaderboard"
                   className="btn-samy btn-samy-enhanced text-white px-4 py-3 rounded-full text-center font-bold"
                 >
-                  LEADERBOARD
+                  LEADERBOARDS
                 </Link>
               </div>
             </div>
