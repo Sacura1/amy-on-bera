@@ -32,6 +32,8 @@ interface PointsData {
   onchainConvictionMultiplier?: number;
   referralMultiplier?: number;
   swapperMultiplier?: number;
+  telegramModMultiplier?: number;
+  discordModMultiplier?: number;
 }
 
 interface EquippedBadge {
@@ -409,6 +411,30 @@ export default function BadgeSelector({
           multiplier: pointsData.swapperMultiplier
         });
       }
+    }
+
+    // Telegram Mod badge
+    if (pointsData && pointsData.telegramModMultiplier && pointsData.telegramModMultiplier > 0) {
+      const tierName = pointsData.telegramModMultiplier >= 15 ? 'Archlord' : pointsData.telegramModMultiplier >= 7 ? 'Sentinel' : 'Guardian';
+      active.push({
+        id: `telegram_mod_x${pointsData.telegramModMultiplier}`,
+        name: 'Telegram Mod',
+        title: tierName,
+        image: '/tg.png',
+        multiplier: pointsData.telegramModMultiplier
+      });
+    }
+
+    // Discord Mod badge
+    if (pointsData && pointsData.discordModMultiplier && pointsData.discordModMultiplier > 0) {
+      const tierName = pointsData.discordModMultiplier >= 15 ? 'Archlord' : pointsData.discordModMultiplier >= 7 ? 'Sentinel' : 'Guardian';
+      active.push({
+        id: `discord_mod_x${pointsData.discordModMultiplier}`,
+        name: 'Discord Mod',
+        title: tierName,
+        image: '/dc.jpg',
+        multiplier: pointsData.discordModMultiplier
+      });
     }
 
     return active;

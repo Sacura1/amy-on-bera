@@ -28,6 +28,8 @@ interface PointsData {
   onchainConvictionMultiplier?: number;
   referralMultiplier?: number;
   swapperMultiplier?: number;
+  telegramModMultiplier?: number;
+  discordModMultiplier?: number;
   // Dawn season (historical)
   dawnReferralCount?: number;
   dawnReferralMultiplier?: number;
@@ -827,7 +829,9 @@ export default function PointsPage() {
                         const convMult = pointsData?.onchainConvictionMultiplier && pointsData.onchainConvictionMultiplier > 0 ? pointsData.onchainConvictionMultiplier : 0;
                         const refMult = pointsData?.referralMultiplier && pointsData.referralMultiplier > 0 ? pointsData.referralMultiplier : 0;
                         const swapMult = pointsData?.swapperMultiplier && pointsData.swapperMultiplier > 0 ? pointsData.swapperMultiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult);
+                        const tgModMult = pointsData?.telegramModMultiplier && pointsData.telegramModMultiplier > 0 ? pointsData.telegramModMultiplier : 0;
+                        const dcModMult = pointsData?.discordModMultiplier && pointsData.discordModMultiplier > 0 ? pointsData.discordModMultiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult);
 
                         let badgeGradient = 'bg-gray-600'; // default for 1x
                         if (totalMultiplier >= 100) {
@@ -867,7 +871,9 @@ export default function PointsPage() {
                         const convMult = pointsData?.onchainConvictionMultiplier && pointsData.onchainConvictionMultiplier > 0 ? pointsData.onchainConvictionMultiplier : 0;
                         const refMult = pointsData?.referralMultiplier && pointsData.referralMultiplier > 0 ? pointsData.referralMultiplier : 0;
                         const swapMult = pointsData?.swapperMultiplier && pointsData.swapperMultiplier > 0 ? pointsData.swapperMultiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult);
+                        const tgModMult = pointsData?.telegramModMultiplier && pointsData.telegramModMultiplier > 0 ? pointsData.telegramModMultiplier : 0;
+                        const dcModMult = pointsData?.discordModMultiplier && pointsData.discordModMultiplier > 0 ? pointsData.discordModMultiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult);
                         const pointsPerHour = currentTier.pointsPerHour * totalMultiplier;
                         return (
                           <div className="flex flex-col items-center">
@@ -1275,6 +1281,36 @@ export default function PointsPage() {
               ]}
               isActive={(pointsData?.swapperMultiplier || 0) > 0}
               currentMultiplier={(pointsData?.swapperMultiplier || 0) > 0 ? `x${pointsData?.swapperMultiplier}` : undefined}
+            />
+
+            {/* 12. Telegram Mod */}
+            <MultiplierBadge
+              name="Telegram"
+              title="Mod"
+              image="/tg.png"
+              description="Recognize community moderators who keep Amy's Telegram channels safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
+              multipliers={[
+                { requirement: 'Guardian', multiplier: 'x3' },
+                { requirement: 'Sentinel', multiplier: 'x7' },
+                { requirement: 'Archlord', multiplier: 'x15' },
+              ]}
+              isActive={(pointsData?.telegramModMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.telegramModMultiplier || 0) > 0 ? `x${pointsData?.telegramModMultiplier}` : undefined}
+            />
+
+            {/* 13. Discord Mod */}
+            <MultiplierBadge
+              name="Discord"
+              title="Mod"
+              image="/dc.jpg"
+              description="Recognize community moderators who keep Amy's Discord server safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
+              multipliers={[
+                { requirement: 'Guardian', multiplier: 'x3' },
+                { requirement: 'Sentinel', multiplier: 'x7' },
+                { requirement: 'Archlord', multiplier: 'x15' },
+              ]}
+              isActive={(pointsData?.discordModMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.discordModMultiplier || 0) > 0 ? `x${pointsData?.discordModMultiplier}` : undefined}
             />
 
             {/* All other badges - Coming Soon */}

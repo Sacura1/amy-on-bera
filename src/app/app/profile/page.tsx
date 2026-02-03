@@ -86,6 +86,16 @@ function ProfilePageContent() {
   const [isUpdatingSwapper, setIsUpdatingSwapper] = useState(false);
   const [swapperStatus, setSwapperStatus] = useState('');
   const [swapperList, setSwapperList] = useState<Array<{ wallet: string; xUsername: string; multiplier: number }>>([]);
+  // Telegram Mod badges
+  const [telegramModInput, setTelegramModInput] = useState('');
+  const [isUpdatingTelegramMod, setIsUpdatingTelegramMod] = useState(false);
+  const [telegramModStatus, setTelegramModStatus] = useState('');
+  const [telegramModList, setTelegramModList] = useState<Array<{ wallet: string; telegramUsername?: string; multiplier: number }>>([]);
+  // Discord Mod badges
+  const [discordModInput, setDiscordModInput] = useState('');
+  const [isUpdatingDiscordMod, setIsUpdatingDiscordMod] = useState(false);
+  const [discordModStatus, setDiscordModStatus] = useState('');
+  const [discordModList, setDiscordModList] = useState<Array<{ wallet: string; discordUsername?: string; multiplier: number }>>([]);
   // Dawn referral archive
   const [isArchivingDawn, setIsArchivingDawn] = useState(false);
   const [dawnArchiveStatus, setDawnArchiveStatus] = useState('');
@@ -226,6 +236,8 @@ function ProfilePageContent() {
       fetchRaidsharkList();
       fetchConvictionList();
       fetchSwapperList();
+      fetchTelegramModList();
+      fetchDiscordModList();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, walletAddress]);
@@ -615,6 +627,38 @@ function ProfilePageContent() {
     }
   };
 
+  // Fetch Telegram Mod badge list (admin)
+  const fetchTelegramModList = async () => {
+    if (!walletAddress || !isAdmin) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/telegram-mod/list`, {
+        headers: { 'x-wallet-address': walletAddress.toString() }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setTelegramModList(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching telegram mod list:', error);
+    }
+  };
+
+  // Fetch Discord Mod badge list (admin)
+  const fetchDiscordModList = async () => {
+    if (!walletAddress || !isAdmin) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/discord-mod/list`, {
+        headers: { 'x-wallet-address': walletAddress.toString() }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setDiscordModList(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching discord mod list:', error);
+    }
+  };
+
   // Update RaidShark badges from text input (admin)
   // Format: @telegramUsername tier (e.g., "@username 7" means x7 multiplier)
   const updateRaidsharkBadges = async () => {
@@ -797,6 +841,138 @@ function ProfilePageContent() {
       setSwapperStatus('Error updating swapper badges');
     } finally {
       setIsUpdatingSwapper(false);
+    }
+  };
+
+  // Update Telegram Mod badges from text input (admin) - bulk update by Telegram username
+  const updateTelegramModBadges = async () => {
+    if (!walletAddress || !isAdmin) {
+      setTelegramModStatus('Admin wallet not connected');
+      return;
+    }
+    if (!telegramModInput.trim()) {
+      setTelegramModStatus('Please enter Telegram usernames and multipliers');
+      return;
+    }
+
+    setIsUpdatingTelegramMod(true);
+    setTelegramModStatus('');
+
+    try {
+      // Parse input: each line is "@telegramUsername multiplier"
+      const lines = telegramModInput.trim().split('\n').filter(l => l.trim());
+      const updates: Array<{ telegramUsername: string; multiplier: number }> = [];
+
+      for (const line of lines) {
+        // Match patterns like "@username 7" or "username 15"
+        const match = line.trim().match(/^@?([^\s]+)\s+x?(\d+)$/i);
+        if (match) {
+          const telegramUsername = match[1];
+          const multiplier = parseInt(match[2]);
+          if ([0, 3, 7, 15].includes(multiplier)) {
+            updates.push({ telegramUsername, multiplier });
+          }
+        }
+      }
+
+      if (updates.length === 0) {
+        setTelegramModStatus('No valid entries found. Format: @telegram_username 3/7/15');
+        setIsUpdatingTelegramMod(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/admin/telegram-mod/bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': walletAddress.toString()
+        },
+        body: JSON.stringify({ updates }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        const failed = data.results?.filter((r: { success: boolean }) => !r.success) || [];
+        if (failed.length > 0) {
+          setTelegramModStatus(`Updated ${data.updated} users. ${failed.length} not found: ${failed.map((f: { telegramUsername: string }) => '@' + f.telegramUsername).join(', ')}`);
+        } else {
+          setTelegramModStatus(`Successfully updated ${data.updated} Telegram Mod badges! (All others reset)`);
+        }
+        setTelegramModInput('');
+        fetchTelegramModList();
+      } else {
+        setTelegramModStatus(data.error || 'Failed to update badges');
+      }
+    } catch {
+      setTelegramModStatus('Error updating Telegram Mod badges');
+    } finally {
+      setIsUpdatingTelegramMod(false);
+    }
+  };
+
+  // Update Discord Mod badges from text input (admin) - bulk update by Discord username
+  const updateDiscordModBadges = async () => {
+    if (!walletAddress || !isAdmin) {
+      setDiscordModStatus('Admin wallet not connected');
+      return;
+    }
+    if (!discordModInput.trim()) {
+      setDiscordModStatus('Please enter Discord usernames and multipliers');
+      return;
+    }
+
+    setIsUpdatingDiscordMod(true);
+    setDiscordModStatus('');
+
+    try {
+      // Parse input: each line is "@discordUsername multiplier"
+      const lines = discordModInput.trim().split('\n').filter(l => l.trim());
+      const updates: Array<{ discordUsername: string; multiplier: number }> = [];
+
+      for (const line of lines) {
+        // Match patterns like "@username 7" or "username 15"
+        const match = line.trim().match(/^@?([^\s]+)\s+x?(\d+)$/i);
+        if (match) {
+          const discordUsername = match[1];
+          const multiplier = parseInt(match[2]);
+          if ([0, 3, 7, 15].includes(multiplier)) {
+            updates.push({ discordUsername, multiplier });
+          }
+        }
+      }
+
+      if (updates.length === 0) {
+        setDiscordModStatus('No valid entries found. Format: @discord_username 3/7/15');
+        setIsUpdatingDiscordMod(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/admin/discord-mod/bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': walletAddress.toString()
+        },
+        body: JSON.stringify({ updates }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        const failed = data.results?.filter((r: { success: boolean }) => !r.success) || [];
+        if (failed.length > 0) {
+          setDiscordModStatus(`Updated ${data.updated} users. ${failed.length} not found: ${failed.map((f: { discordUsername: string }) => '@' + f.discordUsername).join(', ')}`);
+        } else {
+          setDiscordModStatus(`Successfully updated ${data.updated} Discord Mod badges! (All others reset)`);
+        }
+        setDiscordModInput('');
+        fetchDiscordModList();
+      } else {
+        setDiscordModStatus(data.error || 'Failed to update badges');
+      }
+    } catch {
+      setDiscordModStatus('Error updating Discord Mod badges');
+    } finally {
+      setIsUpdatingDiscordMod(false);
     }
   };
 
@@ -1382,6 +1558,142 @@ function ProfilePageContent() {
                         <span className="font-mono">{user.wallet.slice(0, 6)}...{user.wallet.slice(-4)}</span>
                         <span className="bg-green-700/50 px-2 rounded">{user.multiplier}x</span>
                       </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Telegram Mod Badge Management */}
+            <div className="p-4 md:p-6 border-t border-gray-700/50">
+              <div className="mb-4">
+                <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1 flex items-center gap-2">
+                  <span>📱</span> Telegram Mod Badges
+                </h4>
+                <p className="text-xs text-gray-400">
+                  Paste Telegram usernames with multipliers. Format: @telegram_username 3/7/15
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Guardian = x3, Sentinel = x7, Archlord = x15 (Bulk update resets all others)
+                </p>
+              </div>
+
+              <textarea
+                value={telegramModInput}
+                onChange={(e) => setTelegramModInput(e.target.value)}
+                placeholder={"@bee_username 3\n@mercury_username 3"}
+                rows={5}
+                className="w-full px-4 py-3 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm font-mono focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 resize-none"
+              />
+
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                <div className="text-xs text-gray-400">
+                  {telegramModInput.trim()
+                    ? `${telegramModInput.trim().split('\n').filter(l => l.trim()).length} entries`
+                    : 'Paste Telegram usernames above'}
+                </div>
+                <button
+                  onClick={updateTelegramModBadges}
+                  disabled={isUpdatingTelegramMod || !telegramModInput.trim()}
+                  className="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-2.5 rounded-full text-sm font-bold uppercase disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isUpdatingTelegramMod ? (
+                    <>
+                      <span className="loading-spinner w-4 h-4" />
+                      <span>UPDATING...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📱</span>
+                      <span>UPDATE BADGES</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {telegramModStatus && (
+                <p className={`text-sm mt-3 ${telegramModStatus.includes('Successfully') ? 'text-green-400' : telegramModStatus.includes('Updated') ? 'text-yellow-400' : 'text-red-400'}`}>
+                  {telegramModStatus}
+                </p>
+              )}
+
+              {/* Current Telegram Mod badge holders */}
+              {telegramModList.length > 0 && (
+                <div className="mt-4 p-3 bg-black/30 rounded-xl">
+                  <p className="text-xs text-gray-400 mb-2">Current badge holders ({telegramModList.length}):</p>
+                  <div className="flex flex-wrap gap-2">
+                    {telegramModList.map((user, i) => (
+                      <span key={i} className="text-xs bg-cyan-900/50 text-cyan-300 px-2 py-1 rounded-lg">
+                        @{user.telegramUsername || user.wallet.slice(0, 8)} ({user.multiplier}x)
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Discord Mod Badge Management */}
+            <div className="p-4 md:p-6 border-t border-gray-700/50">
+              <div className="mb-4">
+                <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1 flex items-center gap-2">
+                  <span>💬</span> Discord Mod Badges
+                </h4>
+                <p className="text-xs text-gray-400">
+                  Paste Discord usernames with multipliers. Format: @discord_username 3/7/15
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Guardian = x3, Sentinel = x7, Archlord = x15 (Bulk update resets all others)
+                </p>
+              </div>
+
+              <textarea
+                value={discordModInput}
+                onChange={(e) => setDiscordModInput(e.target.value)}
+                placeholder={"@discord_user1 3\n@discord_user2 7"}
+                rows={5}
+                className="w-full px-4 py-3 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm font-mono focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 resize-none"
+              />
+
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                <div className="text-xs text-gray-400">
+                  {discordModInput.trim()
+                    ? `${discordModInput.trim().split('\n').filter(l => l.trim()).length} entries`
+                    : 'Paste Discord usernames above'}
+                </div>
+                <button
+                  onClick={updateDiscordModBadges}
+                  disabled={isUpdatingDiscordMod || !discordModInput.trim()}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-full text-sm font-bold uppercase disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isUpdatingDiscordMod ? (
+                    <>
+                      <span className="loading-spinner w-4 h-4" />
+                      <span>UPDATING...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>💬</span>
+                      <span>UPDATE BADGES</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {discordModStatus && (
+                <p className={`text-sm mt-3 ${discordModStatus.includes('Successfully') ? 'text-green-400' : discordModStatus.includes('Updated') ? 'text-yellow-400' : 'text-red-400'}`}>
+                  {discordModStatus}
+                </p>
+              )}
+
+              {/* Current Discord Mod badge holders */}
+              {discordModList.length > 0 && (
+                <div className="mt-4 p-3 bg-black/30 rounded-xl">
+                  <p className="text-xs text-gray-400 mb-2">Current badge holders ({discordModList.length}):</p>
+                  <div className="flex flex-wrap gap-2">
+                    {discordModList.map((user, i) => (
+                      <span key={i} className="text-xs bg-indigo-900/50 text-indigo-300 px-2 py-1 rounded-lg">
+                        @{user.discordUsername || user.wallet.slice(0, 8)} ({user.multiplier}x)
+                      </span>
                     ))}
                   </div>
                 </div>
