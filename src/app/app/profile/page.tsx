@@ -77,14 +77,12 @@ function ProfilePageContent() {
   const [raidsharkInput, setRaidsharkInput] = useState('');
   const [isUpdatingRaidshark, setIsUpdatingRaidshark] = useState(false);
   const [raidsharkStatus, setRaidsharkStatus] = useState('');
-  const [raidsharkList, setRaidsharkList] = useState<Array<{ wallet: string; xUsername: string; multiplier: number }>>([]);
-  const [convictionWallet, setConvictionWallet] = useState('');
-  const [convictionMultiplier, setConvictionMultiplier] = useState('');
+  const [raidsharkList, setRaidsharkList] = useState<Array<{ wallet: string; xUsername: string; telegramUsername?: string; multiplier: number }>>([]);
+  const [convictionInput, setConvictionInput] = useState('');
   const [isUpdatingConviction, setIsUpdatingConviction] = useState(false);
   const [convictionStatus, setConvictionStatus] = useState('');
   const [convictionList, setConvictionList] = useState<Array<{ wallet: string; xUsername: string; multiplier: number }>>([]);
-  const [swapperWallet, setSwapperWallet] = useState('');
-  const [swapperMultiplier, setSwapperMultiplier] = useState('');
+  const [swapperInput, setSwapperInput] = useState('');
   const [isUpdatingSwapper, setIsUpdatingSwapper] = useState(false);
   const [swapperStatus, setSwapperStatus] = useState('');
   const [swapperList, setSwapperList] = useState<Array<{ wallet: string; xUsername: string; multiplier: number }>>([]);
@@ -618,11 +616,11 @@ function ProfilePageContent() {
   };
 
   // Update RaidShark badges from text input (admin)
-  // Format: @username tier (e.g., "@Paweł_1260🐾 7" means x7 multiplier)
+  // Format: @telegramUsername tier (e.g., "@username 7" means x7 multiplier)
   const updateRaidsharkBadges = async () => {
     if (!walletAddress || !isAdmin) return;
     if (!raidsharkInput.trim()) {
-      setRaidsharkStatus('Please enter usernames and multipliers');
+      setRaidsharkStatus('Please enter Telegram usernames and multipliers');
       return;
     }
 
@@ -630,29 +628,29 @@ function ProfilePageContent() {
     setRaidsharkStatus('');
 
     try {
-      // Parse input: each line is "@username multiplier" or "username multiplier"
+      // Parse input: each line is "@telegramUsername multiplier" or "telegramUsername multiplier"
       const lines = raidsharkInput.trim().split('\n').filter(l => l.trim());
-      const updates: Array<{ xUsername: string; multiplier: number }> = [];
+      const updates: Array<{ telegramUsername: string; multiplier: number }> = [];
 
       for (const line of lines) {
         // Match patterns like "@username 7" or "username 15" or "@username x7"
         const match = line.trim().match(/^@?([^\s]+)\s+x?(\d+)$/i);
         if (match) {
-          const xUsername = match[1];
+          const telegramUsername = match[1];
           const multiplier = parseInt(match[2]);
           if ([3, 7, 15].includes(multiplier)) {
-            updates.push({ xUsername, multiplier });
+            updates.push({ telegramUsername, multiplier });
           }
         }
       }
 
       if (updates.length === 0) {
-        setRaidsharkStatus('No valid entries found. Format: @username 3/7/15');
+        setRaidsharkStatus('No valid entries found. Format: @telegram_username 3/7/15');
         setIsUpdatingRaidshark(false);
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/admin/raidshark/bulk-by-username`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/raidshark/bulk-by-telegram`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -665,7 +663,7 @@ function ProfilePageContent() {
       if (data.success) {
         const failed = data.results?.filter((r: { success: boolean }) => !r.success) || [];
         if (failed.length > 0) {
-          setRaidsharkStatus(`Updated ${data.updated} users. ${failed.length} not found: ${failed.map((f: { xUsername: string }) => '@' + f.xUsername).join(', ')}`);
+          setRaidsharkStatus(`Updated ${data.updated} users. ${failed.length} not found: ${failed.map((f: { telegramUsername: string }) => '@' + f.telegramUsername).join(', ')}`);
         } else {
           setRaidsharkStatus(`Successfully updated ${data.updated} RaidShark badges!`);
         }
@@ -681,17 +679,12 @@ function ProfilePageContent() {
     }
   };
 
-  // Update Onchain Conviction badge (admin)
-  const updateConvictionBadge = async () => {
+  // Update Onchain Conviction badges from text input (admin) - bulk update
+  // Format: wallet_address multiplier (e.g., "0x123...abc 5" means x5 multiplier)
+  const updateConvictionBadges = async () => {
     if (!walletAddress || !isAdmin) return;
-    if (!convictionWallet.trim() || !convictionMultiplier.trim()) {
-      setConvictionStatus('Please enter wallet address and multiplier');
-      return;
-    }
-
-    const multiplier = parseInt(convictionMultiplier);
-    if (![1, 3, 5, 10].includes(multiplier)) {
-      setConvictionStatus('Multiplier must be 1, 3, 5, or 10');
+    if (!convictionInput.trim()) {
+      setConvictionStatus('Please enter wallet addresses and multipliers');
       return;
     }
 
@@ -699,48 +692,61 @@ function ProfilePageContent() {
     setConvictionStatus('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/conviction/update`, {
+      // Parse input: each line is "wallet multiplier"
+      const lines = convictionInput.trim().split('\n').filter(l => l.trim());
+      const updates: Array<{ wallet: string; multiplier: number }> = [];
+
+      for (const line of lines) {
+        // Match patterns like "0x123...abc 5" or "0x123 x10"
+        const match = line.trim().match(/^(0x[a-fA-F0-9]{40})\s+x?(\d+)$/i);
+        if (match) {
+          const wallet = match[1];
+          const multiplier = parseInt(match[2]);
+          if ([1, 3, 5, 10].includes(multiplier)) {
+            updates.push({ wallet, multiplier });
+          }
+        }
+      }
+
+      if (updates.length === 0) {
+        setConvictionStatus('No valid entries found. Format: 0x... 3/5/10');
+        setIsUpdatingConviction(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/admin/conviction/bulk`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-wallet-address': walletAddress
         },
-        body: JSON.stringify({
-          wallet: convictionWallet.trim(),
-          multiplier
-        }),
+        body: JSON.stringify({ updates }),
       });
       const data = await response.json();
 
       if (data.success) {
-        setConvictionStatus(`Successfully set ${multiplier}x multiplier!`);
-        setConvictionWallet('');
-        setConvictionMultiplier('');
+        setConvictionStatus(`Successfully updated ${data.updated} Conviction badges! (All others reset)`);
+        setConvictionInput('');
         fetchConvictionList();
       } else {
-        setConvictionStatus(data.error || 'Failed to update badge');
+        setConvictionStatus(data.error || 'Failed to update badges');
       }
     } catch {
-      setConvictionStatus('Error updating conviction badge');
+      setConvictionStatus('Error updating conviction badges');
     } finally {
       setIsUpdatingConviction(false);
     }
   };
 
-  // Update swapper badge for a single wallet (admin)
-  const updateSwapperBadge = async () => {
+  // Update swapper badges from text input (admin) - bulk update
+  // Format: wallet_address multiplier (e.g., "0x123...abc 5" means x5 multiplier)
+  const updateSwapperBadges = async () => {
     if (!walletAddress || !isAdmin) {
       setSwapperStatus('Admin wallet not connected');
       return;
     }
-    if (!swapperWallet.trim() || !swapperMultiplier.trim()) {
-      setSwapperStatus('Please enter wallet address and multiplier');
-      return;
-    }
-
-    const multiplier = parseInt(swapperMultiplier);
-    if (![0, 3, 5, 10].includes(multiplier)) {
-      setSwapperStatus('Multiplier must be 0, 3, 5, or 10');
+    if (!swapperInput.trim()) {
+      setSwapperStatus('Please enter wallet addresses and multipliers');
       return;
     }
 
@@ -748,30 +754,47 @@ function ProfilePageContent() {
     setSwapperStatus('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/swapper/update`, {
+      // Parse input: each line is "wallet multiplier"
+      const lines = swapperInput.trim().split('\n').filter(l => l.trim());
+      const updates: Array<{ wallet: string; multiplier: number }> = [];
+
+      for (const line of lines) {
+        // Match patterns like "0x123...abc 5" or "0x123 x10"
+        const match = line.trim().match(/^(0x[a-fA-F0-9]{40})\s+x?(\d+)$/i);
+        if (match) {
+          const wallet = match[1];
+          const multiplier = parseInt(match[2]);
+          if ([0, 3, 5, 10].includes(multiplier)) {
+            updates.push({ wallet, multiplier });
+          }
+        }
+      }
+
+      if (updates.length === 0) {
+        setSwapperStatus('No valid entries found. Format: 0x... 0/3/5/10');
+        setIsUpdatingSwapper(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/admin/swapper/bulk`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-wallet-address': walletAddress.toString()
         },
-        body: JSON.stringify({
-          wallet: swapperWallet.trim(),
-          multiplier,
-          adminWallet: walletAddress.toString()
-        }),
+        body: JSON.stringify({ updates }),
       });
       const data = await response.json();
 
       if (data.success) {
-        setSwapperStatus(`Successfully set ${multiplier}x multiplier!`);
-        setSwapperWallet('');
-        setSwapperMultiplier('');
+        setSwapperStatus(`Successfully updated ${data.updated} Swapper badges! (All others reset)`);
+        setSwapperInput('');
         fetchSwapperList();
       } else {
-        setSwapperStatus(data.error || 'Failed to update badge');
+        setSwapperStatus(data.error || 'Failed to update badges');
       }
     } catch {
-      setSwapperStatus('Error updating swapper badge');
+      setSwapperStatus('Error updating swapper badges');
     } finally {
       setIsUpdatingSwapper(false);
     }
@@ -1166,7 +1189,7 @@ function ProfilePageContent() {
                   <span>🦈</span> RaidShark Badges
                 </h4>
                 <p className="text-xs text-gray-400">
-                  Paste X usernames with multipliers. Format: @username 3/7/15
+                  Paste Telegram usernames with multipliers. Format: @telegram_username 3/7/15
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   x3 = Raid Enthusiast (75+ pts), x7 = Raid Master (250+ pts), x15 = Raid Legend (600+ pts)
@@ -1176,7 +1199,7 @@ function ProfilePageContent() {
               <textarea
                 value={raidsharkInput}
                 onChange={(e) => setRaidsharkInput(e.target.value)}
-                placeholder={"@Paweł_1260🐾 7\n@senpai_Xpr 7\n@CheekyPert 3\n@Biggreatweb3 3"}
+                placeholder={"@telegram_user1 7\n@telegram_user2 7\n@telegram_user3 3\n@telegram_user4 3"}
                 rows={5}
                 className="w-full px-4 py-3 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm font-mono focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 resize-none"
               />
@@ -1219,7 +1242,7 @@ function ProfilePageContent() {
                   <div className="flex flex-wrap gap-2">
                     {raidsharkList.map((user, i) => (
                       <span key={i} className="text-xs bg-blue-900/50 text-blue-300 px-2 py-1 rounded-lg">
-                        @{user.xUsername} ({user.multiplier}x)
+                        @{user.telegramUsername || user.xUsername} ({user.multiplier}x)
                       </span>
                     ))}
                   </div>
@@ -1234,49 +1257,30 @@ function ProfilePageContent() {
                   <span>⛓️</span> Onchain Conviction Badges
                 </h4>
                 <p className="text-xs text-gray-400">
-                  Assign conviction badges by wallet address
+                  Paste wallet addresses with multipliers. Format: 0x... 3/5/10
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Level 1 = x3, Level 2 = x5, Level 3 = x10
+                  Level 1 = x3, Level 2 = x5, Level 3 = x10 (Bulk update resets all others)
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Wallet Address</label>
-                  <input
-                    type="text"
-                    value={convictionWallet}
-                    onChange={(e) => setConvictionWallet(e.target.value)}
-                    placeholder="0x..."
-                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Multiplier</label>
-                  <select
-                    value={convictionMultiplier}
-                    onChange={(e) => setConvictionMultiplier(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all"
-                  >
-                    <option value="">Select level...</option>
-                    <option value="3">Level 1 (x3)</option>
-                    <option value="5">Level 2 (x5)</option>
-                    <option value="10">Level 3 (x10)</option>
-                    <option value="1">Remove (x1)</option>
-                  </select>
-                </div>
-              </div>
+              <textarea
+                value={convictionInput}
+                onChange={(e) => setConvictionInput(e.target.value)}
+                placeholder={"0x1234567890123456789012345678901234567890 5\n0xabcdef1234567890abcdef1234567890abcdef12 10\n0x9876543210987654321098765432109876543210 3"}
+                rows={5}
+                className="w-full px-4 py-3 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm font-mono focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 resize-none"
+              />
 
-              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                 <div className="text-xs text-gray-400">
-                  {convictionWallet && convictionMultiplier
-                    ? `Set ${convictionMultiplier}x for ${convictionWallet.slice(0, 6)}...${convictionWallet.slice(-4)}`
-                    : 'Enter wallet and select level'}
+                  {convictionInput.trim()
+                    ? `${convictionInput.trim().split('\n').filter(l => l.trim()).length} entries`
+                    : 'Paste wallet addresses above'}
                 </div>
                 <button
-                  onClick={updateConvictionBadge}
-                  disabled={isUpdatingConviction || !convictionWallet.trim() || !convictionMultiplier}
+                  onClick={updateConvictionBadges}
+                  disabled={isUpdatingConviction || !convictionInput.trim()}
                   className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2.5 rounded-full text-sm font-bold uppercase disabled:opacity-50 flex items-center gap-2"
                 >
                   {isUpdatingConviction ? (
@@ -1287,7 +1291,7 @@ function ProfilePageContent() {
                   ) : (
                     <>
                       <span>⛓️</span>
-                      <span>SET BADGE</span>
+                      <span>UPDATE BADGES</span>
                     </>
                   )}
                 </button>
@@ -1322,49 +1326,30 @@ function ProfilePageContent() {
                   <span>🔄</span> Seasoned Swapper Badges
                 </h4>
                 <p className="text-xs text-gray-400">
-                  Assign swapper badges by wallet address (monthly swap volume)
+                  Paste wallet addresses with multipliers. Format: 0x... 0/3/5/10
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Engaged ($250+) = x3, Committed ($1,000+) = x5, Elite ($3,000+) = x10
+                  Engaged ($250+) = x3, Committed ($1,000+) = x5, Elite ($3,000+) = x10 (Bulk update resets all others)
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Wallet Address</label>
-                  <input
-                    type="text"
-                    value={swapperWallet}
-                    onChange={(e) => setSwapperWallet(e.target.value)}
-                    placeholder="0x..."
-                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Tier</label>
-                  <select
-                    value={swapperMultiplier}
-                    onChange={(e) => setSwapperMultiplier(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all"
-                  >
-                    <option value="">Select tier...</option>
-                    <option value="3">Engaged (x3)</option>
-                    <option value="5">Committed (x5)</option>
-                    <option value="10">Elite (x10)</option>
-                    <option value="0">Remove (x0)</option>
-                  </select>
-                </div>
-              </div>
+              <textarea
+                value={swapperInput}
+                onChange={(e) => setSwapperInput(e.target.value)}
+                placeholder={"0x1234567890123456789012345678901234567890 5\n0xabcdef1234567890abcdef1234567890abcdef12 10\n0x9876543210987654321098765432109876543210 3"}
+                rows={5}
+                className="w-full px-4 py-3 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm font-mono focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500 resize-none"
+              />
 
-              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                 <div className="text-xs text-gray-400">
-                  {swapperWallet && swapperMultiplier
-                    ? `Set ${swapperMultiplier}x for ${swapperWallet.slice(0, 6)}...${swapperWallet.slice(-4)}`
-                    : 'Enter wallet and select tier'}
+                  {swapperInput.trim()
+                    ? `${swapperInput.trim().split('\n').filter(l => l.trim()).length} entries`
+                    : 'Paste wallet addresses above'}
                 </div>
                 <button
-                  onClick={updateSwapperBadge}
-                  disabled={isUpdatingSwapper || !swapperWallet.trim() || !swapperMultiplier}
+                  onClick={updateSwapperBadges}
+                  disabled={isUpdatingSwapper || !swapperInput.trim()}
                   className="bg-green-600 hover:bg-green-500 text-white px-6 py-2.5 rounded-full text-sm font-bold uppercase disabled:opacity-50 flex items-center gap-2"
                 >
                   {isUpdatingSwapper ? (
@@ -1375,7 +1360,7 @@ function ProfilePageContent() {
                   ) : (
                     <>
                       <span>🔄</span>
-                      <span>SET BADGE</span>
+                      <span>UPDATE BADGES</span>
                     </>
                   )}
                 </button>

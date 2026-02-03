@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThirdwebProvider } from "thirdweb/react";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: "$AMY - Berachain Ecosystem Token",
@@ -30,6 +31,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen text-white relative">
         <ThirdwebProvider>{children}</ThirdwebProvider>
+        <Analytics />
       </body>
     </html>
   );
