@@ -664,7 +664,7 @@ export default function EarnPage() {
 
   // Check if user has active LP position (or TEST_MODE is enabled)
   const hasActiveLp = TEST_MODE || (lpData && lpData.lpValueUsd > 0 && lpData.positionsFound > 0);
-  const hasActiveTokens = tokenData && (tokenData.sailr?.isActive || tokenData.plvhedge?.isActive || tokenData.plsbera?.isActive);
+  const hasActiveTokens = tokenData && (tokenData.sailr?.isActive || tokenData.plvhedge?.isActive || tokenData.plsbera?.isActive || tokenData.honeybend?.isActive || tokenData.stakedbera?.isActive);
   const hasAnyActivePosition = hasActiveLp || hasActiveTokens;
 
   // Helper to get dynamic value for a strategy
@@ -835,6 +835,90 @@ export default function EarnPage() {
                     <span className="text-sm text-gray-400">Manage your position on Plutus</span>
                     <a
                       href="https://plutus.fi/Assets/a/plsBERA/tab/convert"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
+                    >
+                      View Position →
+                    </a>
+                  </div>
+                </div>
+              )}
+              {tokenData?.honeybend?.isActive && (
+                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
+                  <div className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+                        <img src="/honey.jpg" alt="HONEY-Bend" className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <div className="text-white font-bold">HONEY-Bend</div>
+                        <div className="text-sm text-gray-400">Bend Protocol</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-4 pb-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Your Deposit Value</div>
+                        <div className="text-xl font-bold text-white">${tokenData.honeybend.valueUsd.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
+                        <div className="text-xl font-bold text-white">{tokenData.honeybend.balance.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
+                        <div className="text-xl font-bold text-yellow-400">{tokenData.honeybend.multiplier}x</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Manage your position on Bend</span>
+                    <a
+                      href="https://bend.berachain.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
+                    >
+                      View Position →
+                    </a>
+                  </div>
+                </div>
+              )}
+              {tokenData?.stakedbera?.isActive && (
+                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
+                  <div className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+                        <img src="/BERA.png" alt="sWBERA" className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <div className="text-white font-bold">Staked BERA (sWBERA)</div>
+                        <div className="text-sm text-gray-400">Berachain Staking</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-4 pb-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Your Staked Value</div>
+                        <div className="text-xl font-bold text-white">${tokenData.stakedbera.valueUsd.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
+                        <div className="text-xl font-bold text-white">{tokenData.stakedbera.balance.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
+                        <div className="text-xl font-bold text-yellow-400">{tokenData.stakedbera.multiplier}x</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Manage your stake on Berachain Hub</span>
+                    <a
+                      href="https://hub.berachain.com/stake"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
