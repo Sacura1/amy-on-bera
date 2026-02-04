@@ -978,17 +978,25 @@ function ProfilePageContent() {
 
   // Archive Dawn referral season (admin only)
   const archiveDawnSeason = async () => {
-    if (!walletAddress || !isAdmin) return;
+    if (!walletAddress) {
+      setDawnArchiveStatus('Error: Wallet not connected');
+      return;
+    }
+    if (!isAdmin) {
+      setDawnArchiveStatus('Error: Not an admin wallet');
+      return;
+    }
 
     setIsArchivingDawn(true);
     setDawnArchiveStatus('');
 
     try {
+      const adminWallet = typeof walletAddress === 'string' ? walletAddress : String(walletAddress);
       const response = await fetch(`${API_BASE_URL}/api/admin/referrals/archive-dawn`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-wallet-address': walletAddress.toString()
+          'x-wallet-address': adminWallet
         }
       });
 
@@ -1704,17 +1712,17 @@ function ProfilePageContent() {
             <div className="p-4 md:p-6 border-t border-gray-700/50">
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                  {/* <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1 flex items-center gap-2">
+                  <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1 flex items-center gap-2">
                     <span>📦</span> Archive Dawn Referral Season
-                  </h4> */}
-                  {/* <p className="text-xs text-gray-400">
+                  </h4>
+                  <p className="text-xs text-gray-400">
                     Archive current referral counts to dawn_referral_count and reset for Season 2
-                  </p> */}
-                  {/* <p className="text-xs text-red-400 mt-1">
+                  </p>
+                  <p className="text-xs text-red-400 mt-1">
                     ⚠️ This action cannot be undone. Only run once when ending Dawn season.
-                  </p> */}
+                  </p>
                 </div>
-                {/* <button
+                <button
                   onClick={archiveDawnSeason}
                   disabled={isArchivingDawn}
                   className="bg-orange-600 hover:bg-orange-500 text-white px-5 py-2.5 rounded-full text-sm font-bold uppercase disabled:opacity-50 flex items-center gap-2"
@@ -1730,7 +1738,7 @@ function ProfilePageContent() {
                       <span>ARCHIVE DAWN</span>
                     </>
                   )}
-                </button> */}
+                </button>
               </div>
               {dawnArchiveStatus && (
                 <p className={`text-sm mt-3 ${dawnArchiveStatus.includes('Successfully') ? 'text-green-400' : 'text-red-400'}`}>

@@ -451,18 +451,20 @@ export default function BadgeSelector({
   const isBadgeEquipped = (badgeId: string) => equippedBadges.some(b => b.badgeId === badgeId);
 
   const getMultiplierColors = (multiplier: number) => {
-    if (multiplier >= 100) return 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-yellow-950';
-    if (multiplier >= 10) return 'bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900';
-    if (multiplier >= 5) return 'bg-gradient-to-br from-slate-400 to-slate-600 text-slate-100';
-    return 'bg-gradient-to-br from-amber-600 to-amber-800 text-amber-100';
+    // Level 3 (x10+) = Gold, Level 2 (x5) = Silver, Level 1 (x3) = Bronze
+    if (multiplier >= 100) return 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-yellow-950'; // Super Gold for 100x
+    if (multiplier >= 10) return 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-yellow-950'; // Gold for 10x+
+    if (multiplier >= 5) return 'bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900'; // Silver for 5x
+    return 'bg-gradient-to-br from-amber-600 to-amber-800 text-amber-100'; // Bronze for 3x
   };
 
   // Get tier ring color based on multiplier
   const getTierRingColor = (multiplier: number) => {
-    if (multiplier >= 100) return 'ring-yellow-400';
-    if (multiplier >= 10) return 'ring-slate-400';
-    if (multiplier >= 5) return 'ring-slate-500';
-    return 'ring-amber-600';
+    // Level 3 (x10+) = Gold, Level 2 (x5) = Silver, Level 1 (x3) = Bronze
+    if (multiplier >= 100) return 'ring-yellow-400'; // Super Gold for 100x
+    if (multiplier >= 10) return 'ring-yellow-400'; // Gold for 10x+
+    if (multiplier >= 5) return 'ring-slate-400'; // Silver for 5x
+    return 'ring-amber-600'; // Bronze for 3x
   };
 
   const equipBadge = async () => {

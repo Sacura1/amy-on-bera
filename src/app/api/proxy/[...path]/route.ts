@@ -24,6 +24,12 @@ export async function GET(
       headers['Accept'] = 'application/json';
     }
 
+    // Forward x-wallet-address for admin auth
+    const walletAddress = request.headers.get('x-wallet-address');
+    if (walletAddress) {
+      headers['x-wallet-address'] = walletAddress;
+    }
+
     const response = await fetch(url, { headers });
 
     // Handle static files (images)
@@ -99,12 +105,20 @@ export async function POST(
         body = {};
       }
 
+      // Build headers, forwarding x-wallet-address for admin auth
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+      const walletAddress = request.headers.get('x-wallet-address');
+      if (walletAddress) {
+        headers['x-wallet-address'] = walletAddress;
+      }
+
       response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers,
         body: JSON.stringify(body),
       });
     }

@@ -161,7 +161,7 @@ const STRATEGIES: Strategy[] = [
     image: '/snr.jpg',
     tvl: '$2.13M',
     apr: '13%',
-    amyPoints: 'TBC',
+    amyPoints: 'Earn up to 10x',
     riskCategory: 'stable',
     actionType: 'deposit',
     actionUrl: 'https://www.liquidroyalty.com/vaults/senior',
@@ -181,7 +181,7 @@ const STRATEGIES: Strategy[] = [
     image: '/jnr.jpg',
     tvl: '$2.12M',
     apr: '93%',
-    amyPoints: 'TBC',
+    amyPoints: 'Earn up to 10x',
     riskCategory: 'hedge',
     actionType: 'deposit',
     actionUrl: 'https://www.liquidroyalty.com/vaults/junior',
@@ -209,7 +209,7 @@ const STRATEGIES: Strategy[] = [
     protocolUrl: 'https://bend.berachain.com/',
     dynamicDataKey: 'honeybend',
   },
-  // 8. Staked BERA
+  // 8. Staked BERA (sWBERA)
   {
     id: 'stakedbera',
     name: 'Staked – BERA',
@@ -220,9 +220,13 @@ const STRATEGIES: Strategy[] = [
     amyPoints: 'Earn up to 10x',
     riskCategory: 'balanced',
     actionType: 'deposit',
-    actionUrl: 'https://stake.berachain.com/',
-    description: 'Stake BERA for stBERA to secure the network while earning staking rewards. Your liquid staking position earns Amy Points multipliers based on your staked value.',
-    protocolUrl: 'https://stake.berachain.com/',
+    actionUrl: 'https://hub.berachain.com/stake',
+    description: 'Stake BERA for sWBERA to secure the network while earning staking rewards. Your liquid staking position earns Amy Points multipliers based on your staked value. You can also swap HONEY for sWBERA directly.',
+    protocolUrl: 'https://hub.berachain.com/stake',
+    buyUnderlying: {
+      token: '0x118D2cEeE9785eaf70C15Cd74CD84c9f8c3EeC9a', // sWBERA
+      fromToken: 'HONEY',
+    },
     dynamicDataKey: 'stakedbera',
   },
 ];

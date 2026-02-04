@@ -141,7 +141,7 @@ const MOCK_TOKEN_DATA: TokenHoldingsData = {
     isActive: true,
   },
   stakedbera: {
-    token: 'stBERA',
+    token: 'sWBERA',
     address: '0x118D2cEeE9785eaf70C15Cd74CD84c9f8c3EeC9a',
     balance: 50,
     priceUsd: 5.0,
@@ -1058,7 +1058,37 @@ export default function PointsPage() {
               actionLabel="Add Liquidity"
             />
 
-            {/* 2. Staked plsBERA */}
+            {/* 2. Telegram Mod */}
+            <MultiplierBadge
+              name="Telegram"
+              title="Mod"
+              image="/tg.png"
+              description="Recognize community moderators who keep Amy's Telegram channels safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
+              multipliers={[
+                { requirement: 'Guardian', multiplier: 'x3' },
+                { requirement: 'Sentinel', multiplier: 'x7' },
+                { requirement: 'Archlord', multiplier: 'x15' },
+              ]}
+              isActive={(pointsData?.telegramModMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.telegramModMultiplier || 0) > 0 ? `x${pointsData?.telegramModMultiplier}` : undefined}
+            />
+
+            {/* 3. Discord Mod */}
+            <MultiplierBadge
+              name="Discord"
+              title="Mod"
+              image="/dc.jpg"
+              description="Recognize community moderators who keep Amy's Discord server safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
+              multipliers={[
+                { requirement: 'Guardian', multiplier: 'x3' },
+                { requirement: 'Sentinel', multiplier: 'x7' },
+                { requirement: 'Archlord', multiplier: 'x15' },
+              ]}
+              isActive={(pointsData?.discordModMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.discordModMultiplier || 0) > 0 ? `x${pointsData?.discordModMultiplier}` : undefined}
+            />
+
+            {/* 4. Staked plsBERA */}
             <MultiplierBadge
               name="Staked"
               title="plsBERA"
@@ -1075,7 +1105,7 @@ export default function PointsPage() {
               actionLabel="Stake plsBERA"
             />
 
-            {/* 3. plvHEDGE */}
+            {/* 5. plvHEDGE */}
             <MultiplierBadge
               name="plvHEDGE"
               title="Vault"
@@ -1092,7 +1122,7 @@ export default function PointsPage() {
               actionLabel="View plvHEDGE"
             />
 
-            {/* 4. SAIL.r */}
+            {/* 6. SAIL.r */}
             <MultiplierBadge
               name="SAIL.r"
               title="Royalty"
@@ -1109,7 +1139,7 @@ export default function PointsPage() {
               actionLabel="View SAIL.r"
             />
 
-            {/* 5. snrUSD */}
+            {/* 7. snrUSD */}
             <MultiplierBadge
               name="snrUSD"
               title="Senior"
@@ -1126,7 +1156,7 @@ export default function PointsPage() {
               actionLabel="View Vaults"
             />
 
-            {/* 6. jnrUSD */}
+            {/* 8. jnrUSD */}
             <MultiplierBadge
               name="jnrUSD"
               title="Junior"
@@ -1143,7 +1173,7 @@ export default function PointsPage() {
               actionLabel="View Vaults"
             />
 
-            {/* 7. HONEY Bend */}
+            {/* 9. HONEY Bend */}
             <MultiplierBadge
               name="HONEY"
               title="Bend"
@@ -1160,41 +1190,39 @@ export default function PointsPage() {
               actionLabel="Lend HONEY"
             />
 
-            {/* 8. Staked BERA */}
+            {/* 10. Staked BERA (sWBERA) */}
             <MultiplierBadge
               name="Staked"
               title="BERA"
               image="/BERA.png"
-              description="Rewarding users who stake BERA for stBERA. Staked BERA secures the network while earning staking rewards. This badge tracks your liquid staking position."
+              description="Rewarding users who hold sWBERA (staked BERA). Staked BERA secures the network while earning staking rewards. You can stake directly or swap for sWBERA."
               multipliers={[
-                { requirement: '$10+ staked', multiplier: 'x3' },
-                { requirement: '$100+ staked', multiplier: 'x5' },
-                { requirement: '$500+ staked', multiplier: 'x10' },
+                { requirement: '$10+ holdings', multiplier: 'x3' },
+                { requirement: '$100+ holdings', multiplier: 'x5' },
+                { requirement: '$500+ holdings', multiplier: 'x10' },
               ]}
               isActive={tokenData ? tokenData.stakedbera?.isActive : false}
               currentMultiplier={tokenData && tokenData.stakedbera?.multiplier > 1 ? `${tokenData.stakedbera.multiplier}x` : undefined}
-              actionUrl="https://stake.berachain.com/"
+              actionUrl="https://hub.berachain.com/stake"
               actionLabel="Stake BERA"
             />
 
-            {/* 9. BGT */}
+            {/* 11. BGT */}
             <MultiplierBadge
               name="BGT"
               title="Holder"
               image="/bgt.jpg"
-              description="Rewarding users who hold BGT (Bera Governance Token). BGT is earned through providing liquidity and participating in Berachain's Proof of Liquidity consensus. This badge tracks your BGT holdings regardless of USD value."
+              description="Rewarding users who hold BGT (Bera Governance Token). BGT is earned through providing liquidity and participating in Berachain's Proof of Liquidity consensus. BGT cannot be purchased - it's only earned as a reward."
               multipliers={[
-                { requirement: '0.01+ BGT', multiplier: 'x3' },
-                { requirement: '0.1+ BGT', multiplier: 'x5' },
-                { requirement: '1+ BGT', multiplier: 'x10' },
+                { requirement: '$10+ holdings', multiplier: 'x3' },
+                { requirement: '$100+ holdings', multiplier: 'x5' },
+                { requirement: '$500+ holdings', multiplier: 'x10' },
               ]}
               isActive={tokenData ? tokenData.bgt?.isActive : false}
               currentMultiplier={tokenData && tokenData.bgt?.multiplier > 1 ? `${tokenData.bgt.multiplier}x` : undefined}
-              actionUrl="https://bartio.station.berachain.com/"
-              actionLabel="Get BGT"
             />
 
-            {/* 10. Amy × Kodiak Perps */}
+            {/* 12. Amy × Kodiak Perps */}
             <MultiplierBadge
               name="Amy × Kodiak"
               title="Perps"
@@ -1208,7 +1236,7 @@ export default function PointsPage() {
               isActive={false}
             />
 
-            {/* 8. Dawn Referral Season (Historical - no longer gives active bonus) */}
+            {/* 13. Dawn Referral Season (Historical - no longer gives active bonus) */}
             <MultiplierBadge
               name="Dawn Referral"
               title="(Ended)"
@@ -1223,22 +1251,10 @@ export default function PointsPage() {
               currentMultiplier={(pointsData?.dawnReferralMultiplier || 0) > 0 ? `x${pointsData?.dawnReferralMultiplier} (ended)` : undefined}
             />
 
-            {/* 8b. Season 2 Referral (Active) */}
-            <MultiplierBadge
-              name="Season 2"
-              title="Referral"
-              image="/ref.jpg"
-              description="Invite new users to Amy and earn multipliers! Referrals count when your invitees hold 300+ $AMY. This is the active referral season."
-              multipliers={[
-                { requirement: '1 referral', multiplier: 'x3' },
-                { requirement: '2 referrals', multiplier: 'x5' },
-                { requirement: '3+ referrals', multiplier: 'x10' },
-              ]}
-              isActive={(pointsData?.referralMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.referralMultiplier || 0) > 0 ? `x${pointsData?.referralMultiplier}` : undefined}
-            />
+            {/* Season 2 Referral - Hidden until new logo is ready */}
+            {/* Will be re-added later with new branding */}
 
-            {/* 9. Amy Onchain Conviction */}
+            {/* 15. Amy Onchain Conviction */}
             <MultiplierBadge
               name="Amy Onchain"
               title="Conviction"
@@ -1253,7 +1269,7 @@ export default function PointsPage() {
               currentMultiplier={onchainConviction ? `${onchainConviction.multiplier}x` : undefined}
             />
 
-            {/* 10. RaidShark Bot */}
+            {/* 16. RaidShark Bot */}
             <MultiplierBadge
               name="RaidShark"
               title="Bot"
@@ -1268,7 +1284,7 @@ export default function PointsPage() {
               currentMultiplier={raidsharkBadge ? `${raidsharkBadge.multiplier}x` : undefined}
             />
 
-            {/* 11. Seasoned Swapper */}
+            {/* 17. Seasoned Swapper */}
             <MultiplierBadge
               name="Seasoned"
               title="Swapper"
@@ -1281,36 +1297,6 @@ export default function PointsPage() {
               ]}
               isActive={(pointsData?.swapperMultiplier || 0) > 0}
               currentMultiplier={(pointsData?.swapperMultiplier || 0) > 0 ? `x${pointsData?.swapperMultiplier}` : undefined}
-            />
-
-            {/* 12. Telegram Mod */}
-            <MultiplierBadge
-              name="Telegram"
-              title="Mod"
-              image="/tg.png"
-              description="Recognize community moderators who keep Amy's Telegram channels safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
-              multipliers={[
-                { requirement: 'Guardian', multiplier: 'x3' },
-                { requirement: 'Sentinel', multiplier: 'x7' },
-                { requirement: 'Archlord', multiplier: 'x15' },
-              ]}
-              isActive={(pointsData?.telegramModMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.telegramModMultiplier || 0) > 0 ? `x${pointsData?.telegramModMultiplier}` : undefined}
-            />
-
-            {/* 13. Discord Mod */}
-            <MultiplierBadge
-              name="Discord"
-              title="Mod"
-              image="/dc.jpg"
-              description="Recognize community moderators who keep Amy's Discord server safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
-              multipliers={[
-                { requirement: 'Guardian', multiplier: 'x3' },
-                { requirement: 'Sentinel', multiplier: 'x7' },
-                { requirement: 'Archlord', multiplier: 'x15' },
-              ]}
-              isActive={(pointsData?.discordModMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.discordModMultiplier || 0) > 0 ? `x${pointsData?.discordModMultiplier}` : undefined}
             />
 
             {/* All other badges - Coming Soon */}
