@@ -1058,37 +1058,7 @@ export default function PointsPage() {
               actionLabel="Add Liquidity"
             />
 
-            {/* 2. Telegram Mod */}
-            <MultiplierBadge
-              name="Telegram"
-              title="Mod"
-              image="/tg.png"
-              description="Recognize community moderators who keep Amy's Telegram channels safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
-              multipliers={[
-                { requirement: 'Guardian', multiplier: 'x3' },
-                { requirement: 'Sentinel', multiplier: 'x7' },
-                { requirement: 'Archlord', multiplier: 'x15' },
-              ]}
-              isActive={(pointsData?.telegramModMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.telegramModMultiplier || 0) > 0 ? `x${pointsData?.telegramModMultiplier}` : undefined}
-            />
-
-            {/* 3. Discord Mod */}
-            <MultiplierBadge
-              name="Discord"
-              title="Mod"
-              image="/dc.jpg"
-              description="Recognize community moderators who keep Amy's Discord server safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
-              multipliers={[
-                { requirement: 'Guardian', multiplier: 'x3' },
-                { requirement: 'Sentinel', multiplier: 'x7' },
-                { requirement: 'Archlord', multiplier: 'x15' },
-              ]}
-              isActive={(pointsData?.discordModMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.discordModMultiplier || 0) > 0 ? `x${pointsData?.discordModMultiplier}` : undefined}
-            />
-
-            {/* 4. Staked plsBERA */}
+            {/* 2. Staked plsBERA */}
             <MultiplierBadge
               name="Staked"
               title="plsBERA"
@@ -1105,7 +1075,7 @@ export default function PointsPage() {
               actionLabel="Stake plsBERA"
             />
 
-            {/* 5. plvHEDGE */}
+            {/* 3. plvHEDGE */}
             <MultiplierBadge
               name="plvHEDGE"
               title="Vault"
@@ -1122,7 +1092,7 @@ export default function PointsPage() {
               actionLabel="View plvHEDGE"
             />
 
-            {/* 6. SAIL.r */}
+            {/* 4. SAIL.r */}
             <MultiplierBadge
               name="SAIL.r"
               title="Royalty"
@@ -1139,24 +1109,7 @@ export default function PointsPage() {
               actionLabel="View SAIL.r"
             />
 
-            {/* 7. snrUSD */}
-            <MultiplierBadge
-              name="snrUSD"
-              title="Senior"
-              image="/snr.jpg"
-              description="Rewarding users who hold or deploy capital into snrUSD, a senior tranche stable yield product. snrUSD is designed to maintain a stable $1 value while generating yield, backed by over-collateralisation and senior position within the strategy. Powered by Liquid Royalty."
-              multipliers={[
-                { requirement: '$10+ holdings', multiplier: 'x3' },
-                { requirement: '$100+ holdings', multiplier: 'x5' },
-                { requirement: '$500+ holdings', multiplier: 'x10' },
-              ]}
-              isActive={tokenData ? tokenData.snrusd?.isActive : false}
-              currentMultiplier={tokenData && tokenData.snrusd?.multiplier > 1 ? `${tokenData.snrusd.multiplier}x` : undefined}
-              actionUrl="https://www.liquidroyalty.com/vaults"
-              actionLabel="View Vaults"
-            />
-
-            {/* 8. jnrUSD */}
+            {/* 5. jnrUSD */}
             <MultiplierBadge
               name="jnrUSD"
               title="Junior"
@@ -1173,7 +1126,24 @@ export default function PointsPage() {
               actionLabel="View Vaults"
             />
 
-            {/* 9. HONEY Bend */}
+            {/* 6. snrUSD */}
+            <MultiplierBadge
+              name="snrUSD"
+              title="Senior"
+              image="/snr.jpg"
+              description="Rewarding users who hold or deploy capital into snrUSD, a senior tranche stable yield product. snrUSD is designed to maintain a stable $1 value while generating yield, backed by over-collateralisation and senior position within the strategy. Powered by Liquid Royalty."
+              multipliers={[
+                { requirement: '$10+ holdings', multiplier: 'x3' },
+                { requirement: '$100+ holdings', multiplier: 'x5' },
+                { requirement: '$500+ holdings', multiplier: 'x10' },
+              ]}
+              isActive={tokenData ? tokenData.snrusd?.isActive : false}
+              currentMultiplier={tokenData && tokenData.snrusd?.multiplier > 1 ? `${tokenData.snrusd.multiplier}x` : undefined}
+              actionUrl="https://www.liquidroyalty.com/vaults"
+              actionLabel="View Vaults"
+            />
+
+            {/* 7. HONEY Bend */}
             <MultiplierBadge
               name="HONEY"
               title="Bend"
@@ -1190,7 +1160,7 @@ export default function PointsPage() {
               actionLabel="Lend HONEY"
             />
 
-            {/* 10. Staked BERA (sWBERA) */}
+            {/* 8. Staked BERA (sWBERA) */}
             <MultiplierBadge
               name="Staked"
               title="BERA"
@@ -1207,7 +1177,7 @@ export default function PointsPage() {
               actionLabel="Stake BERA"
             />
 
-            {/* 11. BGT */}
+            {/* 9. BGT */}
             <MultiplierBadge
               name="BGT"
               title="Holder"
@@ -1222,7 +1192,7 @@ export default function PointsPage() {
               currentMultiplier={tokenData && tokenData.bgt?.multiplier > 1 ? `${tokenData.bgt.multiplier}x` : undefined}
             />
 
-            {/* 12. Amy × Kodiak Perps */}
+            {/* 10. Amy × Kodiak Perps */}
             <MultiplierBadge
               name="Amy × Kodiak"
               title="Perps"
@@ -1236,10 +1206,10 @@ export default function PointsPage() {
               isActive={false}
             />
 
-            {/* 13. Dawn Referral Season (Historical - no longer gives active bonus) */}
+            {/* 11. Dawn Referral Season (Historical - no longer gives active bonus) */}
             <MultiplierBadge
-              name="Dawn Referral"
-              title="(Ended)"
+              name="Dawn"
+              title="Referral"
               image="/ref.jpg"
               description="Season 1 referral badge. This season has ended - the badge is preserved but no longer gives an active multiplier bonus."
               multipliers={[
@@ -1251,10 +1221,7 @@ export default function PointsPage() {
               currentMultiplier={(pointsData?.dawnReferralMultiplier || 0) > 0 ? `x${pointsData?.dawnReferralMultiplier} (ended)` : undefined}
             />
 
-            {/* Season 2 Referral - Hidden until new logo is ready */}
-            {/* Will be re-added later with new branding */}
-
-            {/* 15. Amy Onchain Conviction */}
+            {/* 12. Amy Onchain Conviction */}
             <MultiplierBadge
               name="Amy Onchain"
               title="Conviction"
@@ -1269,7 +1236,25 @@ export default function PointsPage() {
               currentMultiplier={onchainConviction ? `${onchainConviction.multiplier}x` : undefined}
             />
 
-            {/* 16. RaidShark Bot */}
+            {/* Season 2 Referral - Hidden until new logo is ready */}
+            {/* Will be re-added later with new branding */}
+
+            {/* 13. Seasoned Swapper */}
+            <MultiplierBadge
+              name="Seasoned"
+              title="Swapper"
+              image="/swapper.jpg"
+              description="Rewarding users who actively swap through Amy's interface. This monthly badge recognizes your swap volume and applies ongoing point multipliers to your rewards."
+              multipliers={[
+                { requirement: 'Engaged ($250+)', multiplier: 'x3' },
+                { requirement: 'Committed ($1,000+)', multiplier: 'x5' },
+                { requirement: 'Elite ($3,000+)', multiplier: 'x10' },
+              ]}
+              isActive={(pointsData?.swapperMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.swapperMultiplier || 0) > 0 ? `x${pointsData?.swapperMultiplier}` : undefined}
+            />
+
+            {/* 14. RaidShark Bot */}
             <MultiplierBadge
               name="RaidShark"
               title="Bot"
@@ -1284,19 +1269,34 @@ export default function PointsPage() {
               currentMultiplier={raidsharkBadge ? `${raidsharkBadge.multiplier}x` : undefined}
             />
 
-            {/* 17. Seasoned Swapper */}
+            {/* 15. Telegram Mod */}
             <MultiplierBadge
-              name="Seasoned"
-              title="Swapper"
-              image="/swapper.jpg"
-              description="Rewarding users who actively swap through Amy's interface. This monthly badge recognizes your swap volume and applies ongoing point multipliers to your rewards."
+              name="Telegram"
+              title="Mod"
+              image="/tg.png"
+              description="Recognize community moderators who keep Amy's Telegram channels safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
               multipliers={[
-                { requirement: 'Engaged ($250+)', multiplier: 'x3' },
-                { requirement: 'Committed ($1,000+)', multiplier: 'x5' },
-                { requirement: 'Elite ($3,000+)', multiplier: 'x10' },
+                { requirement: 'Guardian', multiplier: 'x3' },
+                { requirement: 'Sentinel', multiplier: 'x7' },
+                { requirement: 'Archlord', multiplier: 'x15' },
               ]}
-              isActive={(pointsData?.swapperMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.swapperMultiplier || 0) > 0 ? `x${pointsData?.swapperMultiplier}` : undefined}
+              isActive={(pointsData?.telegramModMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.telegramModMultiplier || 0) > 0 ? `x${pointsData?.telegramModMultiplier}` : undefined}
+            />
+
+            {/* 16. Discord Mod */}
+            <MultiplierBadge
+              name="Discord"
+              title="Mod"
+              image="/dc.jpg"
+              description="Recognize community moderators who keep Amy's Discord server safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
+              multipliers={[
+                { requirement: 'Guardian', multiplier: 'x3' },
+                { requirement: 'Sentinel', multiplier: 'x7' },
+                { requirement: 'Archlord', multiplier: 'x15' },
+              ]}
+              isActive={(pointsData?.discordModMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.discordModMultiplier || 0) > 0 ? `x${pointsData?.discordModMultiplier}` : undefined}
             />
 
             {/* All other badges - Coming Soon */}

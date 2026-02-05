@@ -100,7 +100,43 @@ const STRATEGIES: Strategy[] = [
       fromToken: 'HONEY',
     },
   },
-  // 2. plsBERA
+  // 2. HONEY Bend
+  {
+    id: 'honeybend',
+    name: 'HONEY – Bend',
+    subtitle: 'Bend Protocol',
+    image: '/honey.jpg',
+    tvl: '$12.5M',
+    apr: '8%',
+    amyPoints: 'Earn up to 10x',
+    riskCategory: 'stable',
+    actionType: 'deposit',
+    actionUrl: 'https://bend.berachain.com/',
+    description: 'Lend HONEY on Bend Protocol to earn interest while supporting the Berachain lending ecosystem. Your HONEY-Bend position earns Amy Points multipliers based on your deposit value.',
+    protocolUrl: 'https://bend.berachain.com/',
+    dynamicDataKey: 'honeybend',
+  },
+  // 3. Staked BERA (sWBERA)
+  {
+    id: 'stakedbera',
+    name: 'Staked – BERA',
+    subtitle: 'Berachain Staking',
+    image: '/BERA.png',
+    tvl: '$85M',
+    apr: '21%',
+    amyPoints: 'Earn up to 10x',
+    riskCategory: 'balanced',
+    actionType: 'deposit',
+    actionUrl: 'https://hub.berachain.com/stake',
+    description: 'Stake BERA for sWBERA to secure the network while earning staking rewards. Your liquid staking position earns Amy Points multipliers based on your staked value. You can also swap HONEY for sWBERA directly.',
+    protocolUrl: 'https://hub.berachain.com/stake',
+    buyUnderlying: {
+      token: '0x118D2cEeE9785eaf70C15Cd74CD84c9f8c3EeC9a', // sWBERA
+      fromToken: 'HONEY',
+    },
+    dynamicDataKey: 'stakedbera',
+  },
+  // 4. plsBERA
   {
     id: 'plsbera',
     name: 'Staked – plsBERA',
@@ -119,7 +155,7 @@ const STRATEGIES: Strategy[] = [
     },
     dynamicDataKey: 'plsbera',
   },
-  // 3. plvHEDGE
+  // 5. plvHEDGE
   {
     id: 'plvhedge',
     name: 'plvHEDGE – Vault',
@@ -136,7 +172,7 @@ const STRATEGIES: Strategy[] = [
     protocolUrl: 'https://plutus.fi',
     dynamicDataKey: 'plvhedge',
   },
-  // 4. SAIL.r
+  // 6. SAIL.r
   {
     id: 'sailr',
     name: 'SAIL.r – Royalty',
@@ -153,7 +189,7 @@ const STRATEGIES: Strategy[] = [
     protocolUrl: 'https://www.liquidroyalty.com',
     dynamicDataKey: 'sailr',
   },
-  // 5. snrUSD
+  // 7. snrUSD
   {
     id: 'snrusd',
     name: 'snrUSD – Senior',
@@ -173,7 +209,7 @@ const STRATEGIES: Strategy[] = [
     },
     dynamicDataKey: 'snrusd',
   },
-  // 6. jnrUSD
+  // 8. jnrUSD
   {
     id: 'jnrusd',
     name: 'jnrUSD – Junior',
@@ -192,42 +228,6 @@ const STRATEGIES: Strategy[] = [
       fromToken: 'HONEY',
     },
     dynamicDataKey: 'jnrusd',
-  },
-  // 7. HONEY Bend
-  {
-    id: 'honeybend',
-    name: 'HONEY – Bend',
-    subtitle: 'Bend Protocol',
-    image: '/honey.jpg',
-    tvl: '$12.5M',
-    apr: '8%',
-    amyPoints: 'Earn up to 10x',
-    riskCategory: 'stable',
-    actionType: 'deposit',
-    actionUrl: 'https://bend.berachain.com/',
-    description: 'Lend HONEY on Bend Protocol to earn interest while supporting the Berachain lending ecosystem. Your HONEY-Bend position earns Amy Points multipliers based on your deposit value.',
-    protocolUrl: 'https://bend.berachain.com/',
-    dynamicDataKey: 'honeybend',
-  },
-  // 8. Staked BERA (sWBERA)
-  {
-    id: 'stakedbera',
-    name: 'Staked – BERA',
-    subtitle: 'Berachain Staking',
-    image: '/BERA.png',
-    tvl: '$85M',
-    apr: '21%',
-    amyPoints: 'Earn up to 10x',
-    riskCategory: 'balanced',
-    actionType: 'deposit',
-    actionUrl: 'https://hub.berachain.com/stake',
-    description: 'Stake BERA for sWBERA to secure the network while earning staking rewards. Your liquid staking position earns Amy Points multipliers based on your staked value. You can also swap HONEY for sWBERA directly.',
-    protocolUrl: 'https://hub.berachain.com/stake',
-    buyUnderlying: {
-      token: '0x118D2cEeE9785eaf70C15Cd74CD84c9f8c3EeC9a', // sWBERA
-      fromToken: 'HONEY',
-    },
-    dynamicDataKey: 'stakedbera',
   },
 ];
 
