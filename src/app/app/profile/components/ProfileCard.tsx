@@ -19,6 +19,8 @@ interface TokenHoldingsData {
   sailr: TokenHolding;
   plvhedge: TokenHolding;
   plsbera: TokenHolding;
+  honeybend?: TokenHolding;
+  stakedbera?: TokenHolding;
 }
 
 interface PointsData {
@@ -112,6 +114,20 @@ function getPlsberaBadgeId(valueUsd: number): string | null {
   if (valueUsd >= 500) return 'plsbera_x10';
   if (valueUsd >= 100) return 'plsbera_x5';
   if (valueUsd >= 10) return 'plsbera_x3';
+  return null;
+}
+
+function getHoneybendBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'honeybend_x10';
+  if (valueUsd >= 100) return 'honeybend_x5';
+  if (valueUsd >= 10) return 'honeybend_x3';
+  return null;
+}
+
+function getStakedberaBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'stakedbera_x10';
+  if (valueUsd >= 100) return 'stakedbera_x5';
+  if (valueUsd >= 10) return 'stakedbera_x3';
   return null;
 }
 
@@ -281,6 +297,36 @@ export default function ProfileCard({
           name: 'plsBERA',
           title: 'Staking',
           image: '/plsbera.jpg'
+        });
+      }
+    }
+
+    // HONEY-Bend badge
+    if (tokenData && tokenData.honeybend && tokenData.honeybend.isActive && tokenData.honeybend.multiplier > 1) {
+      const valueUsd = tokenData.honeybend.valueUsd || (tokenData.honeybend.multiplier >= 10 ? 500 : tokenData.honeybend.multiplier >= 5 ? 100 : 10);
+      const badgeId = getHoneybendBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: tokenData.honeybend.multiplier,
+          name: 'HONEY Bend',
+          title: 'Lending',
+          image: '/honey.jpg'
+        });
+      }
+    }
+
+    // Staked BERA badge
+    if (tokenData && tokenData.stakedbera && tokenData.stakedbera.isActive && tokenData.stakedbera.multiplier > 1) {
+      const valueUsd = tokenData.stakedbera.valueUsd || (tokenData.stakedbera.multiplier >= 10 ? 500 : tokenData.stakedbera.multiplier >= 5 ? 100 : 10);
+      const badgeId = getStakedberaBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: tokenData.stakedbera.multiplier,
+          name: 'Staked BERA',
+          title: 'stBERA',
+          image: '/BERA.png'
         });
       }
     }
