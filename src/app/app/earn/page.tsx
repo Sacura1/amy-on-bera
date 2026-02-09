@@ -77,6 +77,10 @@ interface Strategy {
   };
   // Whether this strategy's TVL/APY can be dynamically updated
   dynamicDataKey?: string;
+  // Chain the strategy is on
+  chain: 'berachain' | 'base';
+  // Target tokens (what users get/swap to)
+  targetTokens: string[];
 }
 
 const STRATEGIES: Strategy[] = [
@@ -99,6 +103,8 @@ const STRATEGIES: Strategy[] = [
       token: '0x098a75baeddec78f9a8d0830d6b86eac5cc8894e', // AMY token
       fromToken: 'HONEY',
     },
+    chain: 'berachain',
+    targetTokens: ['AMY', 'HONEY'],
   },
   // 2. HONEY Bend
   {
@@ -115,6 +121,8 @@ const STRATEGIES: Strategy[] = [
     description: 'Lend HONEY on Bend Protocol to earn interest while supporting the Berachain lending ecosystem. Your HONEY-Bend position earns Amy Points multipliers based on your deposit value.',
     protocolUrl: 'https://bend.berachain.com/',
     dynamicDataKey: 'honeybend',
+    chain: 'berachain',
+    targetTokens: ['HONEY'],
   },
   // 3. Staked BERA (sWBERA)
   {
@@ -135,6 +143,8 @@ const STRATEGIES: Strategy[] = [
       fromToken: 'HONEY',
     },
     dynamicDataKey: 'stakedbera',
+    chain: 'berachain',
+    targetTokens: ['BERA'],
   },
   // 4. plsBERA
   {
@@ -154,6 +164,8 @@ const STRATEGIES: Strategy[] = [
       fromToken: 'HONEY',
     },
     dynamicDataKey: 'plsbera',
+    chain: 'berachain',
+    targetTokens: ['plsBERA'],
   },
   // 5. plvHEDGE
   {
@@ -171,6 +183,8 @@ const STRATEGIES: Strategy[] = [
     description: 'Deploy capital into the plvHEDGE delta-neutral strategy. plvHEDGE is an automated vault with dynamic yield sourcing, designed to generate yield while managing market exposure across chains. Powered by Plutus.',
     protocolUrl: 'https://plutus.fi',
     dynamicDataKey: 'plvhedge',
+    chain: 'berachain',
+    targetTokens: ['plvHEDGE'],
   },
   // 6. SAIL.r
   {
@@ -188,6 +202,8 @@ const STRATEGIES: Strategy[] = [
     description: 'Hold SAIL.r, a royalty token backed by real e-commerce revenue. SAIL.r represents a claim on revenue from e-commerce brands, with holders receiving monthly stablecoin distributions based on their share of tokens held. Powered by Liquid Royalty.',
     protocolUrl: 'https://www.liquidroyalty.com',
     dynamicDataKey: 'sailr',
+    chain: 'berachain',
+    targetTokens: ['SAIL.r'],
   },
   // 7. snrUSD
   {
@@ -208,6 +224,8 @@ const STRATEGIES: Strategy[] = [
       fromToken: 'HONEY',
     },
     dynamicDataKey: 'snrusd',
+    chain: 'berachain',
+    targetTokens: ['USDe'],
   },
   // 8. jnrUSD
   {
@@ -228,6 +246,8 @@ const STRATEGIES: Strategy[] = [
       fromToken: 'HONEY',
     },
     dynamicDataKey: 'jnrusd',
+    chain: 'berachain',
+    targetTokens: ['USDe'],
   },
 ];
 
@@ -583,6 +603,9 @@ export default function EarnPage() {
   const [isLoadingLp, setIsLoadingLp] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [selectedChains, setSelectedChains] = useState<string[]>([]);
+  const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
   const [dynamicEarnData, setDynamicEarnData] = useState<DynamicEarnData | null>(null);
 
   // Fetch dynamic TVL/APY data
@@ -605,14 +628,17 @@ export default function EarnPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => setShowSortMenu(false);
-    if (showSortMenu) {
+    const handleClickOutside = () => {
+      setShowSortMenu(false);
+      setShowFilterMenu(false);
+    };
+    if (showSortMenu || showFilterMenu) {
       document.addEventListener('click', handleClickOutside);
     }
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [showSortMenu]);
+  }, [showSortMenu, showFilterMenu]);
 
   // Fetch LP data
   const fetchLpData = useCallback(async () => {
@@ -684,8 +710,20 @@ export default function EarnPage() {
     return strategy.apr;
   };
 
-  // Sort strategies based on selected option
-  const sortedStrategies = [...STRATEGIES].sort((a, b) => {
+  // Get unique chains and tokens
+  const availableChains: ('berachain' | 'base')[] = ['berachain', 'base']; // Show all chains regardless of strategies
+  const availableTokens = Array.from(new Set(STRATEGIES.flatMap(s => s.targetTokens))).sort();
+
+  // Filter strategies based on selected chains and tokens
+  const filteredStrategies = STRATEGIES.filter((strategy) => {
+    // If no filters selected, show all
+    const chainMatch = selectedChains.length === 0 || selectedChains.includes(strategy.chain);
+    const tokenMatch = selectedTokens.length === 0 || strategy.targetTokens.some(token => selectedTokens.includes(token));
+    return chainMatch && tokenMatch;
+  });
+
+  // Sort filtered strategies based on selected option
+  const sortedStrategies = [...filteredStrategies].sort((a, b) => {
     switch (sortBy) {
       case 'tvl-high':
         return parseValue(getDynamicTvl(b)) - parseValue(getDynamicTvl(a));
@@ -703,6 +741,26 @@ export default function EarnPage() {
         return 0; // Keep original order
     }
   });
+
+  // Toggle filter selection
+  const toggleChain = (chain: string) => {
+    setSelectedChains(prev =>
+      prev.includes(chain) ? prev.filter(c => c !== chain) : [...prev, chain]
+    );
+  };
+
+  const toggleToken = (token: string) => {
+    setSelectedTokens(prev =>
+      prev.includes(token) ? prev.filter(t => t !== token) : [...prev, token]
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedChains([]);
+    setSelectedTokens([]);
+  };
+
+  const hasActiveFilters = selectedChains.length > 0 || selectedTokens.length > 0;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -952,10 +1010,98 @@ export default function EarnPage() {
 
           {/* Filter and Sort */}
           <div className="flex items-center justify-between mb-6">
-            <button className="flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-full text-sm text-gray-300">
-              <span className="w-2 h-2 rounded-full bg-gray-500"></span>
-              ALL
-            </button>
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowFilterMenu(!showFilterMenu);
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-colors ${
+                  hasActiveFilters
+                    ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filter
+                {hasActiveFilters && (
+                  <span className="ml-1 bg-yellow-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full">
+                    {selectedChains.length + selectedTokens.length}
+                  </span>
+                )}
+              </button>
+
+              {/* Filter Dropdown Menu */}
+              {showFilterMenu && (
+                <div className="absolute left-0 mt-2 w-64 bg-gray-800 rounded-xl border border-gray-700 shadow-xl z-50 overflow-hidden">
+                  {/* Header */}
+                  <div className="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-white">Filters</span>
+                    {hasActiveFilters && (
+                      <button
+                        onClick={clearFilters}
+                        className="text-xs text-yellow-400 hover:text-yellow-300"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Chain Filters */}
+                  <div className="px-4 py-3 border-b border-gray-700">
+                    <div className="text-xs font-semibold text-gray-400 uppercase mb-2">Chain</div>
+                    {availableChains.map((chain) => (
+                      <button
+                        key={chain}
+                        onClick={() => toggleChain(chain)}
+                        className="w-full flex items-center gap-2 py-2 hover:bg-gray-700/50 rounded px-2 transition-colors"
+                      >
+                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                          selectedChains.includes(chain)
+                            ? 'bg-yellow-500 border-yellow-500'
+                            : 'border-gray-600'
+                        }`}>
+                          {selectedChains.includes(chain) && (
+                            <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                        <span className="text-sm text-white">{chain === 'berachain' ? 'Berachain' : 'Base'}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Token Filters */}
+                  <div className="px-4 py-3 max-h-64 overflow-y-auto">
+                    <div className="text-xs font-semibold text-gray-400 uppercase mb-2">Token</div>
+                    {availableTokens.map((token) => (
+                      <button
+                        key={token}
+                        onClick={() => toggleToken(token)}
+                        className="w-full flex items-center gap-2 py-2 hover:bg-gray-700/50 rounded px-2 transition-colors"
+                      >
+                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                          selectedTokens.includes(token)
+                            ? 'bg-yellow-500 border-yellow-500'
+                            : 'border-gray-600'
+                        }`}>
+                          {selectedTokens.includes(token) && (
+                            <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                        <span className="text-sm text-white">{token}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="relative flex items-center gap-2">
               {/* Current sort selection display */}
               <span className="bg-gray-800 px-4 py-2 rounded-full text-sm text-white">
@@ -1002,11 +1148,29 @@ export default function EarnPage() {
           </div>
 
           {/* Strategy Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-            {sortedStrategies.map((strategy) => (
-              <StrategyCard key={strategy.id} strategy={strategy} dynamicData={dynamicEarnData || undefined} />
-            ))}
-          </div>
+          {sortedStrategies.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+              {sortedStrategies.map((strategy) => (
+                <StrategyCard key={strategy.id} strategy={strategy} dynamicData={dynamicEarnData || undefined} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-gray-900/60 rounded-2xl border border-gray-700/50 p-12 text-center">
+              <div className="text-gray-400 mb-4">
+                <svg className="w-12 h-12 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <p className="text-lg font-medium">No strategies match your filters</p>
+                <p className="text-sm mt-2">Try adjusting your filter selection</p>
+              </div>
+              <button
+                onClick={clearFilters}
+                className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2.5 rounded-full font-semibold text-sm transition-all"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Back to Home */}

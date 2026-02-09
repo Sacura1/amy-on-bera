@@ -33,7 +33,9 @@
       "Bash(echo:*)",
       "Bash(done)",
       "Bash(python3:*)",
-      "Bash(npm i:*)"
+      "Bash(npm i:*)",
+      "WebFetch(domain:surf-2.gitbook.io)",
+      "WebFetch(domain:www.surfliquid.com)"
     ]
   }
 }
