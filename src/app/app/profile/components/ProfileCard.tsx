@@ -21,6 +21,9 @@ interface TokenHoldingsData {
   plsbera: TokenHolding;
   honeybend?: TokenHolding;
   stakedbera?: TokenHolding;
+  bgt?: TokenHolding;
+  snrusd?: TokenHolding;
+  jnrusd?: TokenHolding;
 }
 
 interface PointsData {
@@ -128,6 +131,27 @@ function getStakedberaBadgeId(valueUsd: number): string | null {
   if (valueUsd >= 500) return 'stakedbera_x10';
   if (valueUsd >= 100) return 'stakedbera_x5';
   if (valueUsd >= 10) return 'stakedbera_x3';
+  return null;
+}
+
+function getBgtBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'bgt_x10';
+  if (valueUsd >= 100) return 'bgt_x5';
+  if (valueUsd >= 10) return 'bgt_x3';
+  return null;
+}
+
+function getSnrusdBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'snrusd_x10';
+  if (valueUsd >= 100) return 'snrusd_x5';
+  if (valueUsd >= 10) return 'snrusd_x3';
+  return null;
+}
+
+function getJnrusdBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'jnrusd_x10';
+  if (valueUsd >= 100) return 'jnrusd_x5';
+  if (valueUsd >= 10) return 'jnrusd_x3';
   return null;
 }
 
@@ -327,6 +351,51 @@ export default function ProfileCard({
           name: 'Staked BERA',
           title: 'stBERA',
           image: '/BERA.png'
+        });
+      }
+    }
+
+    // BGT badge
+    if (tokenData && tokenData.bgt && tokenData.bgt.isActive && tokenData.bgt.multiplier > 1) {
+      const valueUsd = tokenData.bgt.valueUsd || (tokenData.bgt.multiplier >= 10 ? 500 : tokenData.bgt.multiplier >= 5 ? 100 : 10);
+      const badgeId = getBgtBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: tokenData.bgt.multiplier,
+          name: 'BGT',
+          title: 'Governance',
+          image: '/BERA.png'
+        });
+      }
+    }
+
+    // snrUSD badge
+    if (tokenData && tokenData.snrusd && tokenData.snrusd.isActive && tokenData.snrusd.multiplier > 1) {
+      const valueUsd = tokenData.snrusd.valueUsd || (tokenData.snrusd.multiplier >= 10 ? 500 : tokenData.snrusd.multiplier >= 5 ? 100 : 10);
+      const badgeId = getSnrusdBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: tokenData.snrusd.multiplier,
+          name: 'snrUSD',
+          title: 'Senior',
+          image: '/snr.jpg'
+        });
+      }
+    }
+
+    // jnrUSD badge
+    if (tokenData && tokenData.jnrusd && tokenData.jnrusd.isActive && tokenData.jnrusd.multiplier > 1) {
+      const valueUsd = tokenData.jnrusd.valueUsd || (tokenData.jnrusd.multiplier >= 10 ? 500 : tokenData.jnrusd.multiplier >= 5 ? 100 : 10);
+      const badgeId = getJnrusdBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: tokenData.jnrusd.multiplier,
+          name: 'jnrUSD',
+          title: 'Junior',
+          image: '/jnr.jpg'
         });
       }
     }
