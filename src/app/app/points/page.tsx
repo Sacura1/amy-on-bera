@@ -1206,19 +1206,19 @@ export default function PointsPage() {
               isActive={false}
             />
 
-            {/* 11. Dawn Referral Season (Historical - no longer gives active bonus) */}
+            {/* 11. Dawn Referral Season (Active for existing holders) */}
             <MultiplierBadge
               name="Dawn"
               title="Referral"
               image="/ref.jpg"
-              description="Season 1 referral badge. This season has ended - the badge is preserved but no longer gives an active multiplier bonus."
+              description="Season 1 referral badge. Registration has closed for new users, but existing holders continue to earn their multiplier bonus as long as they hold $AMY."
               multipliers={[
                 { requirement: '1 referral', multiplier: 'x3' },
                 { requirement: '2 referrals', multiplier: 'x5' },
                 { requirement: '3+ referrals', multiplier: 'x10' },
               ]}
               isActive={(pointsData?.dawnReferralMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.dawnReferralMultiplier || 0) > 0 ? `x${pointsData?.dawnReferralMultiplier} (ended)` : undefined}
+              currentMultiplier={(pointsData?.dawnReferralMultiplier || 0) > 0 ? `x${pointsData?.dawnReferralMultiplier}` : undefined}
             />
 
             {/* 12. Amy Onchain Conviction */}

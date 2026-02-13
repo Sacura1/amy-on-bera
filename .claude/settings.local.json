@@ -35,7 +35,8 @@
       "Bash(python3:*)",
       "Bash(npm i:*)",
       "WebFetch(domain:surf-2.gitbook.io)",
-      "WebFetch(domain:www.surfliquid.com)"
+      "WebFetch(domain:www.surfliquid.com)",
+      "Bash(npm install:*)"
     ]
   }
 }
