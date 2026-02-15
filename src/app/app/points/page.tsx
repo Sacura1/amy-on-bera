@@ -831,7 +831,8 @@ export default function PointsPage() {
                         const swapMult = pointsData?.swapperMultiplier && pointsData.swapperMultiplier > 0 ? pointsData.swapperMultiplier : 0;
                         const tgModMult = pointsData?.telegramModMultiplier && pointsData.telegramModMultiplier > 0 ? pointsData.telegramModMultiplier : 0;
                         const dcModMult = pointsData?.discordModMultiplier && pointsData.discordModMultiplier > 0 ? pointsData.discordModMultiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult);
+                        const dawnMult = pointsData?.dawnReferralMultiplier && pointsData.dawnReferralMultiplier > 0 ? pointsData.dawnReferralMultiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult);
 
                         let badgeGradient = 'bg-gray-600'; // default for 1x
                         if (totalMultiplier >= 100) {
@@ -873,7 +874,8 @@ export default function PointsPage() {
                         const swapMult = pointsData?.swapperMultiplier && pointsData.swapperMultiplier > 0 ? pointsData.swapperMultiplier : 0;
                         const tgModMult = pointsData?.telegramModMultiplier && pointsData.telegramModMultiplier > 0 ? pointsData.telegramModMultiplier : 0;
                         const dcModMult = pointsData?.discordModMultiplier && pointsData.discordModMultiplier > 0 ? pointsData.discordModMultiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult);
+                        const dawnMult = pointsData?.dawnReferralMultiplier && pointsData.dawnReferralMultiplier > 0 ? pointsData.dawnReferralMultiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult);
                         const pointsPerHour = currentTier.pointsPerHour * totalMultiplier;
                         return (
                           <div className="flex flex-col items-center">
