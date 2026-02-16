@@ -96,7 +96,7 @@ const STRATEGIES: Strategy[] = [
     riskCategory: 'hedge',
     actionType: 'deposit',
     actionUrl: 'https://www.bulla.exchange/pools/0xff716930eefb37b5b4ac55b1901dc5704b098d84',
-    description: 'Provide liquidity to the AMY / HONEY pool on Bulla Exchange. Earn trading fees plus Amy Points multipliers based on your LP value.',
+    description: 'Provide liquidity to the AMY/HONEY pool on Bulla Exchange. This is a manual concentrated liquidity pool — you deposit both AMY and HONEY and choose a price range where your liquidity is active. Narrow ranges can earn more fees but may fall out of range if the price moves. A full range is simpler but less capital-efficient.\n\nEarn swap fees from traders using the pool. Fees accrue separately and can be claimed on Bulla Exchange.\n\nYour multiplier tier is based on the live USD value of this position.',
     infoButtonLabel: 'AMY Pool',
     dynamicDataKey: 'amy-honey',
     buyUnderlying: {
@@ -106,10 +106,10 @@ const STRATEGIES: Strategy[] = [
     chain: 'berachain',
     targetTokens: ['AMY', 'HONEY'],
   },
-  // 2. HONEY Bend
+  // 2. HONEY Lent
   {
     id: 'honeybend',
-    name: 'HONEY – Bend',
+    name: 'HONEY – Lent',
     subtitle: 'Bend Protocol',
     image: '/honey.jpg',
     tvl: '$12.5M',
@@ -117,17 +117,21 @@ const STRATEGIES: Strategy[] = [
     amyPoints: 'Earn up to 10x',
     riskCategory: 'stable',
     actionType: 'deposit',
-    actionUrl: 'https://bend.berachain.com/',
-    description: 'Lend HONEY on Bend Protocol to earn interest while supporting the Berachain lending ecosystem. Your HONEY-Bend position earns Amy Points multipliers based on your deposit value.',
-    protocolUrl: 'https://bend.berachain.com/',
+    actionUrl: 'https://bend.berachain.com/lend/80094/0x30BbA9CD9Eb8c95824aa42Faa1Bb397b07545bc1',
+    description: 'Lend HONEY on Bend to earn lending interest from borrowers. Lenders earn BGT rewards, which must be manually claimed. Holding BGT also unlocks a separate Amy Points badge.\n\nYour multiplier tier is based on the live USD value of this position.',
+    protocolUrl: 'https://bend.berachain.com/lend/80094/0x30BbA9CD9Eb8c95824aa42Faa1Bb397b07545bc1',
+    buyUnderlying: {
+      token: '0x0E4aaF1351de4c0264C5c7056Ef3777b41BD8e03', // HONEY
+      fromToken: 'BERA',
+    },
     dynamicDataKey: 'honeybend',
     chain: 'berachain',
     targetTokens: ['HONEY'],
   },
-  // 3. Staked BERA (sWBERA)
+  // 3. BERA – Staked
   {
     id: 'stakedbera',
-    name: 'Staked – BERA',
+    name: 'BERA – Staked',
     subtitle: 'Berachain Staking',
     image: '/BERA.png',
     tvl: '$85M',
@@ -136,7 +140,7 @@ const STRATEGIES: Strategy[] = [
     riskCategory: 'balanced',
     actionType: 'deposit',
     actionUrl: 'https://hub.berachain.com/stake',
-    description: 'Stake BERA for sWBERA to secure the network while earning staking rewards. Your liquid staking position earns Amy Points multipliers based on your staked value. You can also swap HONEY for sWBERA directly.',
+    description: 'Stake BERA to receive sWBERA and earn staking rewards. sWBERA uses an appreciating token model — your token balance stays constant, but each sWBERA increases in value relative to BERA as rewards accrue. Yield is generated from Berachain staking rewards and reflected in the rising exchange rate.\n\nYour multiplier tier is based on the live USD value of this position.',
     protocolUrl: 'https://hub.berachain.com/stake',
     buyUnderlying: {
       token: '0x118D2cEeE9785eaf70C15Cd74CD84c9f8c3EeC9a', // sWBERA
@@ -157,8 +161,8 @@ const STRATEGIES: Strategy[] = [
     amyPoints: 'Earn up to 10x',
     riskCategory: 'hedge',
     actionType: 'deposit',
-    actionUrl: 'https://plutus.fi/Assets/a/plsBERA/tab/convert',
-    description: 'Stake plsBERA and support Berachain\'s economic security. This strategy reflects active staking participation and may update over time as your position changes. Powered by Plutus.',
+    actionUrl: 'https://plutus.fi/Assets/a/plsBERA/tab/stake',
+    description: 'Stake BERA into plsBERA via Plutus. plsBERA uses an appreciating token model — your token balance stays constant, but each plsBERA increases in value relative to BERA as staking rewards accrue. Yield is generated from Berachain staking rewards and reflected in the rising exchange rate.\n\nYour multiplier tier is based on the live USD value of this position.',
     buyUnderlying: {
       token: '0xc66D1a2460De7b96631f4AC37ce906aCFa6A3c30', // plsBERA
       fromToken: 'HONEY',
@@ -180,8 +184,8 @@ const STRATEGIES: Strategy[] = [
     actionType: 'buy',
     buyToken: '0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',
     fromToken: 'HONEY',
-    description: 'Deploy capital into the plvHEDGE delta-neutral strategy. plvHEDGE is an automated vault with dynamic yield sourcing, designed to generate yield while managing market exposure across chains. Powered by Plutus.',
-    protocolUrl: 'https://plutus.fi',
+    description: 'Deposit into the plvHEDGE delta-neutral vault via Plutus. The strategy sources yield across onchain markets and is designed to stay neutral to market price movements. Yield from the strategy is auto-compounded and reflected in the increasing value of the plvHEDGE vault token, which you can enter or exit at any time.\n\nYour multiplier tier is based on the live USD value of this position.',
+    protocolUrl: 'https://plutus.fi/Vaults/v/plvHEDGE/chain/berachain',
     dynamicDataKey: 'plvhedge',
     chain: 'berachain',
     targetTokens: ['plvHEDGE'],
@@ -199,8 +203,8 @@ const STRATEGIES: Strategy[] = [
     actionType: 'buy',
     buyToken: '0x59a61B8d3064A51a95a5D6393c03e2152b1a2770',
     fromToken: 'HONEY',
-    description: 'Hold SAIL.r, a royalty token backed by real e-commerce revenue. SAIL.r represents a claim on revenue from e-commerce brands, with holders receiving monthly stablecoin distributions based on their share of tokens held. Powered by Liquid Royalty.',
-    protocolUrl: 'https://www.liquidroyalty.com',
+    description: 'Hold SAIL.r to receive stablecoin distributions backed by real e-commerce revenue via Liquid Royalty. Revenue is distributed in USDe daily. SAIL.r is fully liquid and can be bought or sold at any time.\n\nYour multiplier tier is based on the live USD value of this position.',
+    protocolUrl: 'https://www.liquidroyalty.com/invest/sail',
     dynamicDataKey: 'sailr',
     chain: 'berachain',
     targetTokens: ['SAIL.r'],
@@ -208,7 +212,7 @@ const STRATEGIES: Strategy[] = [
   // 7. snrUSD
   {
     id: 'snrusd',
-    name: 'snrUSD – Senior',
+    name: 'snrUSD – Vault',
     subtitle: 'Liquid Royalty',
     image: '/snr.jpg',
     tvl: '$2.13M',
@@ -216,9 +220,9 @@ const STRATEGIES: Strategy[] = [
     amyPoints: 'Earn up to 10x',
     riskCategory: 'stable',
     actionType: 'deposit',
-    actionUrl: 'https://www.liquidroyalty.com/vaults/senior',
-    description: 'Deploy capital into snrUSD, a senior tranche stable yield product. snrUSD is designed to maintain a stable $1 value while generating yield, backed by over-collateralisation and senior position within the strategy. Powered by Liquid Royalty.',
-    protocolUrl: 'https://www.liquidroyalty.com',
+    actionUrl: 'https://www.liquidroyalty.com/vaults',
+    description: 'Deposit into the snrUSD vault via Liquid Royalty. snrUSD is designed for more stable returns within a structured RWA strategy. It prioritises capital stability and predictable yield over higher upside.\n\nYour multiplier tier is based on the live USD value of this position.',
+    protocolUrl: 'https://www.liquidroyalty.com/vaults',
     buyUnderlying: {
       token: '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34', // USDe
       fromToken: 'HONEY',
@@ -230,7 +234,7 @@ const STRATEGIES: Strategy[] = [
   // 8. jnrUSD
   {
     id: 'jnrusd',
-    name: 'jnrUSD – Junior',
+    name: 'jnrUSD – Vault',
     subtitle: 'Liquid Royalty',
     image: '/jnr.jpg',
     tvl: '$2.12M',
@@ -238,9 +242,9 @@ const STRATEGIES: Strategy[] = [
     amyPoints: 'Earn up to 10x',
     riskCategory: 'hedge',
     actionType: 'deposit',
-    actionUrl: 'https://www.liquidroyalty.com/vaults/junior',
-    description: 'Deploy capital into jnrUSD, the junior tranche designed to capture excess yield. jnrUSD sits below the senior tranche and is exposed to variable returns, offering higher potential yield in exchange for higher risk. Powered by Liquid Royalty.',
-    protocolUrl: 'https://www.liquidroyalty.com',
+    actionUrl: 'https://www.liquidroyalty.com/vaults',
+    description: 'Deposit into the jnrUSD vault via Liquid Royalty. jnrUSD is the higher-return side of a structured RWA strategy. Returns are variable and depend on overall strategy performance. As the junior tranche, it takes on more risk in exchange for greater upside potential.\n\nYour multiplier tier is based on the live USD value of this position.',
+    protocolUrl: 'https://www.liquidroyalty.com/vaults',
     buyUnderlying: {
       token: '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34', // USDe
       fromToken: 'HONEY',
@@ -456,39 +460,20 @@ const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicDa
             {strategy.description}
           </p>
 
-          {/* Action Links */}
-          <div className="space-y-2">
-            {strategy.actionUrl && (
-              <a
-                href={strategy.actionUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 bg-gray-800/80 hover:bg-gray-700/80 rounded-xl px-4 py-3 transition-colors"
-              >
-                <div className="w-6 h-6 rounded bg-gray-700 flex items-center justify-center">
-                  <svg className="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </div>
-                <span className="text-sm text-white font-medium">{strategy.infoButtonLabel || `View ${getShortName()} pool details`}</span>
-              </a>
-            )}
-            {strategy.protocolUrl && (
-              <a
-                href={strategy.protocolUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 bg-gray-800/80 hover:bg-gray-700/80 rounded-xl px-4 py-3 transition-colors"
-              >
-                <div className="w-6 h-6 rounded bg-gray-700 flex items-center justify-center">
-                  <svg className="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </div>
-                <span className="text-sm text-white font-medium">View protocol details</span>
-              </a>
-            )}
-          </div>
+          {/* Action Link */}
+          <a
+            href={strategy.actionUrl || strategy.protocolUrl || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 bg-gray-800/80 hover:bg-gray-700/80 rounded-xl px-4 py-3 transition-colors"
+          >
+            <div className="w-6 h-6 rounded bg-gray-700 flex items-center justify-center">
+              <svg className="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </div>
+            <span className="text-sm text-white font-medium">Strategy Details</span>
+          </a>
         </div>
       )}
     </div>
@@ -892,7 +877,7 @@ export default function EarnPage() {
                   <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
                     <span className="text-sm text-gray-400">Manage your position on Plutus</span>
                     <a
-                      href="https://plutus.fi/Assets/a/plsBERA/tab/convert"
+                      href="https://plutus.fi/Assets/a/plsBERA/tab/stake"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium text-yellow-400 hover:text-yellow-300"

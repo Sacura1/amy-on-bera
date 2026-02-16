@@ -184,6 +184,11 @@ interface MultiplierTier {
   multiplier: string;
 }
 
+interface ActionLink {
+  url: string;
+  label: string;
+}
+
 interface BadgeProps {
   name: string;
   title: string;
@@ -195,9 +200,10 @@ interface BadgeProps {
   isPlaceholder?: boolean;
   actionUrl?: string;
   actionLabel?: string;
+  actionLinks?: ActionLink[];
 }
 
-const MultiplierBadge = ({ name, title, image, description, multipliers, currentMultiplier, isActive, isPlaceholder, actionUrl, actionLabel }: BadgeProps) => {
+const MultiplierBadge = ({ name, title, image, description, multipliers, currentMultiplier, isActive, isPlaceholder, actionUrl, actionLabel, actionLinks }: BadgeProps) => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupStyle, setPopupStyle] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const cardRef = React.useRef<HTMLDivElement>(null);
@@ -208,7 +214,7 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
     if (cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
       const popupWidth = 288; // w-72 = 18rem = 288px
-      const popupHeight = 400; // Approximate max popup height
+      const popupHeight = Math.min(350, window.innerHeight - 32); // Max height with padding
       const padding = 16; // Padding from viewport edges
 
       // Calculate initial position (centered below the card)
@@ -356,77 +362,89 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
       {showPopup && description && (
         <div
           ref={popupRef}
-          className="fixed z-[9999] w-72 rounded-2xl border border-yellow-500/50 overflow-hidden shadow-2xl shadow-black/50 bg-gray-800"
+          className="fixed z-[9999] w-72 max-h-[calc(100vh-32px)] rounded-2xl border border-yellow-500/50 overflow-hidden shadow-2xl shadow-black/50 bg-gray-800 flex flex-col"
           style={{ top: popupStyle.top, left: popupStyle.left }}
           onMouseEnter={() => setShowPopup(true)}
           onMouseLeave={() => setShowPopup(false)}
         >
-          <div className="bg-gray-800">
-            {/* Close button for mobile */}
-            <button
-              onClick={() => setShowPopup(false)}
-              className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center z-10 md:hidden"
-            >
-              <span className="text-gray-300 text-sm">×</span>
-            </button>
+          {/* Close button for mobile */}
+          <button
+            onClick={() => setShowPopup(false)}
+            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center z-10 md:hidden"
+          >
+            <span className="text-gray-300 text-sm">×</span>
+          </button>
 
-            {/* Header with logo */}
-            <div className="bg-gradient-to-b from-gray-700/50 to-gray-800 p-4 flex justify-center">
-              <div className="w-24 h-20 rounded-xl flex items-center justify-center overflow-hidden bg-gray-800 shadow-lg">
-                {image ? (
-                  <img src={image} alt={name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-12 h-10 rounded bg-green-500" />
-                )}
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-4">
-              {/* Title */}
-              <h3 className="text-base font-bold text-yellow-400 mb-2">
-                {name} – {title}
-              </h3>
-
-              {/* Description */}
-              <p className="text-sm text-gray-300 mb-4">{description}</p>
-
-              {/* Multipliers */}
-              {multipliers && multipliers.length > 0 && (
-                <div className="mb-4">
-                  <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Multipliers:</div>
-                  <div className="space-y-2">
-                    {multipliers.map((tier, index) => (
-                      <div key={index} className="flex items-center gap-3 text-sm">
-                        <span className="w-2 h-2 rounded-full bg-green-500" />
-                        <span className="text-gray-300">
-                          {tier.requirement}
-                        </span>
-                        <span className="text-gray-500">→</span>
-                        <span className="text-yellow-400 font-bold">{tier.multiplier}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          {/* Header with logo */}
+          <div className="bg-gradient-to-b from-gray-700/50 to-gray-800 p-3 flex justify-center flex-shrink-0">
+            <div className="w-20 h-16 rounded-xl flex items-center justify-center overflow-hidden bg-gray-800 shadow-lg">
+              {image ? (
+                <img src={image} alt={name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-12 h-10 rounded bg-green-500" />
               )}
-
-              {/* Footer */}
-              <div className="pt-3 border-t border-gray-700">
-                <p className="text-xs text-gray-500 italic mb-3">
-                  Only the highest unlocked multiplier applies.
-                </p>
-                {actionUrl && (
-                  <a
-                    href={actionUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-bold text-sm py-2.5 px-4 rounded-xl text-center transition-all shadow-lg hover:shadow-yellow-500/25"
-                  >
-                    {actionLabel || 'Add Liquidity'} →
-                  </a>
-                )}
-              </div>
             </div>
+          </div>
+
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto flex-1 px-4 py-3">
+            {/* Title */}
+            <h3 className="text-sm font-bold text-yellow-400 mb-2">
+              {name} – {title}
+            </h3>
+
+            {/* Description */}
+            <p className="text-xs text-gray-300 mb-3 leading-relaxed">{description}</p>
+
+            {/* Multipliers */}
+            {multipliers && multipliers.length > 0 && (
+              <div className="mb-3">
+                <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Multipliers:</div>
+                <div className="space-y-1.5">
+                  {multipliers.map((tier, index) => (
+                    <div key={index} className="flex items-center gap-2 text-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      <span className="text-gray-300">
+                        {tier.requirement}
+                      </span>
+                      <span className="text-gray-500">→</span>
+                      <span className="text-yellow-400 font-bold">{tier.multiplier}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer - fixed at bottom */}
+          <div className="px-4 pb-3 pt-2 border-t border-gray-700 flex-shrink-0 bg-gray-800">
+            <p className="text-[11px] text-gray-500 italic mb-2">
+              Only the highest unlocked multiplier applies.
+            </p>
+            {actionLinks && actionLinks.length > 0 ? (
+              <div className="space-y-1.5">
+                {actionLinks.map((link, index) => (
+                  <a
+                    key={index}
+                    href={link.url}
+                    target={link.url.startsWith('/') ? '_self' : '_blank'}
+                    rel="noopener noreferrer"
+                    className="block w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-bold text-xs py-2 px-3 rounded-xl text-center transition-all shadow-lg hover:shadow-yellow-500/25"
+                  >
+                    {link.label} →
+                  </a>
+                ))}
+              </div>
+            ) : actionUrl ? (
+              <a
+                href={actionUrl}
+                target={actionUrl.startsWith('/') ? '_self' : '_blank'}
+                rel="noopener noreferrer"
+                className="block w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-bold text-xs py-2 px-3 rounded-xl text-center transition-all shadow-lg hover:shadow-yellow-500/25"
+              >
+                {actionLabel || 'View Details'} →
+              </a>
+            ) : null}
           </div>
         </div>
       )}
@@ -927,15 +945,35 @@ export default function PointsPage() {
             </h2>
           </div>
 
-          <p className="text-sm md:text-xl text-yellow-300 leading-relaxed font-medium mb-3 md:mb-4">
-            Amy Points are our way of rewarding behaviour — not gambling.
+          <p className="text-sm md:text-lg text-gray-300 mb-4">
+            Amy Points reward people who use Amy regularly.
           </p>
           <p className="text-sm md:text-lg text-gray-300 mb-4">
-            They&apos;re not a token and not something you trade. Amy Points are in-app points that sit on top of the Amy app and our partner ecosystem.
+            They&apos;re not a token and not something you trade. They&apos;re in-app points that track your activity across Amy and our partners.
+          </p>
+          <p className="text-sm md:text-lg text-gray-300 mb-4">
+            Hold 300+ $AMY to start earning. Your tier (Bronze, Silver, Gold, Platinum) sets your base rate — from 1 to 10 points per hour.
           </p>
           <p className="text-sm md:text-lg text-gray-300 mb-6">
-            You start with a base earning rate by holding $AMY. Your tier determines how many Amy Points you earn per hour. You can then boost this with badges and activity.
+            You can earn more by unlocking multiplier badges. Badges add together to make your total multiplier. Within each strategy, only your highest tier counts.
           </p>
+
+          {/* Example */}
+          <div className="bg-black/30 rounded-xl p-4 md:p-6 mb-6 max-w-2xl mx-auto">
+            <p className="text-yellow-400 font-bold text-sm md:text-base mb-3">Example</p>
+            <p className="text-gray-300 text-sm md:text-base mb-2">
+              Silver tier = 3 points per hour
+            </p>
+            <p className="text-gray-300 text-sm md:text-base mb-2">
+              plsBERA x5 + Discord Mod x7 = x12 total
+            </p>
+            <p className="text-gray-300 text-sm md:text-base mb-3">
+              3 × 12 = 36 Amy Points per hour
+            </p>
+            <p className="text-gray-400 text-sm md:text-base italic">
+              Your total updates every hour based on your tier and active badges.
+            </p>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-4">
             <div className={`bg-gradient-to-br from-orange-900/40 to-amber-900/20 rounded-xl border-2 transition-all ${
@@ -1024,22 +1062,16 @@ export default function PointsPage() {
             </h2>
           </div>
 
-          <div className="bg-black/30 rounded-xl p-4 md:p-6 mb-6 max-w-2xl mx-auto">
-            <p className="text-gray-200 text-sm md:text-base leading-relaxed mb-3">
-              Multiplier Badges boost your Amy Points when you actively use partner strategies.
-            </p>
-            <ul className="text-gray-400 text-sm md:text-base space-y-1.5 mb-3 list-disc list-inside">
-              <li>Each badge represents a specific action (like LPing or vaults)</li>
-              <li>Only your highest unlocked badge per strategy applies</li>
-            </ul>
-            <p className="text-gray-400 text-sm md:text-base">
-              Access these strategies from the{' '}
-              <Link href="/app/earn" className="text-yellow-400 hover:text-yellow-300 font-semibold">
-                Earn
-              </Link>{' '}
-              page.
-            </p>
-          </div>
+          <p className="text-sm md:text-lg text-gray-300 mb-4">
+            Multiplier Badges boost your Amy Points when you actively use partner strategies.
+          </p>
+          <ul className="text-sm md:text-lg text-gray-400 space-y-1.5 mb-4 list-disc list-inside">
+            <li>Each badge represents a specific action (like LPing or vaults)</li>
+            <li>Only your highest unlocked badge per strategy applies</li>
+          </ul>
+          <p className="text-sm md:text-lg text-gray-300 mb-6">
+            Access these strategies from the <Link href="/app/earn" className="text-yellow-400 underline hover:text-yellow-300 font-semibold">Earn</Link> page.
+          </p>
 
           {/* Badge Grid */}
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
@@ -1056,8 +1088,12 @@ export default function PointsPage() {
               ]}
               isActive={lpData ? lpData.lpMultiplier > 1 : false}
               currentMultiplier={lpData && lpData.lpMultiplier > 1 ? `${lpData.lpMultiplier}x` : undefined}
-              actionUrl="https://www.bulla.exchange/pools/0xff716930eefb37b5b4ac55b1901dc5704b098d84"
-              actionLabel="Add Liquidity"
+              actionLinks={[
+                { url: '/app/earn', label: 'View on Earn' },
+                { url: '/app/trade', label: 'Start Swapping' },
+                { url: 'https://t.me/amy_on_bera', label: 'Join Telegram' },
+                { url: 'https://discord.com/invite/9Y3UzP93r3', label: 'Join Discord' },
+              ]}
             />
 
             {/* 2. Staked plsBERA */}
@@ -1065,16 +1101,16 @@ export default function PointsPage() {
               name="Staked"
               title="plsBERA"
               image="/plsbera.jpg"
-              description="Rewarding users who stake plsBERA and support Berachain's economic security. This badge reflects active staking participation and may update over time as your position changes. Powered by Plutus."
+              description="Stake BERA into plsBERA via Plutus. Your plsBERA balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
-                { requirement: '$10+ staked', multiplier: 'x3' },
-                { requirement: '$100+ staked', multiplier: 'x5' },
-                { requirement: '$500+ staked', multiplier: 'x10' },
+                { requirement: '$10+', multiplier: 'x3' },
+                { requirement: '$100+', multiplier: 'x5' },
+                { requirement: '$500+', multiplier: 'x10' },
               ]}
               isActive={tokenData ? tokenData.plsbera?.isActive : false}
               currentMultiplier={tokenData && tokenData.plsbera?.multiplier > 1 ? `${tokenData.plsbera.multiplier}x` : undefined}
-              actionUrl="https://plutus.fi/Assets/a/plsBERA/tab/convert"
-              actionLabel="Stake plsBERA"
+              actionUrl="/app/earn"
+              actionLabel="View on Earn"
             />
 
             {/* 3. plvHEDGE */}
@@ -1082,16 +1118,16 @@ export default function PointsPage() {
               name="plvHEDGE"
               title="Vault"
               image="/plvhedge.jpg"
-              description="Rewarding users who deploy capital into the plvHEDGE delta-neutral strategy. plvHEDGE is an automated vault with dynamic yield sourcing, designed to generate yield while managing market exposure across chains. Powered by Plutus."
+              description="Deposit into the plvHEDGE vault. Your plvHEDGE balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
-                { requirement: '$10+ holdings', multiplier: 'x3' },
-                { requirement: '$100+ holdings', multiplier: 'x5' },
-                { requirement: '$500+ holdings', multiplier: 'x10' },
+                { requirement: '$10+', multiplier: 'x3' },
+                { requirement: '$100+', multiplier: 'x5' },
+                { requirement: '$500+', multiplier: 'x10' },
               ]}
               isActive={tokenData ? tokenData.plvhedge.isActive : false}
               currentMultiplier={tokenData && tokenData.plvhedge.multiplier > 1 ? `${tokenData.plvhedge.multiplier}x` : undefined}
-              actionUrl="https://plutus.fi"
-              actionLabel="View plvHEDGE"
+              actionUrl="https://www.amyonbera.com/app/earn"
+              actionLabel="View on Earn"
             />
 
             {/* 4. SAIL.r */}
@@ -1099,107 +1135,107 @@ export default function PointsPage() {
               name="SAIL.r"
               title="Royalty"
               image="/sail.jpg"
-              description="Rewarding users who hold SAIL.r, a royalty token backed by real e-commerce revenue. SAIL.r represents a claim on revenue from e-commerce brands, with holders receiving monthly stablecoin distributions based on their share of tokens held. Powered by Liquid Royalty."
+              description="Hold SAIL.r in your wallet. Your SAIL.r balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
-                { requirement: '$10+ holdings', multiplier: 'x3' },
-                { requirement: '$100+ holdings', multiplier: 'x5' },
-                { requirement: '$500+ holdings', multiplier: 'x10' },
+                { requirement: '$10+', multiplier: 'x3' },
+                { requirement: '$100+', multiplier: 'x5' },
+                { requirement: '$500+', multiplier: 'x10' },
               ]}
               isActive={tokenData ? tokenData.sailr.isActive : false}
               currentMultiplier={tokenData && tokenData.sailr.multiplier > 1 ? `${tokenData.sailr.multiplier}x` : undefined}
-              actionUrl="https://www.liquidroyalty.com/invest"
-              actionLabel="View SAIL.r"
+              actionUrl="https://www.amyonbera.com/app/earn"
+              actionLabel="View on Earn"
             />
 
             {/* 5. jnrUSD */}
             <MultiplierBadge
               name="jnrUSD"
-              title="Junior"
+              title="Vault"
               image="/jnr.jpg"
-              description="Rewarding users who deploy capital into jnrUSD, the junior tranche designed to capture excess yield. jnrUSD sits below the senior tranche and is exposed to variable returns, offering higher potential yield in exchange for higher risk. Powered by Liquid Royalty."
+              description="Deposit into the jnrUSD vault. Your jnrUSD vault balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
-                { requirement: '$10+ holdings', multiplier: 'x3' },
-                { requirement: '$100+ holdings', multiplier: 'x5' },
-                { requirement: '$500+ holdings', multiplier: 'x10' },
+                { requirement: '$10+', multiplier: 'x3' },
+                { requirement: '$100+', multiplier: 'x5' },
+                { requirement: '$500+', multiplier: 'x10' },
               ]}
               isActive={tokenData ? tokenData.jnrusd?.isActive : false}
               currentMultiplier={tokenData && tokenData.jnrusd?.multiplier > 1 ? `${tokenData.jnrusd.multiplier}x` : undefined}
-              actionUrl="https://www.liquidroyalty.com/vaults"
-              actionLabel="View Vaults"
+              actionUrl="/app/earn"
+              actionLabel="View on Earn"
             />
 
             {/* 6. snrUSD */}
             <MultiplierBadge
               name="snrUSD"
-              title="Senior"
+              title="Vault"
               image="/snr.jpg"
-              description="Rewarding users who hold or deploy capital into snrUSD, a senior tranche stable yield product. snrUSD is designed to maintain a stable $1 value while generating yield, backed by over-collateralisation and senior position within the strategy. Powered by Liquid Royalty."
+              description="Deposit into the snrUSD vault. Your snrUSD vault balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
-                { requirement: '$10+ holdings', multiplier: 'x3' },
-                { requirement: '$100+ holdings', multiplier: 'x5' },
-                { requirement: '$500+ holdings', multiplier: 'x10' },
+                { requirement: '$10+', multiplier: 'x3' },
+                { requirement: '$100+', multiplier: 'x5' },
+                { requirement: '$500+', multiplier: 'x10' },
               ]}
               isActive={tokenData ? tokenData.snrusd?.isActive : false}
               currentMultiplier={tokenData && tokenData.snrusd?.multiplier > 1 ? `${tokenData.snrusd.multiplier}x` : undefined}
-              actionUrl="https://www.liquidroyalty.com/vaults"
-              actionLabel="View Vaults"
+              actionUrl="/app/earn"
+              actionLabel="View on Earn"
             />
 
-            {/* 7. HONEY Bend */}
+            {/* 7. HONEY Lent */}
             <MultiplierBadge
               name="HONEY"
-              title="Bend"
+              title="Lent"
               image="/honey.jpg"
-              description="Rewarding users who lend HONEY on Bend. HONEY-Bend represents your lending position, earning interest while supporting the Berachain lending ecosystem. Powered by Bend."
+              description="Lend HONEY on Bend. Your HONEY lending balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
-                { requirement: '$10+ deposited', multiplier: 'x3' },
-                { requirement: '$100+ deposited', multiplier: 'x5' },
-                { requirement: '$500+ deposited', multiplier: 'x10' },
+                { requirement: '$10+', multiplier: 'x3' },
+                { requirement: '$100+', multiplier: 'x5' },
+                { requirement: '$500+', multiplier: 'x10' },
               ]}
               isActive={tokenData ? tokenData.honeybend?.isActive : false}
               currentMultiplier={tokenData && tokenData.honeybend?.multiplier > 1 ? `${tokenData.honeybend.multiplier}x` : undefined}
-              actionUrl="https://bend.berachain.com/"
-              actionLabel="Lend HONEY"
+              actionUrl="https://www.amyonbera.com/app/earn"
+              actionLabel="View on Earn"
             />
 
-            {/* 8. Staked BERA (sWBERA) */}
+            {/* 8. BERA – Staked */}
             <MultiplierBadge
-              name="Staked"
-              title="BERA"
+              name="BERA"
+              title="Staked"
               image="/BERA.png"
-              description="Rewarding users who hold sWBERA (staked BERA). Staked BERA secures the network while earning staking rewards. You can stake directly or swap for sWBERA."
+              description="Stake BERA to receive sWBERA. Your staked BERA balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
-                { requirement: '$10+ holdings', multiplier: 'x3' },
-                { requirement: '$100+ holdings', multiplier: 'x5' },
-                { requirement: '$500+ holdings', multiplier: 'x10' },
+                { requirement: '$10+', multiplier: 'x3' },
+                { requirement: '$100+', multiplier: 'x5' },
+                { requirement: '$500+', multiplier: 'x10' },
               ]}
               isActive={tokenData ? tokenData.stakedbera?.isActive : false}
               currentMultiplier={tokenData && tokenData.stakedbera?.multiplier > 1 ? `${tokenData.stakedbera.multiplier}x` : undefined}
-              actionUrl="https://hub.berachain.com/stake"
-              actionLabel="Stake BERA"
+              actionUrl="https://www.amyonbera.com/app/earn"
+              actionLabel="View on Earn"
             />
 
-            {/* 9. BGT */}
+            {/* 9. BGT – Holder */}
             <MultiplierBadge
               name="BGT"
               title="Holder"
               image="/bgt.jpg"
-              description="Rewarding users who hold BGT (Bera Governance Token). BGT is earned through providing liquidity and participating in Berachain's Proof of Liquidity consensus. BGT cannot be purchased - it's only earned as a reward."
+              description="Hold BGT in your wallet. BGT is earned through participation in Berachain and represents governance power. Your BGT balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
-                { requirement: '$10+ holdings', multiplier: 'x3' },
-                { requirement: '$100+ holdings', multiplier: 'x5' },
-                { requirement: '$500+ holdings', multiplier: 'x10' },
+                { requirement: '$10+', multiplier: 'x3' },
+                { requirement: '$100+', multiplier: 'x5' },
+                { requirement: '$500+', multiplier: 'x10' },
               ]}
               isActive={tokenData ? tokenData.bgt?.isActive : false}
               currentMultiplier={tokenData && tokenData.bgt?.multiplier > 1 ? `${tokenData.bgt.multiplier}x` : undefined}
             />
 
-            {/* 10. Amy × Kodiak Perps */}
+            {/* 10. Kodiak – Legacy */}
             <MultiplierBadge
-              name="Amy × Kodiak"
-              title="Perps"
+              name="Kodiak"
+              title="Legacy"
               image="/kodiak.jpg"
-              description="Trade perpetuals on Kodiak through Amy in December 2025."
+              description="Earned during the Amy × Kodiak Perps competition (Dec 2025). This badge is permanent for participants and rewards early supporters."
               multipliers={[
                 { requirement: 'Level 1', multiplier: 'TBC' },
                 { requirement: 'Level 2', multiplier: 'TBC' },
@@ -1208,12 +1244,12 @@ export default function PointsPage() {
               isActive={false}
             />
 
-            {/* 11. Dawn Referral Season (Active for existing holders) */}
+            {/* 11. Dawn – Legacy */}
             <MultiplierBadge
               name="Dawn"
-              title="Referral"
+              title="Legacy"
               image="/ref.jpg"
-              description="Season 1 referral badge. Registration has closed for new users, but existing holders continue to earn their multiplier bonus as long as they hold $AMY."
+              description="Earned during the Dawn referral campaign (Dec – Jan 2025). This badge is permanent for participants and rewards early supporters."
               multipliers={[
                 { requirement: '1 referral', multiplier: 'x3' },
                 { requirement: '2 referrals', multiplier: 'x5' },
@@ -1223,12 +1259,12 @@ export default function PointsPage() {
               currentMultiplier={(pointsData?.dawnReferralMultiplier || 0) > 0 ? `x${pointsData?.dawnReferralMultiplier}` : undefined}
             />
 
-            {/* 12. Amy Onchain Conviction */}
+            {/* 12. Conviction – Monthly */}
             <MultiplierBadge
-              name="Amy Onchain"
-              title="Conviction"
+              name="Conviction"
+              title="Monthly"
               image="/convic.jpg"
-              description="Rewarding users who actively deploy capital on Berachain. This badge reflects ongoing onchain activity and applies a points multiplier."
+              description="Assigned monthly based on your onchain activity across Web3. Activity this month determines your badge for next month. Once assigned, it stays active for the entire month."
               multipliers={[
                 { requirement: 'Level 1', multiplier: 'x3' },
                 { requirement: 'Level 2', multiplier: 'x5' },
@@ -1241,42 +1277,46 @@ export default function PointsPage() {
             {/* Season 2 Referral - Hidden until new logo is ready */}
             {/* Will be re-added later with new branding */}
 
-            {/* 13. Seasoned Swapper */}
+            {/* 13. Swapper – Monthly */}
             <MultiplierBadge
-              name="Seasoned"
-              title="Swapper"
+              name="Swapper"
+              title="Monthly"
               image="/swapper.jpg"
-              description="Rewarding users who actively swap through Amy's interface. This monthly badge recognizes your swap volume and applies ongoing point multipliers to your rewards."
+              description="Based on your swap volume through Amy during the current month. Activity this month determines your badge for next month. Once assigned, it stays active for the entire month."
               multipliers={[
-                { requirement: 'Engaged ($250+)', multiplier: 'x3' },
-                { requirement: 'Committed ($1,000+)', multiplier: 'x5' },
-                { requirement: 'Elite ($3,000+)', multiplier: 'x10' },
+                { requirement: '$250+', multiplier: 'x3' },
+                { requirement: '$1,000+', multiplier: 'x5' },
+                { requirement: '$3,000+', multiplier: 'x10' },
               ]}
               isActive={(pointsData?.swapperMultiplier || 0) > 0}
               currentMultiplier={(pointsData?.swapperMultiplier || 0) > 0 ? `x${pointsData?.swapperMultiplier}` : undefined}
+              actionUrl="https://www.amyonbera.com/app/trade"
+              actionLabel="Start Swapping"
             />
 
-            {/* 14. RaidShark Bot */}
+            {/* 14. Raider – Monthly */}
             <MultiplierBadge
-              name="RaidShark"
-              title="Bot"
+              name="Raider"
+              title="Monthly"
               image="/shark.jpg"
-              description="Rewarding users who actively raid and promote Amy across X (Twitter). This badge reflects monthly raid participation and grants ongoing point multipliers to top raiders."
+              description="Based on your raid activity during the current month. Raid points are tracked through the Amy Telegram bot. Activity this month determines your badge for next month. Once assigned, it stays active for the entire month."
               multipliers={[
-                { requirement: 'Raid Enthusiast (75+ pts)', multiplier: 'x3' },
-                { requirement: 'Raid Master (250+ pts)', multiplier: 'x7' },
-                { requirement: 'Raid Legend (600+ pts)', multiplier: 'x15' },
+                { requirement: '75+ pts', multiplier: 'x3' },
+                { requirement: '250+ pts', multiplier: 'x7' },
+                { requirement: '600+ pts', multiplier: 'x15' },
               ]}
               isActive={!!raidsharkBadge}
               currentMultiplier={raidsharkBadge ? `${raidsharkBadge.multiplier}x` : undefined}
+              actionUrl="https://t.me/amy_on_bera"
+              actionLabel="Join Telegram"
             />
 
-            {/* 15. Telegram Mod */}
+            {/* 15. Telegram – Mod */}
             <MultiplierBadge
               name="Telegram"
               title="Mod"
               image="/tg.png"
-              description="Recognize community moderators who keep Amy's Telegram channels safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
+              description="Assigned to active Telegram moderators who support the community. Level is determined by the team and may be updated over time based on contribution."
               multipliers={[
                 { requirement: 'Guardian', multiplier: 'x3' },
                 { requirement: 'Sentinel', multiplier: 'x7' },
@@ -1284,14 +1324,16 @@ export default function PointsPage() {
               ]}
               isActive={(pointsData?.telegramModMultiplier || 0) > 0}
               currentMultiplier={(pointsData?.telegramModMultiplier || 0) > 0 ? `x${pointsData?.telegramModMultiplier}` : undefined}
+              actionUrl="https://t.me/amy_on_bera"
+              actionLabel="Join Telegram"
             />
 
-            {/* 16. Discord Mod */}
+            {/* 16. Discord – Mod */}
             <MultiplierBadge
               name="Discord"
               title="Mod"
               image="/dc.jpg"
-              description="Recognize community moderators who keep Amy's Discord server safe, engaging, and welcoming. Active moderation earns ongoing point multipliers."
+              description="Assigned to active Discord moderators who support the community. Level is determined by the team and may be updated over time based on contribution."
               multipliers={[
                 { requirement: 'Guardian', multiplier: 'x3' },
                 { requirement: 'Sentinel', multiplier: 'x7' },
@@ -1299,6 +1341,8 @@ export default function PointsPage() {
               ]}
               isActive={(pointsData?.discordModMultiplier || 0) > 0}
               currentMultiplier={(pointsData?.discordModMultiplier || 0) > 0 ? `x${pointsData?.discordModMultiplier}` : undefined}
+              actionUrl="https://discord.com/invite/9Y3UzP93r3"
+              actionLabel="Join Discord"
             />
 
             {/* All other badges - Coming Soon */}
