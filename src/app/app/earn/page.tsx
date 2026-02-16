@@ -153,7 +153,7 @@ const STRATEGIES: Strategy[] = [
   // 4. plsBERA
   {
     id: 'plsbera',
-    name: 'Staked – plsBERA',
+    name: 'plsBERA – Staked',
     subtitle: 'Plutus',
     image: '/plsbera.jpg',
     tvl: '$22K',
@@ -769,7 +769,7 @@ export default function EarnPage() {
                         <img src="/sail.jpg" alt="SAIL.r" className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <div className="text-white font-bold">SAIL.r</div>
+                        <div className="text-white font-bold">SAIL.r – Royalty</div>
                         <div className="text-sm text-gray-400">Liquid Royalty</div>
                       </div>
                     </div>
@@ -793,7 +793,7 @@ export default function EarnPage() {
                   <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
                     <span className="text-sm text-gray-400">Manage your position on Liquid Royalty</span>
                     <a
-                      href="https://www.liquidroyalty.com/invest"
+                      href="https://www.liquidroyalty.com/invest/sail"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
@@ -811,7 +811,7 @@ export default function EarnPage() {
                         <img src="/plvhedge.jpg" alt="plvHEDGE" className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <div className="text-white font-bold">plvHEDGE</div>
+                        <div className="text-white font-bold">plvHEDGE – Vault</div>
                         <div className="text-sm text-gray-400">Plutus</div>
                       </div>
                     </div>
@@ -835,7 +835,7 @@ export default function EarnPage() {
                   <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
                     <span className="text-sm text-gray-400">Manage your position on Plutus</span>
                     <a
-                      href="https://plutus.fi"
+                      href="https://plutus.fi/Vaults/v/plvHEDGE/chain/berachain"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
@@ -853,7 +853,7 @@ export default function EarnPage() {
                         <img src="/plsbera.jpg" alt="plsBERA" className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <div className="text-white font-bold">plsBERA</div>
+                        <div className="text-white font-bold">plsBERA – Staked</div>
                         <div className="text-sm text-gray-400">Plutus</div>
                       </div>
                     </div>
@@ -895,7 +895,7 @@ export default function EarnPage() {
                         <img src="/honey.jpg" alt="HONEY-Bend" className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <div className="text-white font-bold">HONEY-Bend</div>
+                        <div className="text-white font-bold">HONEY – Lent</div>
                         <div className="text-sm text-gray-400">Bend Protocol</div>
                       </div>
                     </div>
@@ -919,7 +919,7 @@ export default function EarnPage() {
                   <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
                     <span className="text-sm text-gray-400">Manage your position on Bend</span>
                     <a
-                      href="https://bend.berachain.com/"
+                      href="https://bend.berachain.com/lend/80094/0x30BbA9CD9Eb8c95824aa42Faa1Bb397b07545bc1"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
@@ -937,7 +937,7 @@ export default function EarnPage() {
                         <img src="/BERA.png" alt="sWBERA" className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <div className="text-white font-bold">Staked BERA (sWBERA)</div>
+                        <div className="text-white font-bold">BERA – Staked</div>
                         <div className="text-sm text-gray-400">Berachain Staking</div>
                       </div>
                     </div>
@@ -1021,8 +1021,8 @@ export default function EarnPage() {
                         <img src="/snr.jpg" alt="snrUSD" className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <div className="text-white font-bold">snrUSD</div>
-                        <div className="text-sm text-gray-400">Liquid Royalty Senior Tranche</div>
+                        <div className="text-white font-bold">snrUSD – Vault</div>
+                        <div className="text-sm text-gray-400">Liquid Royalty</div>
                       </div>
                     </div>
                   </div>
@@ -1045,7 +1045,7 @@ export default function EarnPage() {
                   <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
                     <span className="text-sm text-gray-400">Manage your position on Liquid Royalty</span>
                     <a
-                      href="https://www.liquidroyalty.com/vaults/senior"
+                      href="https://www.liquidroyalty.com/vaults"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
@@ -1063,8 +1063,8 @@ export default function EarnPage() {
                         <img src="/jnr.jpg" alt="jnrUSD" className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <div className="text-white font-bold">jnrUSD</div>
-                        <div className="text-sm text-gray-400">Liquid Royalty Junior Tranche</div>
+                        <div className="text-white font-bold">jnrUSD – Vault</div>
+                        <div className="text-sm text-gray-400">Liquid Royalty</div>
                       </div>
                     </div>
                   </div>
@@ -1087,7 +1087,7 @@ export default function EarnPage() {
                   <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
                     <span className="text-sm text-gray-400">Manage your position on Liquid Royalty</span>
                     <a
-                      href="https://www.liquidroyalty.com/vaults/junior"
+                      href="https://www.liquidroyalty.com/vaults"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium text-yellow-400 hover:text-yellow-300"

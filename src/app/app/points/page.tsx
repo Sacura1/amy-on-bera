@@ -311,18 +311,27 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
 
         {/* Multiplier badge corner */}
         {isActive && currentMultiplier && (() => {
-          // Extract number from multiplier string (e.g., "3x" -> 3, "100x" -> 100)
           const multiplierNum = parseInt(currentMultiplier.replace(/[^0-9]/g, ''), 10);
 
-          // Color based on multiplier tier:
-          // Level 1 (x3) = Bronze, Level 2 (x5) = Silver, Level 3 (x10+) = Gold
-          let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // Level 1 - Bronze
-          if (multiplierNum >= 10) {
-            badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300'; // Level 3 - Gold (10x, 50x, 100x)
-          } else if (multiplierNum >= 5) {
-            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200'; // Level 2 - Silver (5x)
+          // Determine tier level (1=bronze, 2=silver, 3=gold) based on badge's own multiplier list
+          let tierLevel = 1;
+          if (multipliers && multipliers.length > 0) {
+            const tierValues = multipliers.map(m => parseInt(m.multiplier.replace(/[^0-9]/g, ''), 10));
+            const matchIndex = tierValues.indexOf(multiplierNum);
+            if (matchIndex >= 0) {
+              tierLevel = matchIndex + 1;
+            } else {
+              // Fallback: find closest tier
+              tierLevel = tierValues.filter(v => multiplierNum >= v).length || 1;
+            }
           }
-          // else: Level 1 - Bronze (3x) - default
+
+          let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // Level 1 - Bronze
+          if (tierLevel >= 3) {
+            badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300'; // Level 3 - Gold
+          } else if (tierLevel >= 2) {
+            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200'; // Level 2 - Silver
+          }
 
           return (
             <div className={`absolute -top-2 -left-2 text-xs font-black px-2 py-1 rounded-md z-10 shadow-lg border-2 ${badgeColors}`}>
@@ -1063,14 +1072,18 @@ export default function PointsPage() {
           </div>
 
           <p className="text-sm md:text-lg text-gray-300 mb-4">
-            Multiplier Badges boost your Amy Points when you actively use partner strategies.
+            Multiplier Badges increase how many Amy Points you earn.
+          </p>
+          <p className="text-sm md:text-lg text-gray-300 mb-4">
+            You unlock them by taking specific actions — like providing liquidity, staking, lending, trading, or being active in the community.
           </p>
           <ul className="text-sm md:text-lg text-gray-400 space-y-1.5 mb-4 list-disc list-inside">
-            <li>Each badge represents a specific action (like LPing or vaults)</li>
-            <li>Only your highest unlocked badge per strategy applies</li>
+            <li>Each badge is tied to a clear action</li>
+            <li>Only your highest tier per strategy applies</li>
+            <li>Capital strategies are on the <Link href="/app/earn" className="text-yellow-400 underline hover:text-yellow-300 font-semibold">Earn</Link> page</li>
           </ul>
           <p className="text-sm md:text-lg text-gray-300 mb-6">
-            Access these strategies from the <Link href="/app/earn" className="text-yellow-400 underline hover:text-yellow-300 font-semibold">Earn</Link> page.
+            For capital badges, your multiplier depends on the live USD value of that position and adjusts as your value changes.
           </p>
 
           {/* Badge Grid */}
@@ -1080,26 +1093,22 @@ export default function PointsPage() {
               name="Bulla Exchange"
               title="AMY/HONEY"
               image="/bulla.jpg"
-              description="Provide liquidity to the AMY / HONEY pool on Bulla Exchange."
+              description="Provide liquidity to the AMY/HONEY pool on Bulla Exchange. Your AMY/HONEY LP balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
-                { requirement: '$10+ LP', multiplier: 'x5' },
-                { requirement: '$100+ LP', multiplier: 'x10' },
-                { requirement: '$500+ LP', multiplier: 'x100' },
+                { requirement: '$10+', multiplier: 'x5' },
+                { requirement: '$100+', multiplier: 'x10' },
+                { requirement: '$500+', multiplier: 'x100' },
               ]}
               isActive={lpData ? lpData.lpMultiplier > 1 : false}
               currentMultiplier={lpData && lpData.lpMultiplier > 1 ? `${lpData.lpMultiplier}x` : undefined}
-              actionLinks={[
-                { url: '/app/earn', label: 'View on Earn' },
-                { url: '/app/trade', label: 'Start Swapping' },
-                { url: 'https://t.me/amy_on_bera', label: 'Join Telegram' },
-                { url: 'https://discord.com/invite/9Y3UzP93r3', label: 'Join Discord' },
-              ]}
+              actionUrl="/app/earn"
+              actionLabel="View on Earn"
             />
 
-            {/* 2. Staked plsBERA */}
+            {/* 2. plsBERA – Staked */}
             <MultiplierBadge
-              name="Staked"
-              title="plsBERA"
+              name="plsBERA"
+              title="Staked"
               image="/plsbera.jpg"
               description="Stake BERA into plsBERA via Plutus. Your plsBERA balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
