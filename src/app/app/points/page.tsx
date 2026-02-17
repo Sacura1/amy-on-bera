@@ -1088,10 +1088,10 @@ export default function PointsPage() {
 
           {/* Badge Grid */}
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
-            {/* 1. Bulla Exchange - AMY/HONEY */}
+            {/* 1. AMY/HONEY – LP */}
             <MultiplierBadge
-              name="Bulla Exchange"
-              title="AMY/HONEY"
+              name="AMY/HONEY"
+              title="LP"
               image="/bulla.jpg"
               description="Provide liquidity to the AMY/HONEY pool on Bulla Exchange. Your AMY/HONEY LP balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
@@ -1135,7 +1135,7 @@ export default function PointsPage() {
               ]}
               isActive={tokenData ? tokenData.plvhedge.isActive : false}
               currentMultiplier={tokenData && tokenData.plvhedge.multiplier > 1 ? `${tokenData.plvhedge.multiplier}x` : undefined}
-              actionUrl="https://www.amyonbera.com/app/earn"
+              actionUrl="/app/earn"
               actionLabel="View on Earn"
             />
 
@@ -1152,7 +1152,7 @@ export default function PointsPage() {
               ]}
               isActive={tokenData ? tokenData.sailr.isActive : false}
               currentMultiplier={tokenData && tokenData.sailr.multiplier > 1 ? `${tokenData.sailr.multiplier}x` : undefined}
-              actionUrl="https://www.amyonbera.com/app/earn"
+              actionUrl="/app/earn"
               actionLabel="View on Earn"
             />
 
@@ -1203,7 +1203,7 @@ export default function PointsPage() {
               ]}
               isActive={tokenData ? tokenData.honeybend?.isActive : false}
               currentMultiplier={tokenData && tokenData.honeybend?.multiplier > 1 ? `${tokenData.honeybend.multiplier}x` : undefined}
-              actionUrl="https://www.amyonbera.com/app/earn"
+              actionUrl="/app/earn"
               actionLabel="View on Earn"
             />
 
@@ -1220,7 +1220,7 @@ export default function PointsPage() {
               ]}
               isActive={tokenData ? tokenData.stakedbera?.isActive : false}
               currentMultiplier={tokenData && tokenData.stakedbera?.multiplier > 1 ? `${tokenData.stakedbera.multiplier}x` : undefined}
-              actionUrl="https://www.amyonbera.com/app/earn"
+              actionUrl="/app/earn"
               actionLabel="View on Earn"
             />
 
@@ -1299,7 +1299,7 @@ export default function PointsPage() {
               ]}
               isActive={(pointsData?.swapperMultiplier || 0) > 0}
               currentMultiplier={(pointsData?.swapperMultiplier || 0) > 0 ? `x${pointsData?.swapperMultiplier}` : undefined}
-              actionUrl="https://www.amyonbera.com/app/trade"
+              actionUrl="/app/trade"
               actionLabel="Start Swapping"
             />
 

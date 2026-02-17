@@ -84,10 +84,10 @@ interface Strategy {
 }
 
 const STRATEGIES: Strategy[] = [
-  // 1. AMY/HONEY Pool
+  // 1. AMY/HONEY – LP
   {
     id: 'amy-honey',
-    name: 'AMY/ HONEY Pool',
+    name: 'AMY/HONEY – LP',
     subtitle: 'Bulla Exchange',
     image: '/bulla.jpg',
     tvl: '$1.17K',
@@ -491,7 +491,7 @@ const ActivePositionCard = ({ lpData }: { lpData: LpData }) => {
             <img src="/bulla.jpg" alt="Bulla Exchange" className="w-full h-full object-cover" />
           </div>
           <div>
-            <div className="text-white font-bold">AMY / HONEY Pool</div>
+            <div className="text-white font-bold">AMY/HONEY – LP</div>
             <div className="text-sm text-gray-400">Bulla Exchange</div>
           </div>
         </div>
