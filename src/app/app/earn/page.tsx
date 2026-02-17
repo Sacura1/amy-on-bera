@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useActiveAccount } from 'thirdweb/react';
 import { API_BASE_URL } from '@/lib/constants';
 
@@ -760,343 +760,89 @@ export default function EarnPage() {
             </div>
           ) : hasAnyActivePosition ? (
             <>
-              {hasActiveLp && <ActivePositionCard lpData={lpData || MOCK_LP_DATA} />}
-              {tokenData?.sailr?.isActive && (
-                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
-                  <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
-                        <img src="/sail.jpg" alt="SAIL.r" className="w-full h-full object-cover" />
-                      </div>
-                      <div>
-                        <div className="text-white font-bold">SAIL.r – Royalty</div>
-                        <div className="text-sm text-gray-400">Liquid Royalty</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Your Token Value</div>
-                        <div className="text-xl font-bold text-white">${tokenData.sailr.valueUsd.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                        <div className="text-xl font-bold text-white">{tokenData.sailr.balance.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
-                        <div className="text-xl font-bold text-yellow-400">{tokenData.sailr.multiplier}x</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Manage your position on Liquid Royalty</span>
-                    <a
-                      href="https://www.liquidroyalty.com/invest/sail"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
-                    >
-                      View Position →
-                    </a>
-                  </div>
-                </div>
-              )}
-              {tokenData?.plvhedge?.isActive && (
-                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
-                  <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
-                        <img src="/plvhedge.jpg" alt="plvHEDGE" className="w-full h-full object-cover" />
-                      </div>
-                      <div>
-                        <div className="text-white font-bold">plvHEDGE – Vault</div>
-                        <div className="text-sm text-gray-400">Plutus</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Your Token Value</div>
-                        <div className="text-xl font-bold text-white">${tokenData.plvhedge.valueUsd.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                        <div className="text-xl font-bold text-white">{tokenData.plvhedge.balance.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
-                        <div className="text-xl font-bold text-yellow-400">{tokenData.plvhedge.multiplier}x</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Manage your position on Plutus</span>
-                    <a
-                      href="https://plutus.fi/Vaults/v/plvHEDGE/chain/berachain"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
-                    >
-                      View Position →
-                    </a>
-                  </div>
-                </div>
-              )}
-              {tokenData?.plsbera?.isActive && (
-                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
-                  <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
-                        <img src="/plsbera.jpg" alt="plsBERA" className="w-full h-full object-cover" />
-                      </div>
-                      <div>
-                        <div className="text-white font-bold">plsBERA – Staked</div>
-                        <div className="text-sm text-gray-400">Plutus</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Your Staked Value</div>
-                        <div className="text-xl font-bold text-white">${tokenData.plsbera.valueUsd.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                        <div className="text-xl font-bold text-white">{tokenData.plsbera.balance.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
-                        <div className="text-xl font-bold text-yellow-400">{tokenData.plsbera.multiplier}x</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Manage your position on Plutus</span>
-                    <a
-                      href="https://plutus.fi/Assets/a/plsBERA/tab/stake"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
-                    >
-                      View Position →
-                    </a>
-                  </div>
-                </div>
-              )}
-              {tokenData?.honeybend?.isActive && (
-                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
-                  <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
-                        <img src="/honey.jpg" alt="HONEY-Bend" className="w-full h-full object-cover" />
-                      </div>
-                      <div>
-                        <div className="text-white font-bold">HONEY – Lent</div>
-                        <div className="text-sm text-gray-400">Bend Protocol</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Your Deposit Value</div>
-                        <div className="text-xl font-bold text-white">${tokenData.honeybend.valueUsd.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                        <div className="text-xl font-bold text-white">{tokenData.honeybend.balance.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
-                        <div className="text-xl font-bold text-yellow-400">{tokenData.honeybend.multiplier}x</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Manage your position on Bend</span>
-                    <a
-                      href="https://bend.berachain.com/lend/80094/0x30BbA9CD9Eb8c95824aa42Faa1Bb397b07545bc1"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
-                    >
-                      View Position →
-                    </a>
-                  </div>
-                </div>
-              )}
-              {tokenData?.stakedbera?.isActive && (
-                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
-                  <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
-                        <img src="/BERA.png" alt="sWBERA" className="w-full h-full object-cover" />
-                      </div>
-                      <div>
-                        <div className="text-white font-bold">BERA – Staked</div>
-                        <div className="text-sm text-gray-400">Berachain Staking</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Your Staked Value</div>
-                        <div className="text-xl font-bold text-white">${tokenData.stakedbera.valueUsd.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                        <div className="text-xl font-bold text-white">{tokenData.stakedbera.balance.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
-                        <div className="text-xl font-bold text-yellow-400">{tokenData.stakedbera.multiplier}x</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Manage your stake on Berachain Hub</span>
-                    <a
-                      href="https://hub.berachain.com/stake"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
-                    >
-                      View Position →
-                    </a>
-                  </div>
-                </div>
-              )}
-              {tokenData?.bgt?.isActive && (
-                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
-                  <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
-                        <img src="/BERA.png" alt="BGT" className="w-full h-full object-cover" />
-                      </div>
-                      <div>
-                        <div className="text-white font-bold">BGT</div>
-                        <div className="text-sm text-gray-400">Berachain Governance Token</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Your Token Value</div>
-                        <div className="text-xl font-bold text-white">${tokenData.bgt.valueUsd.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                        <div className="text-xl font-bold text-white">{tokenData.bgt.balance.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
-                        <div className="text-xl font-bold text-yellow-400">{tokenData.bgt.multiplier}x</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
-                    <span className="text-sm text-gray-400">BGT earnings from liquidity provision</span>
-                    <a
-                      href="https://hub.berachain.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
-                    >
-                      View Hub →
-                    </a>
-                  </div>
-                </div>
-              )}
-              {tokenData?.snrusd?.isActive && (
-                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
-                  <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
-                        <img src="/snr.jpg" alt="snrUSD" className="w-full h-full object-cover" />
-                      </div>
-                      <div>
-                        <div className="text-white font-bold">snrUSD – Vault</div>
-                        <div className="text-sm text-gray-400">Liquid Royalty</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Your Token Value</div>
-                        <div className="text-xl font-bold text-white">${tokenData.snrusd.valueUsd.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                        <div className="text-xl font-bold text-white">{tokenData.snrusd.balance.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
-                        <div className="text-xl font-bold text-yellow-400">{tokenData.snrusd.multiplier}x</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Manage your position on Liquid Royalty</span>
-                    <a
-                      href="https://www.liquidroyalty.com/vaults"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
-                    >
-                      View Position →
-                    </a>
-                  </div>
-                </div>
-              )}
-              {tokenData?.jnrusd?.isActive && (
-                <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
-                  <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
-                        <img src="/jnr.jpg" alt="jnrUSD" className="w-full h-full object-cover" />
-                      </div>
-                      <div>
-                        <div className="text-white font-bold">jnrUSD – Vault</div>
-                        <div className="text-sm text-gray-400">Liquid Royalty</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Your Token Value</div>
-                        <div className="text-xl font-bold text-white">${tokenData.jnrusd.valueUsd.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                        <div className="text-xl font-bold text-white">{tokenData.jnrusd.balance.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-gray-800/60 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
-                        <div className="text-xl font-bold text-yellow-400">{tokenData.jnrusd.multiplier}x</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Manage your position on Liquid Royalty</span>
-                    <a
-                      href="https://www.liquidroyalty.com/vaults"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
-                    >
-                      View Position →
-                    </a>
-                  </div>
-                </div>
-              )}
+              {/* Build sorted list of active positions by value (highest first) */}
+              {(() => {
+                const positions: { key: string; valueUsd: number; element: React.ReactNode }[] = [];
+
+                // AMY/HONEY LP
+                if (hasActiveLp) {
+                  positions.push({
+                    key: 'lp',
+                    valueUsd: lpData?.lpValueUsd || 0,
+                    element: <ActivePositionCard lpData={lpData || MOCK_LP_DATA} />,
+                  });
+                }
+
+                // Token positions
+                const tokenPositions = [
+                  { key: 'sailr', data: tokenData?.sailr, name: 'SAIL.r – Royalty', subtitle: 'Liquid Royalty', image: '/sail.jpg', valueLabel: 'Your Token Value', manageText: 'Manage your position on Liquid Royalty', link: 'https://www.liquidroyalty.com/invest/sail', linkText: 'View Position →' },
+                  { key: 'plvhedge', data: tokenData?.plvhedge, name: 'plvHEDGE – Vault', subtitle: 'Plutus', image: '/plvhedge.jpg', valueLabel: 'Your Token Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Vaults/v/plvHEDGE/chain/berachain', linkText: 'View Position →' },
+                  { key: 'plsbera', data: tokenData?.plsbera, name: 'plsBERA – Staked', subtitle: 'Plutus', image: '/plsbera.jpg', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Assets/a/plsBERA/tab/stake', linkText: 'View Position →' },
+                  { key: 'honeybend', data: tokenData?.honeybend, name: 'HONEY – Lent', subtitle: 'Bend Protocol', image: '/honey.jpg', valueLabel: 'Your Deposit Value', manageText: 'Manage your position on Berachain', link: 'https://bend.berachain.com/lend/80094/0x30BbA9CD9Eb8c95824aa42Faa1Bb397b07545bc1', linkText: 'View Position →' },
+                  { key: 'stakedbera', data: tokenData?.stakedbera, name: 'BERA – Staked', subtitle: 'Berachain Staking', image: '/BERA.png', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Berachain', link: 'https://hub.berachain.com/stake', linkText: 'View Position →' },
+                  { key: 'bgt', data: tokenData?.bgt, name: 'BGT', subtitle: 'Berachain Governance Token', image: '/BERA.png', valueLabel: 'Your Token Value', manageText: 'BGT earnings from liquidity provision', link: 'https://hub.berachain.com/', linkText: 'View Hub →' },
+                  { key: 'snrusd', data: tokenData?.snrusd, name: 'snrUSD – Vault', subtitle: 'Liquid Royalty', image: '/snr.jpg', valueLabel: 'Your Token Value', manageText: 'Manage your position on Liquid Royalty', link: 'https://www.liquidroyalty.com/vaults', linkText: 'View Position →' },
+                  { key: 'jnrusd', data: tokenData?.jnrusd, name: 'jnrUSD – Vault', subtitle: 'Liquid Royalty', image: '/jnr.jpg', valueLabel: 'Your Token Value', manageText: 'Manage your position on Liquid Royalty', link: 'https://www.liquidroyalty.com/vaults', linkText: 'View Position →' },
+                ];
+
+                tokenPositions.forEach((pos) => {
+                  if (pos.data?.isActive) {
+                    positions.push({
+                      key: pos.key,
+                      valueUsd: pos.data.valueUsd || 0,
+                      element: (
+                        <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
+                          <div className="p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+                                <img src={pos.image} alt={pos.name} className="w-full h-full object-cover" />
+                              </div>
+                              <div>
+                                <div className="text-white font-bold">{pos.name}</div>
+                                <div className="text-sm text-gray-400">{pos.subtitle}</div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="px-4 pb-4">
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="bg-gray-800/60 rounded-lg p-3">
+                                <div className="text-xs text-gray-500 uppercase mb-1">{pos.valueLabel}</div>
+                                <div className="text-xl font-bold text-white">${pos.data!.valueUsd.toFixed(2)}</div>
+                              </div>
+                              <div className="bg-gray-800/60 rounded-lg p-3">
+                                <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
+                                <div className="text-xl font-bold text-white">{pos.data!.balance.toFixed(2)}</div>
+                              </div>
+                              <div className="bg-gray-800/60 rounded-lg p-3">
+                                <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
+                                <div className="text-xl font-bold text-yellow-400">{pos.data!.multiplier}x</div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-between">
+                            <span className="text-sm text-gray-400">{pos.manageText}</span>
+                            <a
+                              href={pos.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
+                            >
+                              {pos.linkText}
+                            </a>
+                          </div>
+                        </div>
+                      ),
+                    });
+                  }
+                });
+
+                // Sort by value descending (highest first)
+                positions.sort((a, b) => b.valueUsd - a.valueUsd);
+
+                return positions.map((pos) => (
+                  <React.Fragment key={pos.key}>{pos.element}</React.Fragment>
+                ));
+              })()}
             </>
           ) : (
             <div className="bg-gray-900/60 rounded-2xl border border-gray-700/50 p-8 text-center">
