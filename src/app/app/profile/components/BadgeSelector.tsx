@@ -225,8 +225,8 @@ export default function BadgeSelector({
       if (badgeId) {
         active.push({
           id: badgeId,
-          name: 'Bulla Exchange',
-          title: 'AMY/HONEY LP',
+          name: 'AMY/HONEY',
+          title: 'LP',
           image: '/bulla.jpg',
           multiplier: lpData.lpMultiplier
         });
@@ -271,7 +271,7 @@ export default function BadgeSelector({
         active.push({
           id: badgeId,
           name: 'plsBERA',
-          title: 'Staking',
+          title: 'Staked',
           image: '/plsbera.jpg',
           multiplier: tokenData.plsbera.multiplier
         });
@@ -285,8 +285,8 @@ export default function BadgeSelector({
       if (badgeId) {
         active.push({
           id: badgeId,
-          name: 'HONEY Bend',
-          title: 'Lending',
+          name: 'HONEY',
+          title: 'Lent',
           image: '/honey.jpg',
           multiplier: tokenData.honeybend.multiplier
         });
@@ -300,8 +300,8 @@ export default function BadgeSelector({
       if (badgeId) {
         active.push({
           id: badgeId,
-          name: 'Staked BERA',
-          title: 'stBERA',
+          name: 'BERA',
+          title: 'Staked',
           image: '/BERA.png',
           multiplier: tokenData.stakedbera.multiplier
         });
@@ -331,7 +331,7 @@ export default function BadgeSelector({
         active.push({
           id: badgeId,
           name: 'snrUSD',
-          title: 'Senior',
+          title: 'Vault',
           image: '/snr.jpg',
           multiplier: tokenData.snrusd.multiplier
         });
@@ -346,7 +346,7 @@ export default function BadgeSelector({
         active.push({
           id: badgeId,
           name: 'jnrUSD',
-          title: 'Junior',
+          title: 'Vault',
           image: '/jnr.jpg',
           multiplier: tokenData.jnrusd.multiplier
         });
@@ -357,11 +357,10 @@ export default function BadgeSelector({
     if (pointsData && pointsData.raidsharkMultiplier && pointsData.raidsharkMultiplier > 0) {
       const badgeId = getRaidsharkBadgeId(pointsData.raidsharkMultiplier);
       if (badgeId) {
-        const tierName = pointsData.raidsharkMultiplier >= 15 ? 'Raid Legend' : pointsData.raidsharkMultiplier >= 7 ? 'Raid Master' : 'Raid Enthusiast';
         active.push({
           id: badgeId,
-          name: 'RaidShark',
-          title: tierName,
+          name: 'Raider',
+          title: 'Monthly',
           image: '/shark.jpg',
           multiplier: pointsData.raidsharkMultiplier
         });
@@ -372,11 +371,10 @@ export default function BadgeSelector({
     if (pointsData && pointsData.onchainConvictionMultiplier && pointsData.onchainConvictionMultiplier > 0) {
       const badgeId = getConvictionBadgeId(pointsData.onchainConvictionMultiplier);
       if (badgeId) {
-        const level = pointsData.onchainConvictionMultiplier >= 10 ? 3 : pointsData.onchainConvictionMultiplier >= 5 ? 2 : 1;
         active.push({
           id: badgeId,
-          name: 'Onchain Conviction',
-          title: `Level ${level}`,
+          name: 'Conviction',
+          title: 'Monthly',
           image: '/convic.jpg',
           multiplier: pointsData.onchainConvictionMultiplier
         });
@@ -387,11 +385,10 @@ export default function BadgeSelector({
     if (pointsData && pointsData.referralMultiplier && pointsData.referralMultiplier > 0) {
       const badgeId = getReferralBadgeId(pointsData.referralMultiplier);
       if (badgeId) {
-        const tierName = pointsData.referralMultiplier >= 10 ? '3+ Referrals' : pointsData.referralMultiplier >= 5 ? '2 Referrals' : '1 Referral';
         active.push({
           id: badgeId,
-          name: 'Dawn Referral',
-          title: tierName,
+          name: 'Dawn',
+          title: 'Legacy',
           image: '/ref.jpg',
           multiplier: pointsData.referralMultiplier
         });
@@ -402,11 +399,10 @@ export default function BadgeSelector({
     if (pointsData && pointsData.swapperMultiplier && pointsData.swapperMultiplier > 0) {
       const badgeId = getSwapperBadgeId(pointsData.swapperMultiplier);
       if (badgeId) {
-        const tierName = pointsData.swapperMultiplier >= 10 ? 'Elite' : pointsData.swapperMultiplier >= 5 ? 'Committed' : 'Engaged';
         active.push({
           id: badgeId,
-          name: 'Seasoned Swapper',
-          title: tierName,
+          name: 'Swapper',
+          title: 'Monthly',
           image: '/swapper.jpg',
           multiplier: pointsData.swapperMultiplier
         });
@@ -415,11 +411,10 @@ export default function BadgeSelector({
 
     // Telegram Mod badge
     if (pointsData && pointsData.telegramModMultiplier && pointsData.telegramModMultiplier > 0) {
-      const tierName = pointsData.telegramModMultiplier >= 15 ? 'Archlord' : pointsData.telegramModMultiplier >= 7 ? 'Sentinel' : 'Guardian';
       active.push({
         id: `telegram_mod_x${pointsData.telegramModMultiplier}`,
-        name: 'Telegram Mod',
-        title: tierName,
+        name: 'Telegram',
+        title: 'Mod',
         image: '/tg.png',
         multiplier: pointsData.telegramModMultiplier
       });
@@ -427,11 +422,10 @@ export default function BadgeSelector({
 
     // Discord Mod badge
     if (pointsData && pointsData.discordModMultiplier && pointsData.discordModMultiplier > 0) {
-      const tierName = pointsData.discordModMultiplier >= 15 ? 'Archlord' : pointsData.discordModMultiplier >= 7 ? 'Sentinel' : 'Guardian';
       active.push({
         id: `discord_mod_x${pointsData.discordModMultiplier}`,
-        name: 'Discord Mod',
-        title: tierName,
+        name: 'Discord',
+        title: 'Mod',
         image: '/dc.jpg',
         multiplier: pointsData.discordModMultiplier
       });
@@ -450,8 +444,14 @@ export default function BadgeSelector({
 
   const isBadgeEquipped = (badgeId: string) => equippedBadges.some(b => b.badgeId === badgeId);
 
-  const getMultiplierColors = (multiplier: number) => {
-    // Level 3 (x10+) = Gold, Level 2 (x5) = Silver, Level 1 (x3) = Bronze
+  const getMultiplierColors = (multiplier: number, badgeId?: string) => {
+    // LP badge has different tiers: x5=bronze, x10=silver, x100=gold
+    if (badgeId?.startsWith('lp_')) {
+      if (multiplier >= 100) return 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-yellow-950'; // Gold for 100x
+      if (multiplier >= 10) return 'bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900'; // Silver for 10x
+      return 'bg-gradient-to-br from-amber-600 to-amber-800 text-amber-100'; // Bronze for 5x
+    }
+    // Default: x3=bronze, x5=silver, x10=gold
     if (multiplier >= 100) return 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-yellow-950'; // Super Gold for 100x
     if (multiplier >= 10) return 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-yellow-950'; // Gold for 10x+
     if (multiplier >= 5) return 'bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900'; // Silver for 5x
@@ -459,8 +459,14 @@ export default function BadgeSelector({
   };
 
   // Get tier ring color based on multiplier
-  const getTierRingColor = (multiplier: number) => {
-    // Level 3 (x10+) = Gold, Level 2 (x5) = Silver, Level 1 (x3) = Bronze
+  const getTierRingColor = (multiplier: number, badgeId?: string) => {
+    // LP badge has different tiers: x5=bronze, x10=silver, x100=gold
+    if (badgeId?.startsWith('lp_')) {
+      if (multiplier >= 100) return 'ring-yellow-400'; // Gold for 100x
+      if (multiplier >= 10) return 'ring-slate-400'; // Silver for 10x
+      return 'ring-amber-600'; // Bronze for 5x
+    }
+    // Default: x3=bronze, x5=silver, x10=gold
     if (multiplier >= 100) return 'ring-yellow-400'; // Super Gold for 100x
     if (multiplier >= 10) return 'ring-yellow-400'; // Gold for 10x+
     if (multiplier >= 5) return 'ring-slate-400'; // Silver for 5x
@@ -556,7 +562,7 @@ export default function BadgeSelector({
                             isSelected
                               ? 'border-yellow-400 bg-yellow-900/30 scale-110'
                               : badge
-                              ? `ring-2 ${getTierRingColor(badge.multiplier)} bg-white hover:scale-105`
+                              ? `ring-2 ${getTierRingColor(badge.multiplier, badge.id)} bg-white hover:scale-105`
                               : 'border-gray-600/50 bg-gray-800/50 border-dashed hover:border-gray-500'
                           }`}
                           onClick={() => setSelectedSlot(slotNumber)}
@@ -565,7 +571,7 @@ export default function BadgeSelector({
                             <>
                               <img src={badge.image} alt={badge.name} className="w-full h-full object-cover" />
                               {/* Banner triangle in bottom left corner */}
-                              <div className={`absolute bottom-0 left-0 ${getMultiplierColors(badge.multiplier)}`}>
+                              <div className={`absolute bottom-0 left-0 ${getMultiplierColors(badge.multiplier, badge.id)}`}>
                                 <div className="text-[10px] font-black px-1.5 py-0.5 rounded-tr-lg">
                                   x{badge.multiplier}
                                 </div>
@@ -626,10 +632,10 @@ export default function BadgeSelector({
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 ring-2 ${getTierRingColor(badge.multiplier)}`}>
+                            <div className={`relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 ring-2 ${getTierRingColor(badge.multiplier, badge.id)}`}>
                               <img src={badge.image} alt={badge.name} className="w-full h-full object-cover" />
                               {/* Banner in bottom left corner */}
-                              <div className={`absolute bottom-0 left-0 ${getMultiplierColors(badge.multiplier)}`}>
+                              <div className={`absolute bottom-0 left-0 ${getMultiplierColors(badge.multiplier, badge.id)}`}>
                                 <div className="text-xs font-black px-2 py-0.5 rounded-tr-lg">
                                   x{badge.multiplier}
                                 </div>

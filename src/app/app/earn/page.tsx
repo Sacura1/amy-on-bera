@@ -846,7 +846,8 @@ export default function EarnPage() {
             </>
           ) : (
             <div className="bg-gray-900/60 rounded-2xl border border-gray-700/50 p-8 text-center">
-              <p className="text-gray-400 mb-4">You don&apos;t have any yield earning assets currently.</p>
+              <p className="text-gray-400">You don&apos;t have any yield earning assets currently.</p>
+              {/* Getting started with Earn link - commented out
               <a
                 href="https://www.bulla.exchange/pools/0xff716930eefb37b5b4ac55b1901dc5704b098d84"
                 target="_blank"
@@ -855,6 +856,7 @@ export default function EarnPage() {
               >
                 Getting started with Earn
               </a>
+              */}
             </div>
           )}
         </div>
