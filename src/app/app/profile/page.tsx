@@ -554,9 +554,11 @@ function ProfilePageContent() {
 
       const response = await fetch(`${API_BASE_URL}/api/points/add-bonus`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': walletAddress.toString(),
+        },
         body: JSON.stringify({
-          wallet: walletAddress,
           xUsername: cleanUsername,
           points: points,
           reason: bonusReason.trim() || 'admin_bonus'
