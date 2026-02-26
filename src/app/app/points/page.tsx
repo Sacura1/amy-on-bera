@@ -346,12 +346,12 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
 
         {/* Icon */}
         <div className="p-3 flex justify-center">
-          <div className={`w-14 h-12 rounded-lg flex items-center justify-center overflow-hidden relative ${
+          <div className={`w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden relative ${
             isActive ? 'bg-gray-800' : 'bg-gray-800/60'
           }`}>
             {image ? (
               <>
-                <img src={image} alt={name} className={`w-full h-full object-cover ${!isActive && 'opacity-60'}`} />
+                <img src={image} alt={name} className={`w-full h-full object-contain ${!isActive && 'opacity-60'}`} />
                 {/* Subtle overlay for inactive state */}
                 {!isActive && <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" />}
               </>
@@ -390,9 +390,9 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
 
           {/* Header with logo */}
           <div className="bg-gradient-to-b from-gray-700/50 to-gray-800 p-3 flex justify-center flex-shrink-0">
-            <div className="w-20 h-16 rounded-xl flex items-center justify-center overflow-hidden bg-gray-800 shadow-lg">
+            <div className="w-20 h-20 rounded-xl flex items-center justify-center overflow-hidden bg-gray-800 shadow-lg">
               {image ? (
-                <img src={image} alt={name} className="w-full h-full object-cover" />
+                <img src={image} alt={name} className="w-full h-full object-contain" />
               ) : (
                 <div className="w-12 h-10 rounded bg-green-500" />
               )}
@@ -863,7 +863,11 @@ export default function PointsPage() {
                         const tgModMult = pointsData?.telegramModMultiplier && pointsData.telegramModMultiplier > 0 ? pointsData.telegramModMultiplier : 0;
                         const dcModMult = pointsData?.discordModMultiplier && pointsData.discordModMultiplier > 0 ? pointsData.discordModMultiplier : 0;
                         const dawnMult = pointsData?.dawnReferralMultiplier && pointsData.dawnReferralMultiplier > 0 ? pointsData.dawnReferralMultiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult);
+                        const bullasMult = pointsData?.bullasMultiplier && pointsData.bullasMultiplier > 0 ? pointsData.bullasMultiplier : 0;
+                        const boogaBullasMult = pointsData?.boogaBullasMultiplier && pointsData.boogaBullasMultiplier > 0 ? pointsData.boogaBullasMultiplier : 0;
+                        const emberMult = pointsData?.emberMultiplier && pointsData.emberMultiplier > 0 ? pointsData.emberMultiplier : 0;
+                        const genesisMult = pointsData?.genesisMultiplier && pointsData.genesisMultiplier > 0 ? pointsData.genesisMultiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult + bullasMult + boogaBullasMult + emberMult + genesisMult);
 
                         let badgeGradient = 'bg-gray-600'; // default for 1x
                         if (totalMultiplier >= 100) {
@@ -906,7 +910,11 @@ export default function PointsPage() {
                         const tgModMult = pointsData?.telegramModMultiplier && pointsData.telegramModMultiplier > 0 ? pointsData.telegramModMultiplier : 0;
                         const dcModMult = pointsData?.discordModMultiplier && pointsData.discordModMultiplier > 0 ? pointsData.discordModMultiplier : 0;
                         const dawnMult = pointsData?.dawnReferralMultiplier && pointsData.dawnReferralMultiplier > 0 ? pointsData.dawnReferralMultiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult);
+                        const bullasMult = pointsData?.bullasMultiplier && pointsData.bullasMultiplier > 0 ? pointsData.bullasMultiplier : 0;
+                        const boogaBullasMult = pointsData?.boogaBullasMultiplier && pointsData.boogaBullasMultiplier > 0 ? pointsData.boogaBullasMultiplier : 0;
+                        const emberMult = pointsData?.emberMultiplier && pointsData.emberMultiplier > 0 ? pointsData.emberMultiplier : 0;
+                        const genesisMult = pointsData?.genesisMultiplier && pointsData.genesisMultiplier > 0 ? pointsData.genesisMultiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult + bullasMult + boogaBullasMult + emberMult + genesisMult);
                         const pointsPerHour = currentTier.pointsPerHour * totalMultiplier;
                         return (
                           <div className="flex flex-col items-center">
