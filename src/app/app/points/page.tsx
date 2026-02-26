@@ -30,6 +30,10 @@ interface PointsData {
   swapperMultiplier?: number;
   telegramModMultiplier?: number;
   discordModMultiplier?: number;
+  bullasMultiplier?: number;
+  boogaBullasMultiplier?: number;
+  emberMultiplier?: number;
+  genesisMultiplier?: number;
   // Dawn season (historical)
   dawnReferralCount?: number;
   dawnReferralMultiplier?: number;
@@ -1268,6 +1272,36 @@ export default function PointsPage() {
               currentMultiplier={(pointsData?.dawnReferralMultiplier || 0) > 0 ? `x${pointsData?.dawnReferralMultiplier}` : undefined}
             />
 
+            {/* Ember – Legacy (inactive until 22 March 2026) */}
+            <MultiplierBadge
+              name="Ember"
+              title="Legacy"
+              image="/Ember.png"
+              description="Earned during the Ember referral season. Multipliers activate after 22 March 2026. This badge is permanent for eligible participants."
+              multipliers={[
+                { requirement: 'Level 1', multiplier: 'TBC' },
+                { requirement: 'Level 2', multiplier: 'TBC' },
+                { requirement: 'Level 3', multiplier: 'TBC' },
+              ]}
+              isActive={(pointsData?.emberMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.emberMultiplier || 0) > 0 ? `x${pointsData?.emberMultiplier}` : undefined}
+            />
+
+            {/* Genesis – OGs (inactive) */}
+            <MultiplierBadge
+              name="Genesis"
+              title="OGs"
+              image="/genesis.png"
+              description="Reserved for the earliest and most dedicated community members. Top 50/20/10 holders earn this badge."
+              multipliers={[
+                { requirement: 'Top 50', multiplier: 'x3' },
+                { requirement: 'Top 20', multiplier: 'x5' },
+                { requirement: 'Top 10', multiplier: 'x10' },
+              ]}
+              isActive={(pointsData?.genesisMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.genesisMultiplier || 0) > 0 ? `x${pointsData?.genesisMultiplier}` : undefined}
+            />
+
             {/* 12. Conviction – Monthly */}
             <MultiplierBadge
               name="Conviction"
@@ -1354,8 +1388,42 @@ export default function PointsPage() {
               actionLabel="Join Discord"
             />
 
-            {/* All other badges - Coming Soon */}
-            {Array.from({ length: 4 }).map((_, index) => (
+            {/* Bullas NFT – Active */}
+            <MultiplierBadge
+              name="Bullas"
+              title="NFT"
+              image="/bulla.png"
+              description="Hold Bullas NFTs to earn a multiplier. Multiplier is based on how many NFTs you hold in your connected wallet."
+              multipliers={[
+                { requirement: 'Hold 2+', multiplier: 'x3' },
+                { requirement: 'Hold 8+', multiplier: 'x5' },
+                { requirement: 'Hold 28+', multiplier: 'x15' },
+              ]}
+              isActive={(pointsData?.bullasMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.bullasMultiplier || 0) > 0 ? `x${pointsData?.bullasMultiplier}` : undefined}
+              actionUrl="https://magiceden.io/collections/berachain/0x333814f5e16eee61d0c0b03a5b6abbd424b381c2"
+              actionLabel="View on Magic Eden"
+            />
+
+            {/* Booga Bullas NFT – Active */}
+            <MultiplierBadge
+              name="Booga Bullas"
+              title="NFT"
+              image="/booga.png"
+              description="Hold Booga Bullas NFTs to earn a multiplier. Multiplier is based on how many NFTs you hold in your connected wallet."
+              multipliers={[
+                { requirement: 'Hold 3+', multiplier: 'x3' },
+                { requirement: 'Hold 13+', multiplier: 'x5' },
+                { requirement: 'Hold 42+', multiplier: 'x15' },
+              ]}
+              isActive={(pointsData?.boogaBullasMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.boogaBullasMultiplier || 0) > 0 ? `x${pointsData?.boogaBullasMultiplier}` : undefined}
+              actionUrl="https://magiceden.io/collections/berachain/0x5a30c392714a9a9a8177c7998d9d59c3dd120917"
+              actionLabel="View on Magic Eden"
+            />
+
+            {/* Coming Soon placeholders */}
+            {Array.from({ length: 2 }).map((_, index) => (
               <MultiplierBadge
                 key={index}
                 name=""
