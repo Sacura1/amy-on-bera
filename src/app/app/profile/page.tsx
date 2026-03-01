@@ -96,6 +96,16 @@ function ProfilePageContent() {
   const [isUpdatingDiscordMod, setIsUpdatingDiscordMod] = useState(false);
   const [discordModStatus, setDiscordModStatus] = useState('');
   const [discordModList, setDiscordModList] = useState<Array<{ wallet: string; discordUsername?: string; multiplier: number }>>([]);
+  // Raffle management state (admin)
+  const [activeRaffleList, setActiveRaffleList] = useState<Array<{
+    id: number; title: string; status: string; total_tickets: number;
+    unique_participants: number; total_points_committed: number;
+  }>>([]);
+  const [isCancellingRaffle, setIsCancellingRaffle] = useState<number | null>(null);
+  const [raffleRefund, setRaffleRefund] = useState(true);
+  const [isDrawingRaffle, setIsDrawingRaffle] = useState<number | null>(null);
+  const [raffleActionStatus, setRaffleActionStatus] = useState('');
+
   // Dawn referral archive
   const [isArchivingDawn, setIsArchivingDawn] = useState(false);
   const [dawnArchiveStatus, setDawnArchiveStatus] = useState('');
@@ -979,6 +989,74 @@ function ProfilePageContent() {
   };
 
   // Archive Dawn referral season (admin only)
+  // Fetch active raffles for admin management
+  const fetchAdminRaffles = async () => {
+    if (!walletAddress || !isAdmin) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/raffles`);
+      const data = await res.json();
+      if (data.success) setActiveRaffleList(data.data || []);
+    } catch {
+      // ignore
+    }
+  };
+
+  const cancelRaffle = async (raffleId: number) => {
+    if (!walletAddress || !isAdmin) return;
+    if (!confirm(`Cancel raffle #${raffleId}? This cannot be undone.`)) return;
+    setIsCancellingRaffle(raffleId);
+    setRaffleActionStatus('');
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/raffles/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': String(walletAddress),
+        },
+        body: JSON.stringify({ raffleId, refund: raffleRefund }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRaffleActionStatus(`Raffle #${raffleId} cancelled${raffleRefund ? ' — points refunded' : ''}`);
+        fetchAdminRaffles();
+      } else {
+        setRaffleActionStatus(data.error || 'Failed to cancel raffle');
+      }
+    } catch {
+      setRaffleActionStatus('Error cancelling raffle');
+    } finally {
+      setIsCancellingRaffle(null);
+    }
+  };
+
+  const drawRaffle = async (raffleId: number) => {
+    if (!walletAddress || !isAdmin) return;
+    if (!confirm(`Draw winner for raffle #${raffleId} now?`)) return;
+    setIsDrawingRaffle(raffleId);
+    setRaffleActionStatus('');
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/raffles/draw`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': String(walletAddress),
+        },
+        body: JSON.stringify({ raffleId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRaffleActionStatus(`Winner drawn for raffle #${raffleId}: ${data.winner || 'No entries'}`);
+        fetchAdminRaffles();
+      } else {
+        setRaffleActionStatus(data.error || 'Failed to draw winner');
+      }
+    } catch {
+      setRaffleActionStatus('Error drawing winner');
+    } finally {
+      setIsDrawingRaffle(null);
+    }
+  };
+
   const archiveDawnSeason = async () => {
     if (!walletAddress) {
       setDawnArchiveStatus('Error: Wallet not connected');
@@ -1708,6 +1786,79 @@ function ProfilePageContent() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Raffle Management */}
+            <div className="p-4 md:p-6 border-t border-gray-700/50">
+              <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-4 flex items-center gap-2">
+                <span>🎟️</span> Raffle Management
+              </h4>
+
+              {/* Active Raffles Management */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm text-gray-400 font-medium">Active Raffles</p>
+                  <button
+                    onClick={fetchAdminRaffles}
+                    className="text-xs text-yellow-400 hover:text-yellow-300 underline"
+                  >
+                    Refresh
+                  </button>
+                </div>
+
+                {/* Refund toggle */}
+                <label className="flex items-center gap-2 mb-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={raffleRefund}
+                    onChange={(e) => setRaffleRefund(e.target.checked)}
+                    className="w-4 h-4 accent-yellow-400"
+                  />
+                  <span className="text-xs text-gray-400">Refund participants on cancel</span>
+                </label>
+
+                {activeRaffleList.length === 0 ? (
+                  <p className="text-xs text-gray-500 italic">No active raffles. Click Refresh to load.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {activeRaffleList.map((r) => (
+                      <div key={r.id} className="bg-black/30 rounded-xl p-3 flex flex-wrap items-center gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-white font-bold truncate">{r.title}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            <span className={`font-bold mr-2 ${r.status === 'LIVE' ? 'text-yellow-400' : 'text-gray-400'}`}>{r.status}</span>
+                            {r.total_tickets} tickets &middot; {r.unique_participants} users &middot; {r.total_points_committed} pts
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          {r.status === 'LIVE' && (
+                            <button
+                              onClick={() => drawRaffle(r.id)}
+                              disabled={isDrawingRaffle === r.id}
+                              className="bg-yellow-500 hover:bg-yellow-400 text-black px-3 py-1.5 rounded-full text-xs font-bold uppercase disabled:opacity-50"
+                            >
+                              {isDrawingRaffle === r.id ? 'Drawing...' : 'Draw Now'}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => cancelRaffle(r.id)}
+                            disabled={isCancellingRaffle === r.id}
+                            className="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase disabled:opacity-50"
+                          >
+                            {isCancellingRaffle === r.id ? 'Cancelling...' : 'Cancel'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {raffleActionStatus && (
+                  <p className={`text-sm mt-3 ${raffleActionStatus.includes('cancelled') || raffleActionStatus.includes('Winner') ? 'text-green-400' : 'text-red-400'}`}>
+                    {raffleActionStatus}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Dawn Referral Season Archive */}
