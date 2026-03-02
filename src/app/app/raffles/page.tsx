@@ -176,8 +176,8 @@ export default function RafflesPage() {
 
   return (
     <div>
-      {/* Prize Carousel — 88vw centered on mobile, full-width on desktop */}
-      <div className="w-[88vw] mx-auto mt-[5vh] md:w-full md:max-w-[1440px] md:mt-0">
+      {/* Prize Carousel */}
+      <div className="w-full mt-[4vh] md:max-w-[1440px] md:mx-auto md:mt-0">
         <PrizeCarousel
           raffles={raffles}
           onSelectRaffle={(raffle) => setSelectedRaffle(raffle)}

@@ -36,7 +36,7 @@ export default function RaffleHistory({ history }: RaffleHistoryProps) {
   if (history.length === 0) return null;
 
   return (
-    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden">
+    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto">
       <button
         onClick={() => setIsOpen(o => !o)}
         className="w-full flex items-center justify-between p-4 md:p-6 hover:bg-gray-800/40 transition-colors"

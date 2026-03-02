@@ -80,7 +80,7 @@ export default function ActiveRaffles({ entries, onBuyMore }: ActiveRafflesProps
   if (active.length === 0) return null;
 
   return (
-    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-md mx-auto">
+    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto">
       {/* Header */}
       <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-700/50">
         <h2 className="text-xl font-black text-yellow-400">My Active Raffles</h2>

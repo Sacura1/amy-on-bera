@@ -505,6 +505,13 @@
   }
 }
 
+
+@media (max-width: 767px) {
+  .carousel-bezel {
+    box-shadow: 0 0 0 10px #111111 !important;
+  }
+}
+
 @media (max-width: 768px) {
   .glass-card { border-radius: 16px; }
   .glass-card:hover { transform: none; }

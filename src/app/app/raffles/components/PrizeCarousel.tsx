@@ -31,11 +31,11 @@ const DEFAULT_NOVELTIES = [
 ];
 const DEFAULT_FRAME = '/frame.png';
 
-// Frame interior viewport percentages within frame.png (tune if needed)
-const INT_TOP    = '10.5%';
-const INT_LEFT   = '12.5%';
-const INT_RIGHT  = '12.5%';
-const INT_BOTTOM = '17%';
+// Frame interior viewport — values driven by CSS variables so mobile can override via globals.css
+const INT_TOP    = 'var(--carousel-int-top, 10.5%)';
+const INT_LEFT   = 'var(--carousel-int-left, 12.5%)';
+const INT_RIGHT  = 'var(--carousel-int-right, 12.5%)';
+const INT_BOTTOM = 'var(--carousel-int-bottom, 17%)';
 
 function PrizeItem({ raffle, noveltyIndex, noveltyItems, onClick }: { raffle: Raffle; noveltyIndex: number; noveltyItems: string[]; onClick: () => void }) {
   const noveltyIdx = noveltyIndex % noveltyItems.length;
@@ -46,7 +46,7 @@ function PrizeItem({ raffle, noveltyIndex, noveltyItems, onClick }: { raffle: Ra
   return (
     <div
       className="flex-shrink-0 cursor-pointer"
-      style={{ width: 'clamp(100px, 25vw, 320px)' }}
+      style={{ width: 'clamp(120px, 28vw, 370px)' }}
       onTouchStart={(e) => {
         touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }}
@@ -74,14 +74,14 @@ function PrizeItem({ raffle, noveltyIndex, noveltyItems, onClick }: { raffle: Ra
       <div style={{ position: 'relative', width: '100%', paddingBottom: '115%' }}>
         <div className="absolute inset-0">
 
-          {/* Novelty — back of belt, smaller, sits behind prize */}
+          {/* Novelty — back of belt, sits behind prize */}
           <img
             src={noveltyItems[noveltyIdx]}
             alt=""
             className="absolute left-1/2 object-contain drop-shadow-lg"
             style={{
-              bottom: 0,
-              height: isCooker ? '55%' : '72%',
+              bottom: isCooker ? '4%' : '12%',
+              height: isCooker ? '62%' : '80%',
               width: isCooker ? '140%' : 'auto',
               maxWidth: 'none',
               transform: 'translateX(-50%)',
@@ -96,14 +96,14 @@ function PrizeItem({ raffle, noveltyIndex, noveltyItems, onClick }: { raffle: Ra
             <img
               src={raffle.image_url}
               alt={raffle.title}
-              className="absolute bottom-0 left-1/2 object-contain drop-shadow-xl"
-              style={{ height: '45%', maxWidth: 'none', transform: 'translateX(-50%)', objectPosition: 'bottom', zIndex: 2 }}
+              className="absolute left-1/2 object-contain drop-shadow-xl"
+              style={{ bottom: '3%', height: '52%', maxWidth: 'none', transform: 'translateX(-50%)', objectPosition: 'bottom', zIndex: 2 }}
               draggable={false}
             />
           ) : (
             <div
-              className="absolute bottom-0 left-1/2 flex items-center justify-center bg-blue-600/80 rounded border-2 border-yellow-400/60"
-              style={{ height: '45%', width: '90%', transform: 'translateX(-50%)', zIndex: 2 }}
+              className="absolute left-1/2 flex items-center justify-center bg-blue-600/80 rounded border-2 border-yellow-400/60"
+              style={{ bottom: '3%', height: '52%', width: '90%', transform: 'translateX(-50%)', zIndex: 2 }}
             >
               <span className="text-white font-black text-center leading-tight px-1"
                 style={{ fontSize: 'clamp(7px, 1vw, 10px)' }}>
@@ -121,7 +121,6 @@ function PrizeItem({ raffle, noveltyIndex, noveltyItems, onClick }: { raffle: Ra
 export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarouselProps) {
   const [noveltyItems, setNoveltyItems] = useState<string[]>(DEFAULT_NOVELTIES);
   const [frameUrl, setFrameUrl] = useState(DEFAULT_FRAME);
-
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/carousel-settings`)
       .then(r => r.json())
@@ -219,7 +218,7 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
 
         {/* Dark TV-bezel border rings */}
         <div
-          className="absolute pointer-events-none"
+          className="carousel-bezel absolute pointer-events-none"
           style={{
             top: '1%', bottom: '1%',
             left: '8%', right: '8%',
