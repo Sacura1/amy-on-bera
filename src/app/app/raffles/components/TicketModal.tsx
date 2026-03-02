@@ -130,15 +130,15 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-end"
-      style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0,0,0,0.45)', paddingRight: '5%' }}
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0,0,0,0.45)' }}
       onClick={(e) => { if (e.target === e.currentTarget && Date.now() - openedAt.current > 350) handleClose(); }}
     >
       <div className="bg-gray-900 border border-yellow-400/30 rounded-2xl w-60 overflow-hidden">
-        {/* Header image */}
-        <div className="relative">
+        {/* Header image — pt-3 gives a small gap from the top edge of the card */}
+        <div className="relative pt-3">
           {raffle.image_url ? (
-            <img src={raffle.image_url} alt={raffle.title} className="w-full h-20 object-cover" />
+            <img src={raffle.image_url} alt={raffle.title} className="w-full h-20 object-contain" />
           ) : (
             <div className="w-full h-20 bg-gray-800 flex items-center justify-center">
               <span className="text-4xl">🎟️</span>

@@ -175,33 +175,29 @@ export default function RafflesPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-3 md:py-4 space-y-6">
-      {/* Prize Carousel */}
-      <section>
+    <div>
+      {/* Prize Carousel — 88vw centered on mobile, full-width on desktop */}
+      <div className="w-[88vw] mx-auto mt-[5vh] md:w-full md:max-w-[1440px] md:mt-0">
         <PrizeCarousel
           raffles={raffles}
-          onSelectRaffle={(raffle) => {
-            if (!wallet) {
-              // Carousel is read-only without wallet — still show modal info
-              setSelectedRaffle(raffle);
-            } else {
-              setSelectedRaffle(raffle);
-            }
-          }}
+          onSelectRaffle={(raffle) => setSelectedRaffle(raffle)}
         />
-      </section>
+      </div>
 
-      {/* My Active Raffles */}
-      {wallet && userEntriesFull.length > 0 && (
+      {/* Rest of page — tight gap on mobile, normal on desktop */}
+      <div className="container mx-auto px-4 space-y-4 mt-[2vh] md:mt-4 pb-6">
+        {/* My Active Raffles */}
+        {wallet && userEntriesFull.length > 0 && (
+          <section>
+            <ActiveRaffles entries={userEntriesFull} onBuyMore={handleBuyMore} />
+          </section>
+        )}
+
+        {/* Raffle History */}
         <section>
-          <ActiveRaffles entries={userEntriesFull} onBuyMore={handleBuyMore} />
+          <RaffleHistory history={history} />
         </section>
-      )}
-
-      {/* Raffle History */}
-      <section>
-        <RaffleHistory history={history} />
-      </section>
+      </div>
 
       {/* Ticket Modal */}
       {selectedRaffle && wallet && (

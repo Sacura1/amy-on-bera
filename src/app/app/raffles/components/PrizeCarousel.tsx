@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { API_BASE_URL } from '@/lib/constants';
 
 interface Raffle {
   id: number;
@@ -21,14 +22,14 @@ interface PrizeCarouselProps {
   onSelectRaffle: (raffle: Raffle) => void;
 }
 
-// 5 novelty items — assigned by raffle.id % 5
-const NOVELTY_ITEMS = [
-  '/novelty-1.png', // lamp
-  '/novelty-2.png', // tennis rackets + balls
-  '/novelty-3.png', // MP3 speaker
-  '/novelty-4.png', // cooker stove (flat, needs special treatment)
-  '/novelty-5.png', // teddy bear
+const DEFAULT_NOVELTIES = [
+  '/novelty-1.png',
+  '/novelty-2.png',
+  '/novelty-3.png',
+  '/novelty-4.png',
+  '/novelty-5.png',
 ];
+const DEFAULT_FRAME = '/frame.png';
 
 // Frame interior viewport percentages within frame.png (tune if needed)
 const INT_TOP    = '10.5%';
@@ -36,27 +37,8 @@ const INT_LEFT   = '12.5%';
 const INT_RIGHT  = '12.5%';
 const INT_BOTTOM = '17%';
 
-function useCountdown(endsAt: string | null) {
-  const [timeLeft, setTimeLeft] = useState('');
-  useEffect(() => {
-    if (!endsAt) return;
-    const update = () => {
-      const diff = new Date(endsAt).getTime() - Date.now();
-      if (diff <= 0) { setTimeLeft('Drawing...'); return; }
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setTimeLeft(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`);
-    };
-    update();
-    const id = setInterval(update, 1000);
-    return () => clearInterval(id);
-  }, [endsAt]);
-  return timeLeft;
-}
-
-function PrizeItem({ raffle, noveltyIndex, onClick }: { raffle: Raffle; noveltyIndex: number; onClick: () => void }) {
-  const noveltyIdx = noveltyIndex % NOVELTY_ITEMS.length;
+function PrizeItem({ raffle, noveltyIndex, noveltyItems, onClick }: { raffle: Raffle; noveltyIndex: number; noveltyItems: string[]; onClick: () => void }) {
+  const noveltyIdx = noveltyIndex % noveltyItems.length;
   const isCooker = noveltyIdx === 3;
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const lastTouchTime = useRef(0);
@@ -64,7 +46,7 @@ function PrizeItem({ raffle, noveltyIndex, onClick }: { raffle: Raffle; noveltyI
   return (
     <div
       className="flex-shrink-0 cursor-pointer"
-      style={{ width: 'clamp(68px, 10vw, 120px)' }}
+      style={{ width: 'clamp(100px, 25vw, 320px)' }}
       onTouchStart={(e) => {
         touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }}
@@ -73,63 +55,85 @@ function PrizeItem({ raffle, noveltyIndex, onClick }: { raffle: Raffle; noveltyI
         const dx = e.changedTouches[0].clientX - touchStart.current.x;
         const dy = e.changedTouches[0].clientY - touchStart.current.y;
         touchStart.current = null;
-        if (dx * dx + dy * dy <= 100) { // ≤10px = tap, not drag
-          e.preventDefault(); // kills synthesized ghost click
+        if (dx * dx + dy * dy <= 100) {
+          e.preventDefault();
           lastTouchTime.current = Date.now();
           onClick();
         }
       }}
       onClick={() => {
-        // Desktop mouse clicks only — ignore ghost clicks fired after touch
         if (Date.now() - lastTouchTime.current > 500) onClick();
       }}
     >
-      <div
-        className="relative w-full"
-        style={{ height: 'clamp(75px, 14vw, 165px)' }}
-      >
-        {/* Novelty — behind the gift, bottom-aligned on the conveyor surface */}
-        <img
-          src={NOVELTY_ITEMS[noveltyIdx]}
-          alt=""
-          className="absolute bottom-0 left-1/2 object-contain drop-shadow-lg"
-          style={{
-            height: isCooker ? '63%' : '104%',
-            width: isCooker ? '180%' : 'auto',
-            maxWidth: 'none',
-            transform: 'translateX(-50%)',
-            zIndex: 1,
-          }}
-          draggable={false}
-        />
+      {/*
+        Padding-bottom aspect-ratio trick (115% tall relative to width).
+        Works in ALL browsers including old Safari — unlike aspect-ratio CSS
+        which doesn't reliably establish a containing-block height for
+        absolutely-positioned children's percentage heights.
+      */}
+      <div style={{ position: 'relative', width: '100%', paddingBottom: '115%' }}>
+        <div className="absolute inset-0">
 
-        {/* Gift / prize image — larger, in front, partially overlapping novelty */}
-        {raffle.image_url ? (
+          {/* Novelty — back of belt, smaller, sits behind prize */}
           <img
-            src={raffle.image_url}
-            alt={raffle.title}
-            className="absolute bottom-0 left-1/2 object-contain drop-shadow-xl"
-            style={{ height: '72%', maxWidth: 'none', transform: 'translateX(-50%)', objectPosition: 'bottom', zIndex: 2 }}
+            src={noveltyItems[noveltyIdx]}
+            alt=""
+            className="absolute left-1/2 object-contain drop-shadow-lg"
+            style={{
+              bottom: 0,
+              height: isCooker ? '55%' : '72%',
+              width: isCooker ? '140%' : 'auto',
+              maxWidth: 'none',
+              transform: 'translateX(-50%)',
+              objectPosition: 'bottom',
+              zIndex: 1,
+            }}
             draggable={false}
           />
-        ) : (
-          <div
-            className="absolute bottom-0 left-1/2 flex items-center justify-center bg-blue-600/80 rounded border-2 border-yellow-400/60"
-            style={{ height: '84%', width: '90%', transform: 'translateX(-50%)', zIndex: 2 }}
-          >
-            <span className="text-white font-black text-center leading-tight px-1"
-              style={{ fontSize: 'clamp(7px, 1vw, 10px)' }}>
-              {raffle.title}
-            </span>
-          </div>
-        )}
 
+          {/* Prize image — front of belt */}
+          {raffle.image_url ? (
+            <img
+              src={raffle.image_url}
+              alt={raffle.title}
+              className="absolute bottom-0 left-1/2 object-contain drop-shadow-xl"
+              style={{ height: '45%', maxWidth: 'none', transform: 'translateX(-50%)', objectPosition: 'bottom', zIndex: 2 }}
+              draggable={false}
+            />
+          ) : (
+            <div
+              className="absolute bottom-0 left-1/2 flex items-center justify-center bg-blue-600/80 rounded border-2 border-yellow-400/60"
+              style={{ height: '45%', width: '90%', transform: 'translateX(-50%)', zIndex: 2 }}
+            >
+              <span className="text-white font-black text-center leading-tight px-1"
+                style={{ fontSize: 'clamp(7px, 1vw, 10px)' }}>
+                {raffle.title}
+              </span>
+            </div>
+          )}
+
+        </div>
       </div>
     </div>
   );
 }
 
 export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarouselProps) {
+  const [noveltyItems, setNoveltyItems] = useState<string[]>(DEFAULT_NOVELTIES);
+  const [frameUrl, setFrameUrl] = useState(DEFAULT_FRAME);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/carousel-settings`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data) {
+          if (Array.isArray(d.data.novelties) && d.data.novelties.length > 0) setNoveltyItems(d.data.novelties);
+          if (d.data.frame) setFrameUrl(d.data.frame);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const animRef = useRef<number | null>(null);
@@ -147,9 +151,9 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
     const animate = () => {
       const TW = totalWidthRef.current;
       if (!isPaused.current && trackRef.current && TW > 0) {
-        offsetRef.current -= 0.45;
+        offsetRef.current += 0.45;
+        if (offsetRef.current > 0) offsetRef.current -= TW;
         if (offsetRef.current < -TW * 2) offsetRef.current += TW;
-        if (offsetRef.current > -TW) offsetRef.current -= TW;
         trackRef.current.style.transform = `translateX(${offsetRef.current}px)`;
       }
       animRef.current = requestAnimationFrame(animate);
@@ -205,98 +209,100 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
   const handleTouchEnd = () => { isDragging.current = false; resumeAfterDelay(); };
 
   return (
-    <div
-      className="relative select-none mx-auto"
-      style={{
-        aspectRatio: '1366 / 768',
-        width: 'min(100%, calc((100vh - 220px) * 1366 / 768))',
-      }}
-    >
-      {/* Dark TV-bezel border rings — inset to match frame.png's actual visual edge
-          (frame.png is 1536×1024 inside a 1366:768 container → ~8% transparent side bars) */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          top: '1%', bottom: '1%',
-          left: '8%', right: '8%',
-          boxShadow: '0 0 0 10px #111111, 0 0 0 20px rgba(0,0,0,0.45)',
-          zIndex: 0,
-        }}
-      />
+    /*
+      Padding-bottom aspect-ratio trick for the outer carousel (1366:768 = 56.22%).
+      Replaces aspect-ratio CSS which doesn't establish containing-block height
+      reliably in Safari < 15.4, causing backdrop/belt/items to all render at 0px tall.
+    */
+    <div className="select-none" style={{ position: 'relative', width: '100%', paddingBottom: '56.22%' }}>
+      <div className="absolute inset-0">
 
-      {/* Interior container — clips to frame's transparent opening */}
-      <div
-        className="absolute overflow-hidden"
-        style={{ top: INT_TOP, left: INT_LEFT, right: INT_RIGHT, bottom: INT_BOTTOM }}
-      >
-        {/* Amy backdrop */}
+        {/* Dark TV-bezel border rings */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            top: '1%', bottom: '1%',
+            left: '8%', right: '8%',
+            boxShadow: '0 0 0 10px #111111, 0 0 0 20px rgba(0,0,0,0.45)',
+            zIndex: 0,
+          }}
+        />
+
+        {/* Interior container — clips to frame's transparent opening */}
+        <div
+          className="absolute overflow-hidden"
+          style={{ top: INT_TOP, left: INT_LEFT, right: INT_RIGHT, bottom: INT_BOTTOM }}
+        >
+          {/* Amy backdrop */}
+          <img
+            src="/backdrop.png"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            draggable={false}
+          />
+
+          {raffles.length > 0 ? (
+            <div
+              className="absolute inset-0 overflow-hidden"
+              style={{ touchAction: 'pan-y', zIndex: 3 }}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              {/* Conveyor belt */}
+              <div
+                className="absolute bottom-0 left-0 right-0 pointer-events-none"
+                style={{ height: '30%', overflow: 'hidden' }}
+              >
+                <img
+                  src="/conveyor-belt.png"
+                  alt=""
+                  className="absolute inset-0 w-full h-full"
+                  style={{ objectFit: 'cover', objectPosition: '50% 62%' }}
+                  draggable={false}
+                />
+              </div>
+
+              <div
+                ref={trackRef}
+                className="absolute flex items-end"
+                style={{ gap: '2px', top: 0, left: 0, right: 0, bottom: '1%' }}
+              >
+                {items.map((raffle, idx) => (
+                  <PrizeItem
+                    key={`${raffle.id}-${idx}`}
+                    raffle={raffle}
+                    noveltyIndex={idx % raffles.length}
+                    noveltyItems={noveltyItems}
+                    onClick={() => onSelectRaffle(raffle)}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 5 }}>
+              <div className="text-center bg-black/50 backdrop-blur-sm rounded-2xl px-5 py-3 border border-white/10">
+                <p className="text-white font-black text-sm drop-shadow-lg">No active raffles right now!</p>
+                <p className="text-gray-300 text-xs mt-0.5 opacity-80">Check back soon ✨</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Gold frame — on top, transparent center lets scene show through */}
         <img
-          src="/backdrop.png"
+          src={frameUrl}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+          style={{ zIndex: 10 }}
           draggable={false}
         />
 
-        {raffles.length > 0 ? (
-          /* Prizes + belt — fills the full interior so belt pins to the very bottom */
-          <div
-            className="absolute inset-0 overflow-hidden"
-            style={{ touchAction: 'pan-y', zIndex: 3 }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            {/* Conveyor belt — wrapper clips to just the belt surface */}
-            <div
-              className="absolute bottom-0 left-0 right-0 pointer-events-none"
-              style={{ height: '30%', overflow: 'hidden' }}
-            >
-              <img
-                src="/conveyor-belt.png"
-                alt=""
-                className="absolute inset-0 w-full h-full"
-                style={{ objectFit: 'cover', objectPosition: '50% 62%' }}
-                draggable={false}
-              />
-            </div>
-
-            <div
-              ref={trackRef}
-              className="absolute flex items-end"
-              style={{ gap: '2px', top: 0, left: 0, right: 0, bottom: '1%' }}
-            >
-              {items.map((raffle, idx) => (
-                <PrizeItem
-                  key={`${raffle.id}-${idx}`}
-                  raffle={raffle}
-                  noveltyIndex={idx % raffles.length}
-                  onClick={() => onSelectRaffle(raffle)}
-                />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 5 }}>
-            <div className="text-center bg-black/50 backdrop-blur-sm rounded-2xl px-5 py-3 border border-white/10">
-              <p className="text-white font-black text-sm drop-shadow-lg">No active raffles right now!</p>
-              <p className="text-gray-300 text-xs mt-0.5 opacity-80">Check back soon ✨</p>
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* Gold frame — on top, transparent center lets scene show through */}
-      <img
-        src="/frame.png"
-        alt=""
-        className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-        style={{ zIndex: 10 }}
-        draggable={false}
-      />
     </div>
   );
 }

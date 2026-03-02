@@ -80,7 +80,7 @@ export default function ActiveRaffles({ entries, onBuyMore }: ActiveRafflesProps
   if (active.length === 0) return null;
 
   return (
-    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden">
+    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-md mx-auto">
       {/* Header */}
       <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-700/50">
         <h2 className="text-xl font-black text-yellow-400">My Active Raffles</h2>
@@ -100,13 +100,11 @@ export default function ActiveRaffles({ entries, onBuyMore }: ActiveRafflesProps
         {active.map((entry) => (
           <div
             key={entry.raffle_id}
-            className="grid items-center gap-3 px-4 py-3 md:px-5 md:py-4"
-            style={{ gridTemplateColumns: 'auto 1fr auto' }}
+            className="flex items-center gap-3 px-4 py-3 md:px-5 md:py-4"
           >
             <EntryThumbnail entry={entry} />
 
-            {/* Purchased info — 1fr guarantees it gets all leftover space */}
-            <div className="overflow-hidden">
+            <div className="overflow-hidden flex-1 min-w-0">
               <p className="text-white font-black text-xs md:text-sm leading-snug">Purchased</p>
               <p className="text-gray-400 text-xs font-semibold mt-0.5">
                 Tickets: <span className="text-white font-bold">{entry.tickets}</span>

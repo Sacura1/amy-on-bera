@@ -73,7 +73,10 @@ export default function RaffleHistory({ history }: RaffleHistoryProps) {
               )}
 
               <div className="flex-1 min-w-0 space-y-1">
-                <p className="text-white font-bold text-sm truncate">{raffle.title}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-white font-bold text-sm truncate">{raffle.title}</p>
+                  <span className="text-gray-500 text-xs font-mono flex-shrink-0">#{raffle.id}</span>
+                </div>
                 {raffle.status === 'COMPLETED' ? (
                   <>
                     <p className="text-gray-400 text-xs">

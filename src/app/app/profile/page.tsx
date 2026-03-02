@@ -1899,6 +1899,27 @@ function ProfilePageContent() {
                 </p>
               )}
             </div>
+
+            {/* Raffle Management */}
+            <div className="p-4 md:p-6 border-t border-gray-700/50">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <h4 className="text-base md:text-lg font-bold text-yellow-400 mb-1 flex items-center gap-2">
+                    <span>🎟️</span> Raffle Management
+                  </h4>
+                  <p className="text-xs text-gray-400">
+                    Create new raffles, set prizes, ticket cost and countdown timer
+                  </p>
+                </div>
+                <a
+                  href="/app/admin/raffles"
+                  className="bg-yellow-500 hover:bg-yellow-400 text-black px-5 py-2.5 rounded-full text-sm font-bold uppercase flex items-center gap-2 transition-colors"
+                >
+                  <span>➕</span>
+                  <span>CREATE NEW RAFFLE</span>
+                </a>
+              </div>
+            </div>
           </div>
         )}
       </div>
