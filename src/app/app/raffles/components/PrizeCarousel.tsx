@@ -58,28 +58,30 @@ function useCountdown(endsAt: string | null) {
 function PrizeItem({ raffle, noveltyIndex, onClick }: { raffle: Raffle; noveltyIndex: number; onClick: () => void }) {
   const noveltyIdx = noveltyIndex % NOVELTY_ITEMS.length;
   const isCooker = noveltyIdx === 3;
-  const pointerDown = useRef(false);
-  const pointerStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const lastTouchTime = useRef(0);
 
   return (
     <div
       className="flex-shrink-0 cursor-pointer"
       style={{ width: 'clamp(68px, 10vw, 120px)' }}
-      onPointerDown={(e) => {
-        pointerDown.current = true;
-        pointerStart.current = { x: e.clientX, y: e.clientY };
+      onTouchStart={(e) => {
+        touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }}
-      onPointerMove={(e) => {
-        if (!pointerDown.current) return;
-        const dx = e.clientX - pointerStart.current.x;
-        const dy = e.clientY - pointerStart.current.y;
-        if (dx * dx + dy * dy > 25) pointerDown.current = false; // >5px threshold
-      }}
-      onPointerUp={() => {
-        if (pointerDown.current) {
-          pointerDown.current = false;
+      onTouchEnd={(e) => {
+        if (!touchStart.current) return;
+        const dx = e.changedTouches[0].clientX - touchStart.current.x;
+        const dy = e.changedTouches[0].clientY - touchStart.current.y;
+        touchStart.current = null;
+        if (dx * dx + dy * dy <= 100) { // ≤10px = tap, not drag
+          e.preventDefault(); // kills synthesized ghost click
+          lastTouchTime.current = Date.now();
           onClick();
         }
+      }}
+      onClick={() => {
+        // Desktop mouse clicks only — ignore ghost clicks fired after touch
+        if (Date.now() - lastTouchTime.current > 500) onClick();
       }}
     >
       <div
@@ -132,7 +134,6 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
   const offsetRef = useRef(0);
   const animRef = useRef<number | null>(null);
   const isDragging = useRef(false);
-  const isClick = useRef(false);
   const dragStart = useRef(0);
   const dragOffset = useRef(0);
   const isPaused = useRef(false);
@@ -179,14 +180,12 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
 
   const handleMouseDown = (e: React.MouseEvent) => {
     isDragging.current = true;
-    isClick.current = true;
     dragStart.current = e.clientX;
     dragOffset.current = offsetRef.current;
     isPaused.current = true;
   };
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging.current) return;
-    if (Math.abs(e.clientX - dragStart.current) > 4) isClick.current = false;
     offsetRef.current = dragOffset.current + (e.clientX - dragStart.current);
     if (trackRef.current) trackRef.current.style.transform = `translateX(${offsetRef.current}px)`;
   };
@@ -194,14 +193,12 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
 
   const handleTouchStart = (e: React.TouchEvent) => {
     isDragging.current = true;
-    isClick.current = true;
     dragStart.current = e.touches[0].clientX;
     dragOffset.current = offsetRef.current;
     isPaused.current = true;
   };
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging.current) return;
-    if (Math.abs(e.touches[0].clientX - dragStart.current) > 4) isClick.current = false;
     offsetRef.current = dragOffset.current + (e.touches[0].clientX - dragStart.current);
     if (trackRef.current) trackRef.current.style.transform = `translateX(${offsetRef.current}px)`;
   };
@@ -277,12 +274,7 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
                   key={`${raffle.id}-${idx}`}
                   raffle={raffle}
                   noveltyIndex={idx % raffles.length}
-                  onClick={() => {
-                    if (isClick.current) {
-                      isClick.current = false;
-                      onSelectRaffle(raffle);
-                    }
-                  }}
+                  onClick={() => onSelectRaffle(raffle)}
                 />
               ))}
             </div>

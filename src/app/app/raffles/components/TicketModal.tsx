@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { API_BASE_URL } from '@/lib/constants';
 
 interface Raffle {
@@ -56,6 +56,7 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
   const countdown = useCountdown(raffle.ends_at);
 
   const handleClose = useCallback(() => onClose(), [onClose]);
+  const openedAt = useRef(Date.now());
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -131,7 +132,7 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
     <div
       className="fixed inset-0 z-50 flex items-center justify-end"
       style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0,0,0,0.45)', paddingRight: '5%' }}
-      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget && Date.now() - openedAt.current > 350) handleClose(); }}
     >
       <div className="bg-gray-900 border border-yellow-400/30 rounded-2xl w-60 overflow-hidden">
         {/* Header image */}
