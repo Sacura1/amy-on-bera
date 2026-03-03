@@ -80,7 +80,7 @@ function PrizeItem({ raffle, noveltyIndex, noveltyItems, onClick }: { raffle: Ra
             alt=""
             className="absolute left-1/2 object-contain drop-shadow-lg"
             style={{
-              bottom: isCooker ? '4%' : '12%',
+              bottom: isCooker ? '-1%' : '5%',
               height: isCooker ? '62%' : '80%',
               width: isCooker ? '140%' : 'auto',
               maxWidth: 'none',
@@ -97,13 +97,13 @@ function PrizeItem({ raffle, noveltyIndex, noveltyItems, onClick }: { raffle: Ra
               src={raffle.image_url}
               alt={raffle.title}
               className="absolute left-1/2 object-contain drop-shadow-xl"
-              style={{ bottom: '3%', height: '52%', maxWidth: 'none', transform: 'translateX(-50%)', objectPosition: 'bottom', zIndex: 2 }}
+              style={{ bottom: '-1%', height: '52%', maxWidth: 'none', transform: 'translateX(-50%)', objectPosition: 'bottom', zIndex: 2 }}
               draggable={false}
             />
           ) : (
             <div
               className="absolute left-1/2 flex items-center justify-center bg-blue-600/80 rounded border-2 border-yellow-400/60"
-              style={{ bottom: '3%', height: '52%', width: '90%', transform: 'translateX(-50%)', zIndex: 2 }}
+              style={{ bottom: '-1%', height: '52%', width: '90%', transform: 'translateX(-50%)', zIndex: 2 }}
             >
               <span className="text-white font-black text-center leading-tight px-1"
                 style={{ fontSize: 'clamp(7px, 1vw, 10px)' }}>
