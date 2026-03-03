@@ -40,15 +40,15 @@ function useCompactCountdown(endsAt: string) {
   return { label, expired };
 }
 
-function EntryThumbnail({ entry }: { entry: UserEntry }) {
+function EntryThumbnail({ entry, onClick }: { entry: UserEntry; onClick: () => void }) {
   const { label, expired } = entry.status === 'LIVE' && entry.ends_at
     // eslint-disable-next-line react-hooks/rules-of-hooks
     ? useCompactCountdown(entry.ends_at)
     : { label: '', expired: false };
 
   return (
-    <div className="flex flex-col items-end flex-shrink-0 gap-0.5">
-      {/* Badge sits ABOVE the image, outside it */}
+    <div className="flex flex-col items-center flex-shrink-0 gap-0.5 cursor-pointer" onClick={onClick}>
+      {/* Badge sits ABOVE the image */}
       {entry.status === 'LIVE' ? (
         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black leading-none ${
           expired ? 'bg-purple-600 text-white' : 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/40'
@@ -62,12 +62,12 @@ function EntryThumbnail({ entry }: { entry: UserEntry }) {
       )}
 
       {/* Image below the badge */}
-      <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
+      <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-transparent hover:ring-yellow-400/50 transition-all">
         {entry.image_url ? (
           <img src={entry.image_url} alt={entry.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-            <span className="text-xl">🎟️</span>
+            <span className="text-2xl">🎟️</span>
           </div>
         )}
       </div>
@@ -84,13 +84,19 @@ export default function ActiveRaffles({ entries, onBuyMore }: ActiveRafflesProps
       {/* Header */}
       <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-700/50">
         <h2 className="text-xl font-black text-yellow-400">My Active Raffles</h2>
-        <div className="mt-1.5 space-y-0.5">
+        <div className="mt-1.5 space-y-1">
           <p className="text-xs text-gray-500">Each ticket costs 50 AMY Points. More tickets = higher probability.</p>
           <p className="text-xs text-gray-500">
             <span className="text-gray-400 font-medium">TNM</span> = Threshold Not Met — minimum participation hasn&apos;t been reached yet.
           </p>
           <p className="text-xs text-gray-500">
-            <span className="text-gray-400 font-medium">Countdown</span> — when it hits zero the winner is drawn automatically.
+            <span className="text-gray-400 font-medium">Countdown</span> — when it hits zero, ticket sales close.
+          </p>
+          <p className="text-xs text-gray-500">
+            Winners are selected automatically approximately 10 minutes after countdown ends using a publicly verifiable blockchain-based randomness source. The draw is fully automated and applied uniformly across all tickets.
+          </p>
+          <p className="text-xs text-gray-500">
+            Prizes are typically transferred within 24 hours of raffle close.
           </p>
         </div>
       </div>
@@ -102,10 +108,11 @@ export default function ActiveRaffles({ entries, onBuyMore }: ActiveRafflesProps
             key={entry.raffle_id}
             className="flex items-center gap-3 px-4 py-3 md:px-5 md:py-4"
           >
-            <EntryThumbnail entry={entry} />
+            <EntryThumbnail entry={entry} onClick={() => onBuyMore(entry.raffle_id)} />
 
             <div className="overflow-hidden flex-1 min-w-0">
-              <p className="text-white font-black text-xs md:text-sm leading-snug">Purchased</p>
+              <p className="text-white font-black text-sm leading-snug truncate">{entry.title}</p>
+              <p className="text-gray-500 text-xs font-mono mt-0.5">#{entry.raffle_id}</p>
               <p className="text-gray-400 text-xs font-semibold mt-0.5">
                 Tickets: <span className="text-white font-bold">{entry.tickets}</span>
               </p>

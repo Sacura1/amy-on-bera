@@ -21,7 +21,7 @@ const PRIZE_IMAGE_OPTIONS = [
   { label: '$50 AMY',        value: '/prize-50amy.png' },
   { label: '$25 plvHEDGE',   value: '/prize-25plvhedge.png' },
   { label: '$25 SAIL',       value: '/prize-25sail.png' },
-  { label: 'Bulas NFT',      value: '/prize-bulas-nft.png' },
+  { label: 'Bullas NFT',     value: '/prize-bulas-nft.png' },
   { label: 'Booga Bulla NFT',value: '/prize-booga-bulla-nft.png' },
   { label: 'X Premium',      value: '/prize-x-premium.png' },
   { label: 'Custom URL',     value: '' },
