@@ -255,7 +255,7 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
               {/* Conveyor belt */}
               <div
                 className="absolute bottom-0 left-0 right-0 pointer-events-none"
-                style={{ height: '30%', overflow: 'hidden' }}
+                style={{ height: '35%', overflow: 'hidden' }}
               >
                 <img
                   src="/conveyor-belt.png"

@@ -97,9 +97,10 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
   if (purchased) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 overflow-y-auto"
         style={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(0,0,0,0.65)' }}
       >
+        <div className="flex min-h-full items-center justify-center p-4">
         <div className="bg-gray-900 border border-yellow-400/40 rounded-2xl overflow-hidden max-w-xs w-full text-center">
           {purchased.imageUrl ? (
             <img src={purchased.imageUrl} alt={purchased.raffleName} className="w-full h-28 object-cover" />
@@ -124,16 +125,18 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
           </button>
           </div>
         </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 overflow-y-auto"
       style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0,0,0,0.45)' }}
       onClick={(e) => { if (e.target === e.currentTarget && Date.now() - openedAt.current > 350) handleClose(); }}
     >
+      <div className="flex min-h-full items-center justify-center p-4">
       <div className="bg-gray-900 border border-yellow-400/30 rounded-2xl w-64 md:w-80 overflow-hidden">
         {/* Header image — pt-3 gives a small gap from the top edge of the card */}
         <div className="relative pt-3">
@@ -237,6 +240,7 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
             ) : `Buy ${quantity} Ticket${quantity !== 1 ? 's' : ''}`}
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

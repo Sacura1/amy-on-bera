@@ -77,7 +77,6 @@ function EntryThumbnail({ entry, onClick }: { entry: UserEntry; onClick: () => v
 
 export default function ActiveRaffles({ entries, onBuyMore }: ActiveRafflesProps) {
   const active = entries.filter(e => e.status === 'TNM' || e.status === 'LIVE');
-  if (active.length === 0) return null;
 
   return (
     <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto">
@@ -103,6 +102,11 @@ export default function ActiveRaffles({ entries, onBuyMore }: ActiveRafflesProps
 
       {/* Entries */}
       <div className="divide-y divide-gray-700/30">
+        {active.length === 0 && (
+          <div className="px-4 py-8 text-center">
+            <p className="text-gray-500 text-sm">Your active raffles will appear here.</p>
+          </div>
+        )}
         {active.map((entry) => (
           <div
             key={entry.raffle_id}
