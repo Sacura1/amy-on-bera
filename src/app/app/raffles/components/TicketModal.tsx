@@ -97,11 +97,12 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
   if (purchased) {
     return (
       <div
-        className="fixed inset-0 z-50 overflow-y-auto"
+        className="fixed inset-0 z-50 overflow-y-auto cursor-pointer"
         style={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(0,0,0,0.65)' }}
+        onClick={() => { if (Date.now() - openedAt.current > 350) onClose(); }}
       >
         <div className="flex min-h-full items-center justify-center p-4">
-        <div className="bg-gray-900 border border-yellow-400/40 rounded-2xl overflow-hidden max-w-xs w-full text-center">
+        <div className="bg-gray-900 border border-yellow-400/40 rounded-2xl overflow-hidden max-w-xs w-full text-center cursor-default" onClick={e => e.stopPropagation()}>
           {purchased.imageUrl ? (
             <div className="w-full flex justify-center pt-4 pb-2">
               <img src={purchased.imageUrl} alt={purchased.raffleName} className="h-32 w-auto max-w-full block" />
@@ -134,12 +135,12 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto"
+      className="fixed inset-0 z-50 overflow-y-auto cursor-pointer"
       style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0,0,0,0.45)' }}
-      onClick={(e) => { if (e.target === e.currentTarget && Date.now() - openedAt.current > 350) handleClose(); }}
+      onClick={() => { if (Date.now() - openedAt.current > 350) handleClose(); }}
     >
       <div className="flex min-h-full items-center justify-center p-4">
-      <div className="bg-gray-900 border border-yellow-400/30 rounded-2xl w-64 md:w-80 overflow-hidden">
+      <div className="bg-gray-900 border border-yellow-400/30 rounded-2xl w-64 md:w-80 overflow-hidden cursor-default" onClick={e => e.stopPropagation()}>
         {/* Header image — pt-3 gives a small gap from the top edge of the card */}
         <div className="relative pt-3">
           {raffle.image_url ? (

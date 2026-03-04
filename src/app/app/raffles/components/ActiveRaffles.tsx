@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface UserEntry {
   raffle_id: number;
@@ -16,6 +16,7 @@ interface UserEntry {
 
 interface ActiveRafflesProps {
   entries: UserEntry[];
+  wallet?: string;
   onBuyMore: (raffleId: number) => void;
 }
 
@@ -75,11 +76,13 @@ function EntryThumbnail({ entry, onClick }: { entry: UserEntry; onClick: () => v
   );
 }
 
-export default function ActiveRaffles({ entries, onBuyMore }: ActiveRafflesProps) {
+export default function ActiveRaffles({ entries, wallet, onBuyMore }: ActiveRafflesProps) {
   const active = entries.filter(e => e.status === 'TNM' || e.status === 'LIVE');
 
   return (
-    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto">
+    // bg-gray-900 (fully opaque) avoids Safari desktop subpixel blur caused by
+    // semi-transparent bg + overflow:hidden + border-radius compositing
+    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto" style={{ transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' } as React.CSSProperties}>
       {/* Header */}
       <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-700/50">
         <h2 className="text-xl font-black text-yellow-400">My Active Raffles</h2>
@@ -102,35 +105,43 @@ export default function ActiveRaffles({ entries, onBuyMore }: ActiveRafflesProps
 
       {/* Entries */}
       <div className="divide-y divide-gray-700/30">
-        {active.length === 0 && (
+        {!wallet ? (
           <div className="px-4 py-8 text-center">
-            <p className="text-gray-500 text-sm">Your active raffles will appear here.</p>
+            <p className="text-gray-500 text-sm">Connect your wallet to see your active raffles.</p>
           </div>
-        )}
-        {active.map((entry) => (
-          <div
-            key={entry.raffle_id}
-            className="flex items-center gap-3 px-4 py-3 md:px-5 md:py-4"
-          >
-            <EntryThumbnail entry={entry} onClick={() => onBuyMore(entry.raffle_id)} />
-
-            <div className="overflow-hidden flex-1 min-w-0">
-              <p className="text-white font-black text-sm leading-snug truncate">{entry.title}</p>
-              <p className="text-gray-500 text-xs font-mono mt-0.5">#{entry.raffle_id}</p>
-              <p className="text-gray-400 text-xs font-semibold mt-0.5">
-                Tickets: <span className="text-white font-bold">{entry.tickets}</span>
-              </p>
-            </div>
-
-            {/* Buy more */}
-            <button
-              onClick={() => onBuyMore(entry.raffle_id)}
-              className="btn-samy btn-samy-enhanced text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap"
+        ) : active.length === 0 ? (
+          <div className="px-4 py-8 text-center">
+            <p className="text-gray-500 text-sm">You have no active raffles. Buy tickets above to enter!</p>
+          </div>
+        ) : (
+          active.map((entry) => (
+            <div
+              key={entry.raffle_id}
+              className="flex items-center gap-12 px-4 py-3 md:px-5 md:py-4"
             >
-              Buy more
-            </button>
-          </div>
-        ))}
+              {/* Thumbnail — gap-5 gives clear breathing room between image and text */}
+              <EntryThumbnail entry={entry} onClick={() => onBuyMore(entry.raffle_id)} />
+
+              {/* Text expands, pushing all Buy More buttons to the same right-aligned position */}
+              <div className="flex-1 min-w-0 flex items-center gap-4">
+                <div className="flex-1 overflow-hidden min-w-0">
+                  <p className="text-white font-black text-sm leading-snug truncate">{entry.title}</p>
+                  <p className="text-gray-500 text-xs font-mono mt-0.5">#{entry.raffle_id}</p>
+                  <p className="text-gray-400 text-xs font-semibold mt-0.5">
+                    Tickets: <span className="text-white font-bold">{entry.tickets}</span>
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => onBuyMore(entry.raffle_id)}
+                  className="btn-samy btn-samy-enhanced text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap flex-shrink-0 mr-8 md:mr-14"
+                >
+                  Buy more
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

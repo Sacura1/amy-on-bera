@@ -123,7 +123,16 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
     return points >= 0 ? `+${formatted}` : `-${formatted}`;
   };
 
-  if (!walletAddress) return null;
+  if (!walletAddress) return (
+    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden mb-6 md:mb-8">
+      <div className="px-4 py-3 flex items-center justify-between">
+        <h2 className="text-base font-bold text-yellow-400">Points History</h2>
+      </div>
+      <div className="border-t border-gray-700/50 px-4 py-8 text-center">
+        <p className="text-gray-500 text-sm">Connect your wallet to view your points history.</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden mb-6 md:mb-8">

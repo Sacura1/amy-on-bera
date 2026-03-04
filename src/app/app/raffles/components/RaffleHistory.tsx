@@ -33,10 +33,8 @@ function truncateWallet(w: string) {
 export default function RaffleHistory({ history }: RaffleHistoryProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  if (history.length === 0) return null;
-
   return (
-    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto">
+    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto" style={{ transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' }}>
       <button
         onClick={() => setIsOpen(o => !o)}
         className="w-full flex items-center justify-between p-4 md:p-6 hover:bg-gray-800/40 transition-colors"
@@ -54,6 +52,12 @@ export default function RaffleHistory({ history }: RaffleHistoryProps) {
 
       {isOpen && (
         <div className="border-t border-gray-700/50">
+          {history.length === 0 ? (
+            <div className="px-4 py-8 text-center">
+              <p className="text-gray-500 text-sm">Completed raffles will show here.</p>
+            </div>
+          ) : (
+          <>
           <p className="px-4 md:px-6 py-3 text-xs text-gray-500">
             All completed raffles are recorded here for transparency
           </p>
@@ -96,6 +100,8 @@ export default function RaffleHistory({ history }: RaffleHistoryProps) {
             </div>
           ))}
           </div>
+          </>
+          )}
         </div>
       )}
     </div>
