@@ -103,9 +103,11 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
         <div className="flex min-h-full items-center justify-center p-4">
         <div className="bg-gray-900 border border-yellow-400/40 rounded-2xl overflow-hidden max-w-xs w-full text-center">
           {purchased.imageUrl ? (
-            <img src={purchased.imageUrl} alt={purchased.raffleName} className="w-full h-28 object-cover" />
+            <div className="w-full flex justify-center pt-4 pb-2">
+              <img src={purchased.imageUrl} alt={purchased.raffleName} className="h-32 w-auto max-w-full block" />
+            </div>
           ) : (
-            <div className="w-full h-28 bg-gray-800 flex items-center justify-center text-4xl">🎟️</div>
+            <div className="w-full h-16 bg-gray-800 flex items-center justify-center text-4xl">🎟️</div>
           )}
           <div className="p-5">
           <h3 className="text-yellow-400 font-black text-base mb-2">Purchase Successful!</h3>
@@ -141,9 +143,9 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
         {/* Header image — pt-3 gives a small gap from the top edge of the card */}
         <div className="relative pt-3">
           {raffle.image_url ? (
-            <img src={raffle.image_url} alt={raffle.title} className="w-full h-20 md:h-28 object-contain" />
+            <img src={raffle.image_url} alt={raffle.title} className="w-full h-32 md:h-40 object-contain" />
           ) : (
-            <div className="w-full h-20 bg-gray-800 flex items-center justify-center">
+            <div className="w-full h-32 md:h-40 bg-gray-800 flex items-center justify-center">
               <span className="text-4xl">🎟️</span>
             </div>
           )}

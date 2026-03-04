@@ -37,33 +37,16 @@ const INT_LEFT   = 'var(--carousel-int-left, 12.5%)';
 const INT_RIGHT  = 'var(--carousel-int-right, 12.5%)';
 const INT_BOTTOM = 'var(--carousel-int-bottom, 17%)';
 
-function PrizeItem({ raffle, noveltyIndex, noveltyItems, onClick }: { raffle: Raffle; noveltyIndex: number; noveltyItems: string[]; onClick: () => void }) {
+// Pure display component — no event handlers, pointer-events: none so the
+// transparent wrapper never eats clicks meant for the backdrop.
+function PrizeItem({ raffle, noveltyIndex, noveltyItems }: { raffle: Raffle; noveltyIndex: number; noveltyItems: string[] }) {
   const noveltyIdx = noveltyIndex % noveltyItems.length;
   const isCooker = noveltyIdx === 3;
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const lastTouchTime = useRef(0);
 
   return (
     <div
-      className="flex-shrink-0 cursor-pointer"
-      style={{ width: 'clamp(120px, 28vw, 370px)' }}
-      onTouchStart={(e) => {
-        touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      }}
-      onTouchEnd={(e) => {
-        if (!touchStart.current) return;
-        const dx = e.changedTouches[0].clientX - touchStart.current.x;
-        const dy = e.changedTouches[0].clientY - touchStart.current.y;
-        touchStart.current = null;
-        if (dx * dx + dy * dy <= 100) {
-          e.preventDefault();
-          lastTouchTime.current = Date.now();
-          onClick();
-        }
-      }}
-      onClick={() => {
-        if (Date.now() - lastTouchTime.current > 500) onClick();
-      }}
+      className="flex-shrink-0"
+      style={{ width: 'clamp(120px, 28vw, 370px)', pointerEvents: 'none' }}
     >
       {/*
         Padding-bottom aspect-ratio trick (115% tall relative to width).
@@ -80,7 +63,7 @@ function PrizeItem({ raffle, noveltyIndex, noveltyItems, onClick }: { raffle: Ra
             alt=""
             className="absolute left-1/2 object-contain drop-shadow-lg"
             style={{
-              bottom: isCooker ? '-1%' : '5%',
+              bottom: isCooker ? '-1%' : '2%',
               height: isCooker ? '62%' : '80%',
               width: isCooker ? '140%' : 'auto',
               maxWidth: 'none',
@@ -134,6 +117,7 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
   }, []);
 
   const trackRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const animRef = useRef<number | null>(null);
   const isDragging = useRef(false);
@@ -142,6 +126,8 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
   const isPaused = useRef(false);
   const resumeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const totalWidthRef = useRef(0);
+  const wasDragged = useRef(false);
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
 
   const items = raffles.length > 0 ? [...raffles, ...raffles, ...raffles] : [];
 
@@ -181,31 +167,97 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
     };
   }, [raffles.length, startAnimation]);
 
+  // Mathematical click detection — does NOT rely on elementFromPoint or
+  // overflow:hidden clipping (both are unreliable for off-screen items).
+  // Uses the known track offset + measured item stride to find which item
+  // is under the cursor, then verifies its center is within the visible bounds.
+  const fireClickAt = useCallback((clientX: number, clientY: number) => {
+    if (!containerRef.current || !trackRef.current || raffles.length === 0) return;
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+
+    // Click must be inside the visible container rectangle
+    if (
+      clientX < containerRect.left || clientX > containerRect.right ||
+      clientY < containerRect.top  || clientY > containerRect.bottom
+    ) return;
+
+    // Measure the per-item stride (width + gap) from the first two children.
+    // getBoundingClientRect includes the current translateX on the track so the
+    // transform cancels out in the difference — giving the pure layout stride.
+    const children = trackRef.current.children;
+    if (children.length < 2) return;
+    const stride = (children[1] as HTMLElement).getBoundingClientRect().left
+                 - (children[0] as HTMLElement).getBoundingClientRect().left;
+    if (stride <= 0) return;
+
+    // Convert the click's screen X into track-local coordinates
+    // (before the translateX transform is applied).
+    const trackLocalX = clientX - containerRect.left - offsetRef.current;
+    if (trackLocalX < 0) return;
+
+    const itemIndex = Math.floor(trackLocalX / stride);
+    if (itemIndex < 0 || itemIndex >= raffles.length * 3) return;
+
+    // Verify the item's center is actually inside the visible container.
+    // This rejects items that are entering/leaving but whose slot the user
+    // clicked on while the prize image itself isn't yet in view.
+    const itemCenterScreen = containerRect.left + (itemIndex * stride + stride / 2) + offsetRef.current;
+    if (itemCenterScreen < containerRect.left || itemCenterScreen > containerRect.right) return;
+
+    onSelectRaffle(raffles[itemIndex % raffles.length]);
+  }, [raffles, onSelectRaffle]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     isDragging.current = true;
     dragStart.current = e.clientX;
     dragOffset.current = offsetRef.current;
     isPaused.current = true;
+    wasDragged.current = false;
   };
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging.current) return;
-    offsetRef.current = dragOffset.current + (e.clientX - dragStart.current);
+    const delta = e.clientX - dragStart.current;
+    if (Math.abs(delta) > 6) wasDragged.current = true;
+    offsetRef.current = dragOffset.current + delta;
     if (trackRef.current) trackRef.current.style.transform = `translateX(${offsetRef.current}px)`;
   };
-  const handleMouseUp = () => { isDragging.current = false; resumeAfterDelay(); };
+  const handleMouseUp = (e: React.MouseEvent) => {
+    const dragged = wasDragged.current;
+    isDragging.current = false;
+    wasDragged.current = false;
+    resumeAfterDelay();
+    if (!dragged) fireClickAt(e.clientX, e.clientY);
+  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     isDragging.current = true;
     dragStart.current = e.touches[0].clientX;
     dragOffset.current = offsetRef.current;
     isPaused.current = true;
+    wasDragged.current = false;
+    touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   };
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging.current) return;
-    offsetRef.current = dragOffset.current + (e.touches[0].clientX - dragStart.current);
+    const dx = e.touches[0].clientX - dragStart.current;
+    const dy = touchStartPos.current ? e.touches[0].clientY - touchStartPos.current.y : 0;
+    if (Math.abs(dx) > 6 || Math.abs(dy) > 8) wasDragged.current = true;
+    offsetRef.current = dragOffset.current + dx;
     if (trackRef.current) trackRef.current.style.transform = `translateX(${offsetRef.current}px)`;
   };
-  const handleTouchEnd = () => { isDragging.current = false; resumeAfterDelay(); };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const dragged = wasDragged.current;
+    const startPos = touchStartPos.current;
+    isDragging.current = false;
+    wasDragged.current = false;
+    touchStartPos.current = null;
+    resumeAfterDelay();
+    if (!dragged && startPos) {
+      fireClickAt(startPos.x, startPos.y);
+      e.preventDefault();
+    }
+  };
 
   return (
     /*
@@ -242,12 +294,13 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
 
           {raffles.length > 0 ? (
             <div
-              className="absolute inset-0 overflow-hidden"
+              ref={containerRef}
+              className="absolute inset-0 overflow-hidden cursor-pointer"
               style={{ touchAction: 'pan-y', zIndex: 3 }}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
+              onMouseLeave={() => { isDragging.current = false; wasDragged.current = false; resumeAfterDelay(); }}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
@@ -277,7 +330,6 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
                     raffle={raffle}
                     noveltyIndex={idx % raffles.length}
                     noveltyItems={noveltyItems}
-                    onClick={() => onSelectRaffle(raffle)}
                   />
                 ))}
               </div>

@@ -62,7 +62,7 @@ function EntryThumbnail({ entry, onClick }: { entry: UserEntry; onClick: () => v
       )}
 
       {/* Image below the badge */}
-      <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-transparent hover:ring-yellow-400/50 transition-all">
+      <div className="w-28 h-28 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-transparent hover:ring-yellow-400/50 transition-all">
         {entry.image_url ? (
           <img src={entry.image_url} alt={entry.title} className="w-full h-full object-cover" />
         ) : (
