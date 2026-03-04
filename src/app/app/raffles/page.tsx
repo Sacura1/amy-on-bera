@@ -187,12 +187,12 @@ export default function RafflesPage() {
       {/* Rest of page — tight gap on mobile, normal on desktop */}
       <div className="container mx-auto px-4 space-y-4 mt-[2vh] md:mt-4 pb-6">
         {/* My Active Raffles — always visible */}
-        <section className="landscape:px-4">
+        <section className="px-5 landscape:px-12 md:px-0">
           <ActiveRaffles entries={userEntriesFull} wallet={wallet} onBuyMore={handleBuyMore} />
         </section>
 
         {/* Raffle History — always visible */}
-        <section>
+        <section className="px-5 landscape:px-12 md:px-0">
           <RaffleHistory history={history} />
         </section>
       </div>
