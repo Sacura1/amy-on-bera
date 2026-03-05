@@ -136,7 +136,10 @@ export default function PrizeCarousel({ raffles, onSelectRaffle }: PrizeCarousel
     const animate = () => {
       const TW = totalWidthRef.current;
       if (!isPaused.current && trackRef.current && TW > 0) {
-        offsetRef.current += 0.45;
+        // Scale speed by viewport width so mobile matches desktop visually
+        // Desktop (~1400px) → 0.45 px/frame, mobile (~400px) → ~0.13 px/frame
+        const speed = (window.innerWidth / 1400) * 0.45;
+        offsetRef.current += speed;
         if (offsetRef.current > 0) offsetRef.current -= TW;
         if (offsetRef.current < -TW * 2) offsetRef.current += TW;
         trackRef.current.style.transform = `translateX(${offsetRef.current}px)`;

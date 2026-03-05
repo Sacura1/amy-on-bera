@@ -58,7 +58,7 @@ function EntryThumbnail({ entry, onClick }: { entry: UserEntry; onClick: () => v
         </span>
       ) : (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black leading-none bg-gray-700 text-gray-300">
-          TNM
+          TNM &middot; Waiting for players
         </span>
       )}
 
@@ -78,29 +78,61 @@ function EntryThumbnail({ entry, onClick }: { entry: UserEntry; onClick: () => v
 
 export default function ActiveRaffles({ entries, wallet, onBuyMore }: ActiveRafflesProps) {
   const active = entries.filter(e => e.status === 'TNM' || e.status === 'LIVE');
+  const [infoOpen, setInfoOpen] = useState(true);
 
   return (
     // bg-gray-900 (fully opaque) avoids Safari desktop subpixel blur caused by
     // semi-transparent bg + overflow:hidden + border-radius compositing
-    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto" style={{ transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' } as React.CSSProperties}>
+    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto" style={{ transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', willChange: 'transform' } as React.CSSProperties}>
       {/* Header */}
       <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-700/50">
-        <h2 className="text-xl font-black text-yellow-400">My Active Raffles</h2>
-        <div className="mt-1.5 space-y-1">
-          <p className="text-xs text-gray-500">Each ticket costs 50 AMY Points. More tickets = higher probability.</p>
-          <p className="text-xs text-gray-500">
-            <span className="text-gray-400 font-medium">TNM</span> = Threshold Not Met — minimum participation hasn&apos;t been reached yet.
-          </p>
-          <p className="text-xs text-gray-500">
-            <span className="text-gray-400 font-medium">Countdown</span> — when it hits zero, ticket sales close.
-          </p>
-          <p className="text-xs text-gray-500">
-            Winners are selected automatically approximately 10 minutes after countdown ends using a publicly verifiable blockchain-based randomness source. The draw is fully automated and applied uniformly across all tickets.
-          </p>
-          <p className="text-xs text-gray-500">
-            Prizes are typically transferred within 24 hours of raffle close.
-          </p>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-black text-yellow-400">My Active Raffles</h2>
+          <button onClick={() => setInfoOpen(o => !o)} className="text-gray-500 hover:text-gray-300 transition-colors p-1">
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${infoOpen ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
+
+        {infoOpen && (
+          <div className="mt-2 space-y-2.5 text-xs text-gray-500 leading-relaxed">
+            <p>Spend AMY Points to enter raffles and win prizes.<br />Every ticket has the same chance of winning — more tickets simply improve your odds.</p>
+
+            <div>
+              <p className="text-sm font-bold text-gray-300">Raffle Flow</p>
+              <p className="text-[13px] font-semibold text-gray-400 mt-0.5">Waiting for players → Countdown → Tickets close → Winner drawn</p>
+            </div>
+
+            <p>Each ticket costs <span className="text-gray-300 font-bold">50 AMY Points</span>.</p>
+
+            <div>
+              <p className="text-gray-300 font-bold">Waiting for players (TNM)</p>
+              <p className="mt-0.5">The raffle is filling up before the countdown begins. Tickets can still be purchased during this stage — every ticket bought brings the raffle closer to activating.</p>
+              <p className="mt-1.5">Once minimum participation is reached, the raffle activates and the countdown begins.</p>
+            </div>
+
+            <div>
+              <p className="text-gray-300 font-bold">Countdown (Raffle live)</p>
+              <p className="mt-0.5">The clock is running and tickets remain available until the timer reaches zero. Countdown lengths vary by prize — some raffles run for around 24 hours, while others remain open for several days.</p>
+            </div>
+
+            <div>
+              <p className="text-gray-300 font-bold">Winner drawn</p>
+              <p className="mt-0.5">Around 10 minutes after the countdown ends, a winner is selected automatically.</p>
+              <p className="mt-1.5">Example: if 100 tickets are sold and you hold 10, you have a 10% chance of winning.</p>
+              <p className="mt-1.5">The draw uses on-chain randomness — fully automated, tamper-proof, and independently verifiable by anyone.</p>
+              <p className="mt-1.5">Prizes are typically transferred within 24 hours of the raffle closing.</p>
+            </div>
+
+            <p>New raffles are added regularly as others finish — keep an eye out for new prizes.</p>
+          </div>
+        )}
       </div>
 
       {/* Entries */}

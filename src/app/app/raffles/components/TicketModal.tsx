@@ -50,6 +50,7 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [purchased, setPurchased] = useState<{ quantity: number; raffleName: string; imageUrl: string } | null>(null);
+  const [showLargeConfirm, setShowLargeConfirm] = useState(false);
 
   const totalCost = quantity * (raffle.ticket_cost || 50);
   const hasEnough = pointsBalance >= totalCost;
@@ -168,8 +169,8 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
           {/* Status block */}
           {raffle.status === 'TNM' && (
             <div className="bg-orange-500/10 border border-orange-400/30 rounded-lg px-2.5 py-2 mb-2">
-              <p className="text-orange-400 font-bold text-xs mb-0.5">Status: Threshold Not Met</p>
-              <p className="text-gray-400 text-xs leading-snug">This raffle activates once minimum participation is reached. Draws 72 hours after activation.</p>
+              <p className="text-orange-400 font-bold text-xs mb-0.5">Status: Waiting for players</p>
+              <p className="text-gray-400 text-xs leading-snug">This raffle activates once minimum participation is reached. Tickets purchased now help trigger the countdown.</p>
             </div>
           )}
           {raffle.status === 'LIVE' && (
@@ -233,8 +234,18 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
           )}
           {error && <p className="text-red-400 text-xs text-center mb-2">{error}</p>}
 
+          <p className="text-gray-500 text-[10px] text-center mb-2 leading-snug">
+            Raffle tickets are non-refundable. Points spent on tickets cannot be returned.
+          </p>
+
           <button
-            onClick={handleBuy}
+            onClick={() => {
+              if (quantity >= 50) {
+                setShowLargeConfirm(true);
+                return;
+              }
+              handleBuy();
+            }}
             disabled={!hasEnough || quantity < 1 || isLoading}
             className="w-full btn-samy btn-samy-enhanced text-white py-2 rounded-full font-bold uppercase text-xs disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -242,6 +253,40 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
               <div className="loading-spinner" style={{ width: '18px', height: '18px', borderWidth: '2px', margin: '0 auto' }} />
             ) : `Buy ${quantity} Ticket${quantity !== 1 ? 's' : ''}`}
           </button>
+
+          {/* Large purchase confirmation modal (50+ tickets) */}
+          {showLargeConfirm && (
+            <div
+              className="fixed inset-0 z-[60] flex items-center justify-center p-4 cursor-pointer"
+              style={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(0,0,0,0.7)' }}
+              onClick={() => setShowLargeConfirm(false)}
+            >
+              <div className="bg-gray-900 border border-yellow-400/40 rounded-2xl p-5 max-w-xs w-full text-center cursor-default" onClick={e => e.stopPropagation()}>
+                <h3 className="text-yellow-400 font-black text-base mb-2">Confirm Purchase</h3>
+                <p className="text-gray-300 text-sm mb-1">
+                  Purchase <span className="text-white font-bold">{quantity} tickets</span> for <span className="text-yellow-400 font-bold">{totalCost.toLocaleString()} AMY Points</span>?
+                </p>
+                <p className="text-gray-500 text-xs mb-4">Tickets are non-refundable.</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowLargeConfirm(false)}
+                    className="flex-1 py-2 rounded-full font-bold uppercase text-xs border border-gray-600 text-gray-300 hover:bg-gray-800 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowLargeConfirm(false);
+                      handleBuy();
+                    }}
+                    className="flex-1 btn-samy btn-samy-enhanced text-white py-2 rounded-full font-bold uppercase text-xs"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       </div>

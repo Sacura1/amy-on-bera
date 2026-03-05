@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface CompletedRaffle {
   id: number;
@@ -34,7 +34,7 @@ export default function RaffleHistory({ history }: RaffleHistoryProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto" style={{ transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' }}>
+    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto" style={{ transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', willChange: 'transform' } as React.CSSProperties}>
       <button
         onClick={() => setIsOpen(o => !o)}
         className="w-full flex items-center justify-between p-4 md:p-6 hover:bg-gray-800/40 transition-colors"
