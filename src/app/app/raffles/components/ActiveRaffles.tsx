@@ -41,37 +41,35 @@ function useCompactCountdown(endsAt: string) {
   return { label, expired };
 }
 
-function EntryThumbnail({ entry, onClick }: { entry: UserEntry; onClick: () => void }) {
+function EntryBadge({ entry }: { entry: UserEntry }) {
   const { label, expired } = entry.status === 'LIVE' && entry.ends_at
     // eslint-disable-next-line react-hooks/rules-of-hooks
     ? useCompactCountdown(entry.ends_at)
     : { label: '', expired: false };
 
-  return (
-    <div className="flex flex-col items-center flex-shrink-0 gap-0.5 cursor-pointer" onClick={onClick}>
-      {/* Badge sits ABOVE the image */}
-      {entry.status === 'LIVE' ? (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black leading-none ${
-          expired ? 'bg-purple-600 text-white' : 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/40'
-        }`}>
-          {label}
-        </span>
-      ) : (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black leading-none bg-gray-700 text-gray-300">
-          TNM &middot; Waiting for players
-        </span>
-      )}
+  return entry.status === 'LIVE' ? (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black leading-none ${
+      expired ? 'bg-purple-600 text-white' : 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/40'
+    }`}>
+      {label}
+    </span>
+  ) : (
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black leading-none bg-gray-700 text-gray-300">
+      TNM &middot; Waiting for players
+    </span>
+  );
+}
 
-      {/* Image below the badge */}
-      <div className="w-28 h-28 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-transparent hover:ring-yellow-400/50 transition-all">
-        {entry.image_url ? (
-          <img src={entry.image_url} alt={entry.title} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-            <span className="text-2xl">🎟️</span>
-          </div>
-        )}
-      </div>
+function EntryImage({ entry, onClick }: { entry: UserEntry; onClick: () => void }) {
+  return (
+    <div className="w-20 h-20 md:w-44 md:h-44 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-transparent hover:ring-yellow-400/50 transition-all cursor-pointer" onClick={onClick}>
+      {entry.image_url ? (
+        <img src={entry.image_url} alt={entry.title} className="w-full h-full object-contain" />
+      ) : (
+        <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+          <span className="text-2xl">🎟️</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -83,7 +81,7 @@ export default function ActiveRaffles({ entries, wallet, onBuyMore }: ActiveRaff
   return (
     // bg-gray-900 (fully opaque) avoids Safari desktop subpixel blur caused by
     // semi-transparent bg + overflow:hidden + border-radius compositing
-    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto" style={{ transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', willChange: 'transform' } as React.CSSProperties}>
+    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto" style={{ isolation: 'isolate' } as React.CSSProperties}>
       {/* Header */}
       <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-700/50">
         <div className="flex items-center justify-between">
@@ -149,27 +147,45 @@ export default function ActiveRaffles({ entries, wallet, onBuyMore }: ActiveRaff
           active.map((entry) => (
             <div
               key={entry.raffle_id}
-              className="flex items-center gap-12 px-4 py-3 md:px-5 md:py-4"
+              className="px-4 py-3 md:px-5 md:py-4 space-y-1"
             >
-              {/* Thumbnail — gap-5 gives clear breathing room between image and text */}
-              <EntryThumbnail entry={entry} onClick={() => onBuyMore(entry.raffle_id)} />
+              {/* Badge on its own row so it doesn't eat horizontal space */}
+              <EntryBadge entry={entry} />
 
-              {/* Text expands, pushing all Buy More buttons to the same right-aligned position */}
-              <div className="flex-1 min-w-0 flex items-center gap-4">
-                <div className="flex-1 overflow-hidden min-w-0">
-                  <p className="text-white font-black text-sm leading-snug truncate">{entry.title}</p>
-                  <p className="text-gray-500 text-xs font-mono mt-0.5">#{entry.raffle_id}</p>
+              {/* Image + text + button */}
+              <div className="flex items-center gap-3 md:gap-12">
+                <EntryImage entry={entry} onClick={() => onBuyMore(entry.raffle_id)} />
+
+                {/* Mobile: stack text + button vertically */}
+                <div className="flex-1 min-w-0 md:hidden">
+                  <p className="text-white font-black text-sm leading-snug">{entry.title} <span className="text-gray-500 text-xs font-mono font-normal">#{entry.raffle_id}</span></p>
                   <p className="text-gray-400 text-xs font-semibold mt-0.5">
                     Tickets: <span className="text-white font-bold">{entry.tickets}</span>
                   </p>
+                  <button
+                    onClick={() => onBuyMore(entry.raffle_id)}
+                    className="btn-samy btn-samy-enhanced text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap mt-1.5"
+                  >
+                    Buy more
+                  </button>
                 </div>
 
-                <button
-                  onClick={() => onBuyMore(entry.raffle_id)}
-                  className="btn-samy btn-samy-enhanced text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap flex-shrink-0 mr-8 md:mr-14"
-                >
-                  Buy more
-                </button>
+                {/* Desktop: text + button in a row */}
+                <div className="hidden md:flex flex-1 min-w-0 items-center gap-4">
+                  <div className="flex-1 overflow-hidden min-w-0">
+                    <p className="text-white font-black text-sm leading-snug truncate">{entry.title}</p>
+                    <p className="text-gray-500 text-xs font-mono mt-0.5">#{entry.raffle_id}</p>
+                    <p className="text-gray-400 text-xs font-semibold mt-0.5">
+                      Tickets: <span className="text-white font-bold">{entry.tickets}</span>
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => onBuyMore(entry.raffle_id)}
+                    className="btn-samy btn-samy-enhanced text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap flex-shrink-0 mr-14"
+                  >
+                    Buy more
+                  </button>
+                </div>
               </div>
             </div>
           ))
