@@ -576,6 +576,7 @@ export default function BadgeSelector({
 
     try {
       setIsSaving(true);
+
       const response = await fetch(`${API_BASE_URL}/api/badges/${wallet}/equip`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -602,6 +603,7 @@ export default function BadgeSelector({
   const unequipBadge = async (slotNumber: number) => {
     try {
       setIsSaving(true);
+
       const response = await fetch(`${API_BASE_URL}/api/badges/${wallet}/unequip`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -13,6 +13,13 @@ interface TokenHolding {
   multiplier: number;
   isActive: boolean;
   valueUsd?: number;
+  balance?: number;
+}
+
+interface NftHolding {
+  count: number;
+  multiplier: number;
+  isActive: boolean;
 }
 
 interface TokenHoldingsData {
@@ -24,6 +31,8 @@ interface TokenHoldingsData {
   bgt?: TokenHolding;
   snrusd?: TokenHolding;
   jnrusd?: TokenHolding;
+  bullas?: NftHolding;
+  boogaBullas?: NftHolding;
 }
 
 interface PointsData {
@@ -31,6 +40,10 @@ interface PointsData {
   onchainConvictionMultiplier?: number;
   referralMultiplier?: number;
   swapperMultiplier?: number;
+  telegramModMultiplier?: number;
+  discordModMultiplier?: number;
+  emberMultiplier?: number;
+  genesisMultiplier?: number;
 }
 
 interface EquippedBadge {
@@ -183,6 +196,34 @@ function getSwapperBadgeId(multiplier: number): string | null {
   return null;
 }
 
+function getEmberBadgeId(multiplier: number): string | null {
+  if (multiplier >= 10) return 'ember_x10';
+  if (multiplier >= 5) return 'ember_x5';
+  if (multiplier >= 3) return 'ember_x3';
+  return null;
+}
+
+function getGenesisBadgeId(multiplier: number): string | null {
+  if (multiplier >= 10) return 'genesis_x10';
+  if (multiplier >= 5) return 'genesis_x5';
+  if (multiplier >= 3) return 'genesis_x3';
+  return null;
+}
+
+function getBullasBadgeId(count: number): string | null {
+  if (count >= 28) return 'bullas_x15';
+  if (count >= 8) return 'bullas_x5';
+  if (count >= 2) return 'bullas_x3';
+  return null;
+}
+
+function getBoogaBullasBadgeId(count: number): string | null {
+  if (count >= 42) return 'booga_bullas_x15';
+  if (count >= 13) return 'booga_bullas_x5';
+  if (count >= 3) return 'booga_bullas_x3';
+  return null;
+}
+
 export default function ProfileCard({
   wallet,
   xUsername,
@@ -249,7 +290,11 @@ export default function ProfileCard({
             raidsharkMultiplier: pointsDataResponse.data.raidsharkMultiplier,
             onchainConvictionMultiplier: pointsDataResponse.data.onchainConvictionMultiplier,
             referralMultiplier: pointsDataResponse.data.referralMultiplier,
-            swapperMultiplier: pointsDataResponse.data.swapperMultiplier
+            swapperMultiplier: pointsDataResponse.data.swapperMultiplier,
+            telegramModMultiplier: pointsDataResponse.data.telegramModMultiplier,
+            discordModMultiplier: pointsDataResponse.data.discordModMultiplier,
+            emberMultiplier: pointsDataResponse.data.emberMultiplier,
+            genesisMultiplier: pointsDataResponse.data.genesisMultiplier
           });
         }
       } catch (error) {
@@ -452,6 +497,84 @@ export default function ProfileCard({
           name: 'Swapper',
           title: 'Seasoned',
           image: '/swapper.jpg'
+        });
+      }
+    }
+
+    // Telegram Mod badge
+    if (pointsData && pointsData.telegramModMultiplier && pointsData.telegramModMultiplier > 0) {
+      active.push({
+        id: `telegram_mod_x${pointsData.telegramModMultiplier}`,
+        multiplier: pointsData.telegramModMultiplier,
+        name: 'Telegram',
+        title: 'Mod',
+        image: '/tg.png'
+      });
+    }
+
+    // Discord Mod badge
+    if (pointsData && pointsData.discordModMultiplier && pointsData.discordModMultiplier > 0) {
+      active.push({
+        id: `discord_mod_x${pointsData.discordModMultiplier}`,
+        multiplier: pointsData.discordModMultiplier,
+        name: 'Discord',
+        title: 'Mod',
+        image: '/dc.jpg'
+      });
+    }
+
+    // Ember badge (admin-assigned)
+    if (pointsData && pointsData.emberMultiplier && pointsData.emberMultiplier > 0) {
+      const badgeId = getEmberBadgeId(pointsData.emberMultiplier);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: pointsData.emberMultiplier,
+          name: 'Ember',
+          title: 'Legacy',
+          image: '/Ember.png'
+        });
+      }
+    }
+
+    // Genesis badge (admin-assigned)
+    if (pointsData && pointsData.genesisMultiplier && pointsData.genesisMultiplier > 0) {
+      const badgeId = getGenesisBadgeId(pointsData.genesisMultiplier);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: pointsData.genesisMultiplier,
+          name: 'Genesis',
+          title: 'OGs',
+          image: '/genesis.png'
+        });
+      }
+    }
+
+    // Bullas NFT badge (count-based)
+    if (tokenData && tokenData.bullas && tokenData.bullas.isActive && tokenData.bullas.multiplier > 1) {
+      const badgeId = getBullasBadgeId(tokenData.bullas.count);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: tokenData.bullas.multiplier,
+          name: 'Bullas',
+          title: 'NFT',
+          image: '/bulla.png'
+        });
+      }
+    }
+
+    // Booga Bullas NFT badge (count-based)
+    if (tokenData && tokenData.boogaBullas && tokenData.boogaBullas.isActive && tokenData.boogaBullas.multiplier > 1) {
+      const badgeId = getBoogaBullasBadgeId(tokenData.boogaBullas.count);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: tokenData.boogaBullas.multiplier,
+          name: 'Booga Bullas',
+          title: 'NFT',
+          image: '/booga.png'
         });
       }
     }
