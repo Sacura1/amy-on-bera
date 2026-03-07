@@ -62,7 +62,7 @@ function EntryBadge({ entry }: { entry: UserEntry }) {
 
 function EntryImage({ entry, onClick }: { entry: UserEntry; onClick: () => void }) {
   return (
-    <div className="w-20 h-20 md:w-44 md:h-44 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-transparent hover:ring-yellow-400/50 transition-all cursor-pointer" onClick={onClick}>
+    <div className="w-28 h-28 md:w-44 md:h-44 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-transparent hover:ring-yellow-400/50 transition-all cursor-pointer" onClick={onClick}>
       {entry.image_url ? (
         <img src={entry.image_url} alt={entry.title} className="w-full h-full object-contain" />
       ) : (
@@ -99,29 +99,29 @@ export default function ActiveRaffles({ entries, wallet, onBuyMore }: ActiveRaff
         </div>
 
         {infoOpen && (
-          <div className="mt-2 space-y-2.5 text-xs text-gray-500 leading-relaxed">
+          <div className="mt-2 space-y-2.5 text-xs text-white/90 leading-relaxed">
             <p>Spend AMY Points to enter raffles and win prizes.<br />Every ticket has the same chance of winning — more tickets simply improve your odds.</p>
 
             <div>
-              <p className="text-sm font-bold text-gray-300">Raffle Flow</p>
+              <p className="text-sm font-bold text-yellow-400">Raffle Flow</p>
               <p className="text-[13px] font-semibold text-gray-400 mt-0.5">Waiting for players → Countdown → Tickets close → Winner drawn</p>
             </div>
 
-            <p>Each ticket costs <span className="text-gray-300 font-bold">50 AMY Points</span>.</p>
+            <p>Each ticket costs <span className="text-white font-bold">50 AMY Points</span>.</p>
 
             <div>
-              <p className="text-gray-300 font-bold">Waiting for players (TNM)</p>
+              <p className="text-yellow-400 font-bold">Waiting for players (TNM)</p>
               <p className="mt-0.5">The raffle is filling up before the countdown begins. Tickets can still be purchased during this stage — every ticket bought brings the raffle closer to activating.</p>
               <p className="mt-1.5">Once minimum participation is reached, the raffle activates and the countdown begins.</p>
             </div>
 
             <div>
-              <p className="text-gray-300 font-bold">Countdown (Raffle live)</p>
+              <p className="text-yellow-400 font-bold">Countdown (Raffle live)</p>
               <p className="mt-0.5">The clock is running and tickets remain available until the timer reaches zero. Countdown lengths vary by prize — some raffles run for around 24 hours, while others remain open for several days.</p>
             </div>
 
             <div>
-              <p className="text-gray-300 font-bold">Winner drawn</p>
+              <p className="text-yellow-400 font-bold">Winner drawn</p>
               <p className="mt-0.5">Around 10 minutes after the countdown ends, a winner is selected automatically.</p>
               <p className="mt-1.5">Example: if 100 tickets are sold and you hold 10, you have a 10% chance of winning.</p>
               <p className="mt-1.5">The draw uses on-chain randomness — fully automated, tamper-proof, and independently verifiable by anyone.</p>
@@ -137,51 +137,52 @@ export default function ActiveRaffles({ entries, wallet, onBuyMore }: ActiveRaff
       <div className="divide-y divide-gray-700/30">
         {!wallet ? (
           <div className="px-4 py-8 text-center">
-            <p className="text-gray-500 text-sm">Connect your wallet to see your active raffles.</p>
+            <p className="text-gray-400 text-sm">Connect your wallet to see your active raffles.</p>
           </div>
         ) : active.length === 0 ? (
           <div className="px-4 py-8 text-center">
-            <p className="text-gray-500 text-sm">You have no active raffles. Buy tickets above to enter!</p>
+            <p className="text-gray-400 text-sm">You have no active raffles. Buy tickets above to enter!</p>
           </div>
         ) : (
           active.map((entry) => (
             <div
               key={entry.raffle_id}
-              className="px-4 py-3 md:px-5 md:py-4 space-y-1"
+              className="px-4 py-4 md:px-5 md:py-4 space-y-2"
             >
               {/* Badge on its own row so it doesn't eat horizontal space */}
               <EntryBadge entry={entry} />
 
               {/* Image + text + button */}
-              <div className="flex items-center gap-3 md:gap-12">
+              <div className="flex items-center gap-4 landscape:gap-6 md:gap-12">
                 <EntryImage entry={entry} onClick={() => onBuyMore(entry.raffle_id)} />
 
-                {/* Mobile: stack text + button vertically */}
-                <div className="flex-1 min-w-0 md:hidden">
+                {/* Portrait mobile: text + button right-aligned below */}
+                <div className="flex-1 min-w-0 md:hidden landscape:hidden">
                   <p className="text-white font-black text-sm leading-snug">{entry.title} <span className="text-gray-500 text-xs font-mono font-normal">#{entry.raffle_id}</span></p>
                   <p className="text-gray-400 text-xs font-semibold mt-0.5">
                     Tickets: <span className="text-white font-bold">{entry.tickets}</span>
                   </p>
-                  <button
-                    onClick={() => onBuyMore(entry.raffle_id)}
-                    className="btn-samy btn-samy-enhanced text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap mt-1.5"
-                  >
-                    Buy more
-                  </button>
+                  <div className="flex justify-end mt-2">
+                    <button
+                      onClick={() => onBuyMore(entry.raffle_id)}
+                      className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-xs font-bold uppercase whitespace-nowrap"
+                    >
+                      Buy more
+                    </button>
+                  </div>
                 </div>
 
-                {/* Desktop: text + button in a row */}
-                <div className="hidden md:flex flex-1 min-w-0 items-center gap-4">
+                {/* Landscape + Desktop: text + button spread in a row */}
+                <div className="hidden landscape:flex md:flex flex-1 min-w-0 items-center gap-4">
                   <div className="flex-1 overflow-hidden min-w-0">
-                    <p className="text-white font-black text-sm leading-snug truncate">{entry.title}</p>
-                    <p className="text-gray-500 text-xs font-mono mt-0.5">#{entry.raffle_id}</p>
+                    <p className="text-white font-black text-sm leading-snug">{entry.title} <span className="text-gray-500 text-xs font-mono font-normal">#{entry.raffle_id}</span></p>
                     <p className="text-gray-400 text-xs font-semibold mt-0.5">
                       Tickets: <span className="text-white font-bold">{entry.tickets}</span>
                     </p>
                   </div>
                   <button
                     onClick={() => onBuyMore(entry.raffle_id)}
-                    className="btn-samy btn-samy-enhanced text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap flex-shrink-0 mr-14"
+                    className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-xs font-bold uppercase whitespace-nowrap flex-shrink-0 mr-4 md:mr-14"
                   >
                     Buy more
                   </button>

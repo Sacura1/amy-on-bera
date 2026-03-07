@@ -54,11 +54,11 @@ export default function RaffleHistory({ history }: RaffleHistoryProps) {
         <div className="border-t border-gray-700/50">
           {history.length === 0 ? (
             <div className="px-4 py-8 text-center">
-              <p className="text-gray-500 text-sm">Completed raffles will show here.</p>
+              <p className="text-gray-400 text-sm">Completed raffles will show here.</p>
             </div>
           ) : (
           <>
-          <p className="px-4 md:px-6 py-3 text-xs text-gray-500">
+          <p className="px-4 md:px-6 py-3 text-xs text-gray-400">
             All completed raffles are recorded here for transparency
           </p>
           <div className="divide-y divide-gray-700/30">

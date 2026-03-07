@@ -170,13 +170,13 @@ export default function TicketModal({ raffle, userCurrentTickets, pointsBalance,
           {raffle.status === 'TNM' && (
             <div className="bg-orange-500/10 border border-orange-400/30 rounded-lg px-2.5 py-2 mb-2">
               <p className="text-orange-400 font-bold text-xs mb-0.5">Status: Waiting for players</p>
-              <p className="text-gray-400 text-xs leading-snug">This raffle activates once minimum participation is reached. Tickets purchased now help trigger the countdown.</p>
+              <p className="text-white/80 text-xs leading-snug">This raffle activates once minimum participation is reached. Tickets purchased now help trigger the countdown.</p>
             </div>
           )}
           {raffle.status === 'LIVE' && (
             <div className="bg-green-500/10 border border-green-400/30 rounded-lg px-2.5 py-2 mb-2">
               <p className="text-green-400 font-bold text-xs mb-0.5">Status: Live</p>
-              <p className="text-gray-400 text-xs">Draw ends in <span className="text-white font-bold">{countdown || '...'}</span>.</p>
+              <p className="text-white/80 text-xs">Draw ends in <span className="text-white font-bold">{countdown || '...'}</span>.</p>
             </div>
           )}
 
