@@ -1143,8 +1143,8 @@ export default function PointsPage() {
                 { requirement: '$100+', multiplier: 'x10' },
                 { requirement: '$500+', multiplier: 'x100' },
               ]}
-              isActive={tokenData ? tokenData.amyusdt0?.isActive : false}
-              currentMultiplier={tokenData && tokenData.amyusdt0?.multiplier > 1 ? `${tokenData.amyusdt0.multiplier}x` : undefined}
+              isActive={!!tokenData?.amyusdt0?.isActive}
+              currentMultiplier={tokenData?.amyusdt0?.multiplier && tokenData.amyusdt0.multiplier > 1 ? `${tokenData.amyusdt0.multiplier}x` : undefined}
               actionUrl="/app/earn"
               actionLabel="View on Earn"
             />
