@@ -31,6 +31,7 @@ interface TokenHoldingsData {
   bgt?: TokenHolding;
   snrusd?: TokenHolding;
   jnrusd?: TokenHolding;
+  amyusdt0?: TokenHolding;
   bullas?: NftHolding;
   boogaBullas?: NftHolding;
 }
@@ -93,6 +94,13 @@ function getLpBadgeId(valueUsd: number): string | null {
   if (valueUsd >= 500) return 'lp_x10';
   if (valueUsd >= 100) return 'lp_x5';
   if (valueUsd >= 10) return 'lp_x3';
+  return null;
+}
+
+function getAmyUsdt0LpBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'amyusdt0_x100';
+  if (valueUsd >= 100) return 'amyusdt0_x10';
+  if (valueUsd >= 10) return 'amyusdt0_x5';
   return null;
 }
 
@@ -321,6 +329,21 @@ export default function ProfileCard({
           name: 'Bulla Exchange',
           title: 'AMY/HONEY LP',
           image: '/bulla.jpg'
+        });
+      }
+    }
+
+    // AMY/USDT0 badge
+    if (tokenData && tokenData.amyusdt0 && tokenData.amyusdt0.isActive && tokenData.amyusdt0.multiplier > 1) {
+      const valueUsd = tokenData.amyusdt0.valueUsd || (tokenData.amyusdt0.multiplier >= 100 ? 500 : tokenData.amyusdt0.multiplier >= 10 ? 100 : 10);
+      const badgeId = getAmyUsdt0LpBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: tokenData.amyusdt0.multiplier,
+          name: 'AMY/USDT0',
+          title: 'Kodiak LP',
+          image: '/usdt0.jpg'
         });
       }
     }
@@ -592,10 +615,17 @@ export default function ProfileCard({
   };
 
   // Get ring color based on multiplier tier (gold/silver/bronze)
-  const getMultiplierRingColor = (multiplier: number) => {
-    if (multiplier >= 10) return 'ring-4 ring-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]'; // Gold - $500+ (10x)
-    if (multiplier >= 5) return 'ring-4 ring-slate-300 shadow-[0_0_8px_rgba(203,213,225,0.5)]';  // Silver - $100+ (5x)
-    return 'ring-4 ring-amber-600 shadow-[0_0_8px_rgba(217,119,6,0.5)]';                         // Bronze - $10+ (3x)
+  const getMultiplierRingColor = (multiplier: number, badgeId?: string) => {
+    // For LP badges (both Bulla and Kodiak)
+    if (badgeId?.startsWith('lp_') || badgeId?.startsWith('amyusdt0_')) {
+      if (multiplier >= 100) return 'ring-4 ring-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]'; // Gold - $500+ (100x)
+      if (multiplier >= 10) return 'ring-4 ring-slate-300 shadow-[0_0_8px_rgba(203,213,225,0.5)]';  // Silver - $100+ (10x)
+      return 'ring-4 ring-amber-600 shadow-[0_0_8px_rgba(217,119,6,0.5)]';                         // Bronze - $10+ (5x)
+    }
+    // For other badges
+    if (multiplier >= 10) return 'ring-4 ring-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]'; // Gold (10x)
+    if (multiplier >= 5) return 'ring-4 ring-slate-300 shadow-[0_0_8px_rgba(203,213,225,0.5)]';  // Silver (5x)
+    return 'ring-4 ring-amber-600 shadow-[0_0_8px_rgba(217,119,6,0.5)]';                         // Bronze (3x)
   };
 
   const getAvatarUrl = () => {
@@ -669,7 +699,7 @@ export default function ProfileCard({
                   key={slotNumber}
                   className={`relative w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${
                     badge
-                      ? `bg-white ${getMultiplierRingColor(badge.multiplier)}`
+                      ? `bg-white ${getMultiplierRingColor(badge.multiplier, badge.id)}`
                       : 'border-2 border-gray-600/50 bg-gray-800/50 border-dashed'
                   }`}
                 >

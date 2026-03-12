@@ -30,11 +30,13 @@ interface TokenHoldingsData {
   sailr: TokenHolding;
   plvhedge: TokenHolding;
   plsbera: TokenHolding;
+  plskdk: TokenHolding;
   honeybend: TokenHolding;
   stakedbera: TokenHolding;
   bgt: TokenHolding;
   snrusd: TokenHolding;
   jnrusd: TokenHolding;
+  amyusdt0?: TokenHolding;
 }
 interface DynamicPoolData {
   tvl: string;
@@ -48,6 +50,7 @@ interface DynamicEarnData {
   'jnrusd': DynamicPoolData;
   'plvhedge': DynamicPoolData;
   'plsbera': DynamicPoolData;
+  'plskdk': DynamicPoolData;
   'honeybend': DynamicPoolData;
   'stakedbera': DynamicPoolData;
   lastUpdated: string;
@@ -105,6 +108,28 @@ const STRATEGIES: Strategy[] = [
     },
     chain: 'berachain',
     targetTokens: ['AMY', 'HONEY'],
+  },
+  // 1b. AMY/USDT0 – LP
+  {
+    id: 'amy-usdt0',
+    name: 'AMY/USDT0 – LP',
+    subtitle: 'Kodiak',
+    image: '/usdt0.jpg',
+    tvl: 'TBC',
+    apr: 'TBC',
+    amyPoints: 'Earn up to 100x',
+    riskCategory: 'hedge',
+    actionType: 'deposit',
+    actionUrl: 'https://app.kodiak.finance/#/explore/v3/pools/0xed1bb27281a8bbf296270ed5bb08acf7ecab5c17?chain=berachain_mainnet',
+    description: 'Provide liquidity to the AMY/USDT0 pool on Kodiak. This is a manual concentrated liquidity pool — you deposit both AMY and USDT0 and choose a price range where your liquidity is active. Narrow ranges can earn more fees but may fall out of range if the price moves. A full range is simpler but less capital-efficient.\n\nEarn swap fees from traders using the pool. Fees accrue separately and can be claimed on Kodiak.\n\nYour multiplier tier is based on the live USD value of this position.',
+    infoButtonLabel: 'AMY Pool',
+    dynamicDataKey: 'amy-usdt0',
+    buyUnderlying: {
+      token: '0x098a75baeddec78f9a8d0830d6b86eac5cc8894e', // AMY token
+      fromToken: 'USDT0',
+    },
+    chain: 'berachain',
+    targetTokens: ['AMY', 'USDT0'],
   },
   // 2. HONEY Lent
   {
@@ -170,6 +195,27 @@ const STRATEGIES: Strategy[] = [
     dynamicDataKey: 'plsbera',
     chain: 'berachain',
     targetTokens: ['plsBERA'],
+  },
+  // 4b. plsKDK
+  {
+    id: 'plskdk',
+    name: 'plsKDK – Staked',
+    subtitle: 'Plutus',
+    image: '/plskdk.jpg',
+    tvl: '$0',
+    apr: '0%',
+    amyPoints: 'Earn up to 10x',
+    riskCategory: 'hedge',
+    actionType: 'deposit',
+    actionUrl: 'https://plutus.fi/Assets/a/plsKDK/tab/convert',
+    description: 'Stake KDK into plsKDK via Plutus. plsKDK is a liquid wrapper for Kodiak\'s governance token (KDK). Normally KDK must be converted to xKDK and locked to participate in Kodiak governance and rewards.\n\nplsKDK keeps your exposure to the Kodiak ecosystem while remaining liquid. The token uses an appreciating model — your token balance stays constant, but the value of each plsKDK increases over time as rewards accrue.\n\nYield is generated from Kodiak ecosystem incentives and reflected in the rising exchange rate.\n\nYour multiplier tier is based on the live USD value of this position.',
+    buyUnderlying: {
+      token: '0xC6173A3405Fdb1f5c42004D2d71Cba9Bf1Cfa522', // plsKDK (buy KDK with HONEY)
+      fromToken: 'HONEY',
+    },
+    dynamicDataKey: 'plskdk',
+    chain: 'berachain',
+    targetTokens: ['plsKDK'],
   },
   // 5. plvHEDGE
   {
@@ -374,7 +420,7 @@ const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicDa
                 <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-50">
                   <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl min-w-[160px]">
                     <div className="text-xs font-semibold text-white mb-2">MULTIPLIERS</div>
-                    {strategy.id === 'amy-honey' ? (
+                    {strategy.id === 'amy-honey' || strategy.id === 'amy-usdt0' ? (
                       <>
                         <div className="flex items-center justify-between text-xs mb-1">
                           <span className="text-gray-400">$10+ LP</span>
@@ -675,7 +721,7 @@ export default function EarnPage() {
 
   // Check if user has active LP position (or TEST_MODE is enabled)
   const hasActiveLp = TEST_MODE || (lpData && lpData.lpValueUsd > 0 && lpData.positionsFound > 0);
-  const hasActiveTokens = tokenData && (tokenData.sailr?.isActive || tokenData.plvhedge?.isActive || tokenData.plsbera?.isActive || tokenData.honeybend?.isActive || tokenData.stakedbera?.isActive || tokenData.bgt?.isActive || tokenData.snrusd?.isActive || tokenData.jnrusd?.isActive);
+  const hasActiveTokens = tokenData && (tokenData.sailr?.isActive || tokenData.plvhedge?.isActive || tokenData.plsbera?.isActive || tokenData.plskdk?.isActive || tokenData.honeybend?.isActive || tokenData.stakedbera?.isActive || tokenData.bgt?.isActive || tokenData.snrusd?.isActive || tokenData.jnrusd?.isActive || tokenData.amyusdt0?.isActive);
   const hasAnyActivePosition = hasActiveLp || hasActiveTokens;
 
   // Helper to get dynamic value for a strategy
@@ -775,9 +821,11 @@ export default function EarnPage() {
 
                 // Token positions
                 const tokenPositions = [
+                  { key: 'amyusdt0', data: tokenData?.amyusdt0, name: 'AMY/USDT0 – LP', subtitle: 'Kodiak', image: '/usdt0.jpg', valueLabel: 'Your LP Value', manageText: 'Manage your position on Kodiak', link: 'https://app.kodiak.finance/#/explore/v3/pools/0xed1bb27281a8bbf296270ed5bb08acf7ecab5c17?chain=berachain_mainnet', linkText: 'View Position →' },
                   { key: 'sailr', data: tokenData?.sailr, name: 'SAIL.r – Royalty', subtitle: 'Liquid Royalty', image: '/sail.jpg', valueLabel: 'Your Token Value', manageText: 'Manage your position on Liquid Royalty', link: 'https://www.liquidroyalty.com/invest/sail', linkText: 'View Position →' },
                   { key: 'plvhedge', data: tokenData?.plvhedge, name: 'plvHEDGE – Vault', subtitle: 'Plutus', image: '/plvhedge.jpg', valueLabel: 'Your Token Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Vaults/v/plvHEDGE/chain/berachain', linkText: 'View Position →' },
                   { key: 'plsbera', data: tokenData?.plsbera, name: 'plsBERA – Staked', subtitle: 'Plutus', image: '/plsbera.jpg', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Assets/a/plsBERA/tab/stake', linkText: 'View Position →' },
+                  { key: 'plskdk', data: tokenData?.plskdk, name: 'plsKDK – Staked', subtitle: 'Plutus', image: '/plskdk.jpg', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Assets/a/plsKDK/tab/convert', linkText: 'View Position →' },
                   { key: 'honeybend', data: tokenData?.honeybend, name: 'HONEY – Lent', subtitle: 'Bend Protocol', image: '/honey.jpg', valueLabel: 'Your Deposit Value', manageText: 'Manage your position on Berachain', link: 'https://bend.berachain.com/lend/80094/0x30BbA9CD9Eb8c95824aa42Faa1Bb397b07545bc1', linkText: 'View Position →' },
                   { key: 'stakedbera', data: tokenData?.stakedbera, name: 'BERA – Staked', subtitle: 'Berachain Staking', image: '/BERA.png', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Berachain', link: 'https://hub.berachain.com/stake', linkText: 'View Position →' },
                   { key: 'bgt', data: tokenData?.bgt, name: 'BGT', subtitle: 'Berachain Governance Token', image: '/BERA.png', valueLabel: 'Your Token Value', manageText: 'BGT earnings from liquidity provision', link: 'https://hub.berachain.com/', linkText: 'View Hub →' },

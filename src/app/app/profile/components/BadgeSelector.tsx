@@ -31,6 +31,7 @@ interface TokenHoldingsData {
   bgt: TokenHolding;
   snrusd: TokenHolding;
   jnrusd: TokenHolding;
+  amyusdt0?: TokenHolding;
   bullas?: NftHolding;
   boogaBullas?: NftHolding;
 }
@@ -71,6 +72,13 @@ function getLpBadgeId(valueUsd: number): string | null {
   if (valueUsd >= 500) return 'lp_x10';
   if (valueUsd >= 100) return 'lp_x5';
   if (valueUsd >= 10) return 'lp_x3';
+  return null;
+}
+
+function getAmyUsdt0LpBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'amyusdt0_x100';
+  if (valueUsd >= 100) return 'amyusdt0_x10';
+  if (valueUsd >= 10) return 'amyusdt0_x5';
   return null;
 }
 
@@ -271,6 +279,21 @@ export default function BadgeSelector({
           title: 'LP',
           image: '/bulla.jpg',
           multiplier: lpData.lpMultiplier
+        });
+      }
+    }
+
+    // AMY/USDT0 badge
+    if (tokenData && tokenData.amyusdt0 && tokenData.amyusdt0.isActive && tokenData.amyusdt0.multiplier > 1) {
+      const valueUsd = tokenData.amyusdt0.valueUsd || (tokenData.amyusdt0.multiplier >= 100 ? 500 : tokenData.amyusdt0.multiplier >= 10 ? 100 : 10);
+      const badgeId = getAmyUsdt0LpBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          name: 'AMY/USDT0',
+          title: 'LP',
+          image: '/usdt0.jpg',
+          multiplier: tokenData.amyusdt0.multiplier
         });
       }
     }
@@ -544,7 +567,7 @@ export default function BadgeSelector({
 
   const getMultiplierColors = (multiplier: number, badgeId?: string) => {
     // LP badge has different tiers: x5=bronze, x10=silver, x100=gold
-    if (badgeId?.startsWith('lp_')) {
+    if (badgeId?.startsWith('lp_') || badgeId?.startsWith('amyusdt0_')) {
       if (multiplier >= 100) return 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-yellow-950'; // Gold for 100x
       if (multiplier >= 10) return 'bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900'; // Silver for 10x
       return 'bg-gradient-to-br from-amber-600 to-amber-800 text-amber-100'; // Bronze for 5x
@@ -559,7 +582,7 @@ export default function BadgeSelector({
   // Get tier ring color based on multiplier
   const getTierRingColor = (multiplier: number, badgeId?: string) => {
     // LP badge has different tiers: x5=bronze, x10=silver, x100=gold
-    if (badgeId?.startsWith('lp_')) {
+    if (badgeId?.startsWith('lp_') || badgeId?.startsWith('amyusdt0_')) {
       if (multiplier >= 100) return 'ring-yellow-400'; // Gold for 100x
       if (multiplier >= 10) return 'ring-slate-400'; // Silver for 10x
       return 'ring-amber-600'; // Bronze for 5x

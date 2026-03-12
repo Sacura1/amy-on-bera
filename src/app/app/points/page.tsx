@@ -63,11 +63,13 @@ interface TokenHoldingsData {
   sailr: TokenHolding;
   plvhedge: TokenHolding;
   plsbera: TokenHolding;
+  plskdk: TokenHolding;
   honeybend: TokenHolding;
   stakedbera: TokenHolding;
   bgt: TokenHolding;
   snrusd: TokenHolding;
   jnrusd: TokenHolding;
+  amyusdt0?: TokenHolding;
 }
 
 const TIERS: Record<string, TierInfo> = {
@@ -133,6 +135,15 @@ const MOCK_TOKEN_DATA: TokenHoldingsData = {
     priceUsd: 5.0,
     valueUsd: 500,
     multiplier: 10,
+    isActive: true,
+  },
+  plskdk: {
+    token: 'plsKDK',
+    address: '0x9e6B748d25Ed2600Aa0ce7Cbb42267adCF21Fd9B',
+    balance: 200,
+    priceUsd: 0.5,
+    valueUsd: 100,
+    multiplier: 5,
     isActive: true,
   },
   honeybend: {
@@ -851,6 +862,7 @@ export default function PointsPage() {
                         const sailrMult = tokenData && tokenData.sailr?.multiplier > 1 ? tokenData.sailr.multiplier : 0;
                         const plvhedgeMult = tokenData && tokenData.plvhedge?.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
                         const plsberaMult = tokenData && tokenData.plsbera?.multiplier > 1 ? tokenData.plsbera.multiplier : 0;
+                        const plskdkMult = tokenData && tokenData.plskdk?.multiplier > 1 ? tokenData.plskdk.multiplier : 0;
                         const honeybendMult = tokenData && tokenData.honeybend?.multiplier > 1 ? tokenData.honeybend.multiplier : 0;
                         const stakedberaMult = tokenData && tokenData.stakedbera?.multiplier > 1 ? tokenData.stakedbera.multiplier : 0;
                         const bgtMult = tokenData && tokenData.bgt?.multiplier > 1 ? tokenData.bgt.multiplier : 0;
@@ -867,7 +879,8 @@ export default function PointsPage() {
                         const boogaBullasMult = pointsData?.boogaBullasMultiplier && pointsData.boogaBullasMultiplier > 0 ? pointsData.boogaBullasMultiplier : 0;
                         const emberMult = pointsData?.emberMultiplier && pointsData.emberMultiplier > 0 ? pointsData.emberMultiplier : 0;
                         const genesisMult = pointsData?.genesisMultiplier && pointsData.genesisMultiplier > 0 ? pointsData.genesisMultiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult + bullasMult + boogaBullasMult + emberMult + genesisMult);
+                        const amyusdt0Mult = tokenData && tokenData.amyusdt0?.multiplier > 1 ? tokenData.amyusdt0.multiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + plskdkMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult + bullasMult + boogaBullasMult + emberMult + genesisMult + amyusdt0Mult);
 
                         let badgeGradient = 'bg-gray-600'; // default for 1x
                         if (totalMultiplier >= 100) {
@@ -898,6 +911,7 @@ export default function PointsPage() {
                         const sailrMult = tokenData && tokenData.sailr?.multiplier > 1 ? tokenData.sailr.multiplier : 0;
                         const plvhedgeMult = tokenData && tokenData.plvhedge?.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
                         const plsberaMult = tokenData && tokenData.plsbera?.multiplier > 1 ? tokenData.plsbera.multiplier : 0;
+                        const plskdkMult = tokenData && tokenData.plskdk?.multiplier > 1 ? tokenData.plskdk.multiplier : 0;
                         const honeybendMult = tokenData && tokenData.honeybend?.multiplier > 1 ? tokenData.honeybend.multiplier : 0;
                         const stakedberaMult = tokenData && tokenData.stakedbera?.multiplier > 1 ? tokenData.stakedbera.multiplier : 0;
                         const bgtMult = tokenData && tokenData.bgt?.multiplier > 1 ? tokenData.bgt.multiplier : 0;
@@ -914,7 +928,8 @@ export default function PointsPage() {
                         const boogaBullasMult = pointsData?.boogaBullasMultiplier && pointsData.boogaBullasMultiplier > 0 ? pointsData.boogaBullasMultiplier : 0;
                         const emberMult = pointsData?.emberMultiplier && pointsData.emberMultiplier > 0 ? pointsData.emberMultiplier : 0;
                         const genesisMult = pointsData?.genesisMultiplier && pointsData.genesisMultiplier > 0 ? pointsData.genesisMultiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult + bullasMult + boogaBullasMult + emberMult + genesisMult);
+                        const amyusdt0Mult = tokenData && tokenData.amyusdt0?.multiplier > 1 ? tokenData.amyusdt0.multiplier : 0;
+                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + plskdkMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult + bullasMult + boogaBullasMult + emberMult + genesisMult + amyusdt0Mult);
                         const pointsPerHour = currentTier.pointsPerHour * totalMultiplier;
                         return (
                           <div className="flex flex-col items-center">
@@ -1117,6 +1132,23 @@ export default function PointsPage() {
               actionLabel="View on Earn"
             />
 
+            {/* 1b. AMY/USDT0 – LP */}
+            <MultiplierBadge
+              name="AMY/USDT0"
+              title="LP"
+              image="/usdt0.jpg"
+              description="Provide liquidity to the AMY/USDT0 pool on Kodiak. Your AMY/USDT0 LP balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
+              multipliers={[
+                { requirement: '$10+', multiplier: 'x5' },
+                { requirement: '$100+', multiplier: 'x10' },
+                { requirement: '$500+', multiplier: 'x100' },
+              ]}
+              isActive={tokenData ? tokenData.amyusdt0?.isActive : false}
+              currentMultiplier={tokenData && tokenData.amyusdt0?.multiplier > 1 ? `${tokenData.amyusdt0.multiplier}x` : undefined}
+              actionUrl="/app/earn"
+              actionLabel="View on Earn"
+            />
+
             {/* 2. plsBERA – Staked */}
             <MultiplierBadge
               name="plsBERA"
@@ -1130,6 +1162,23 @@ export default function PointsPage() {
               ]}
               isActive={tokenData ? tokenData.plsbera?.isActive : false}
               currentMultiplier={tokenData && tokenData.plsbera?.multiplier > 1 ? `${tokenData.plsbera.multiplier}x` : undefined}
+              actionUrl="/app/earn"
+              actionLabel="View on Earn"
+            />
+
+            {/* 2b. plsKDK – Staked */}
+            <MultiplierBadge
+              name="plsKDK"
+              title="Staked"
+              image="/plskdk.jpg"
+              description="Stake KDK into plsKDK via Plutus. Your plsKDK balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
+              multipliers={[
+                { requirement: '$10+', multiplier: 'x3' },
+                { requirement: '$100+', multiplier: 'x5' },
+                { requirement: '$500+', multiplier: 'x10' },
+              ]}
+              isActive={tokenData ? tokenData.plskdk?.isActive : false}
+              currentMultiplier={tokenData && tokenData.plskdk?.multiplier > 1 ? `${tokenData.plskdk.multiplier}x` : undefined}
               actionUrl="/app/earn"
               actionLabel="View on Earn"
             />

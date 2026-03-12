@@ -175,6 +175,12 @@ export default function AppHeader() {
                 icon: '/plsbera.jpg',
               },
               {
+                address: '0xC6173A3405Fdb1f5c42004D2d71Cba9Bf1Cfa522',
+                name: 'plsKDK',
+                symbol: 'plsKDK',
+                icon: '/plskdk.jpg',
+              },
+              {
                 address: '0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',
                 name: 'plvHEDGE',
                 symbol: 'plvHEDGE',

@@ -19,6 +19,7 @@ interface EarnData {
   'jnrusd': PoolData;
   'plvhedge': PoolData;
   'plsbera': PoolData;
+  'plskdk': PoolData;
   'honeybend': PoolData;
   'stakedbera': PoolData;
   lastUpdated: string;
@@ -180,6 +181,56 @@ async function fetchPlsBeraData(): Promise<PoolData> {
   } catch (error) {
     console.error('Error fetching plsBERA data:', error);
     return { tvl: '$22K', apr: '31.91%' };
+  }
+}
+
+// Fetch plsKDK data from Plutus API and on-chain
+async function fetchPlsKdkData(): Promise<PoolData> {
+  try {
+    const aprResponse = await fetch(
+      'https://plutus.fi/api/assets/80094/0x9e6B748d25Ed2600Aa0ce7Cbb42267adCF21Fd9B',
+      {
+        headers: { 'Accept': 'application/json' },
+        next: { revalidate: 300 }
+      }
+    );
+
+    let apr = '0%';
+    if (aprResponse.ok) {
+      const aprData = await aprResponse.json();
+      const aprValue = aprData?.APR || aprData?.apr || aprData?.apy || 0;
+      apr = `${Number(aprValue).toFixed(2)}%`;
+    }
+
+    // Get total supply of staked plsKDK
+    const totalSupply = await callContract(
+      '0x9e6B748d25Ed2600Aa0ce7Cbb42267adCF21Fd9B',
+      '0x18160ddd' // totalSupply()
+    );
+
+    let tvl = '$0';
+    if (totalSupply) {
+      // Try to get plsKDK price from GeckoTerminal
+      const priceResponse = await fetch(
+        'https://api.geckoterminal.com/api/v2/networks/berachain/tokens/0xC6173A3405Fdb1f5c42004D2d71Cba9Bf1Cfa522',
+        { headers: { 'Accept': 'application/json' } }
+      );
+
+      if (priceResponse.ok) {
+        const priceData = await priceResponse.json();
+        const tokenPrice = parseFloat(priceData?.data?.attributes?.price_usd || '0');
+        if (tokenPrice > 0) {
+          const totalStaked = Number(totalSupply) / 1e18;
+          const tvlValue = totalStaked * tokenPrice;
+          tvl = formatTvl(tvlValue);
+        }
+      }
+    }
+
+    return { tvl, apr };
+  } catch (error) {
+    console.error('Error fetching plsKDK data:', error);
+    return { tvl: '$0', apr: '0%' };
   }
 }
 
@@ -358,13 +409,14 @@ export async function GET() {
 
   try {
     // Fetch data from all sources in parallel
-    const [bullaData, sailrData, snrUsdData, jnrUsdData, plvhedgeData, plsberaData, honeybendData, stakedberaData] = await Promise.all([
+    const [bullaData, sailrData, snrUsdData, jnrUsdData, plvhedgeData, plsberaData, plskdkData, honeybendData, stakedberaData] = await Promise.all([
       fetchBullaPoolData(),
       fetchSailrPoolData(),
       fetchSnrUsdData(),
       fetchJnrUsdData(),
       fetchPlvHedgeData(),
       fetchPlsBeraData(),
+      fetchPlsKdkData(),
       fetchHoneyBendData(),
       fetchStakedBeraData()
     ]);
@@ -376,6 +428,7 @@ export async function GET() {
       'jnrusd': jnrUsdData,
       'plvhedge': plvhedgeData,
       'plsbera': plsberaData,
+      'plskdk': plskdkData,
       'honeybend': honeybendData,
       'stakedbera': stakedberaData,
       lastUpdated: new Date().toISOString()
@@ -413,6 +466,7 @@ export async function GET() {
         'jnrusd': { tvl: '$2.12M', apr: '93%' },
         'plvhedge': { tvl: '$271.91K', apr: '22.25%' },
         'plsbera': { tvl: '$22K', apr: '31.91%' },
+        'plskdk': { tvl: '$0', apr: '0%' },
         'honeybend': { tvl: '$12.5M', apr: '8%' },
         'stakedbera': { tvl: '$85M', apr: '21%' },
         lastUpdated: new Date().toISOString()
