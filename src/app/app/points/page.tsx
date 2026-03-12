@@ -879,7 +879,7 @@ export default function PointsPage() {
                         const boogaBullasMult = pointsData?.boogaBullasMultiplier && pointsData.boogaBullasMultiplier > 0 ? pointsData.boogaBullasMultiplier : 0;
                         const emberMult = pointsData?.emberMultiplier && pointsData.emberMultiplier > 0 ? pointsData.emberMultiplier : 0;
                         const genesisMult = pointsData?.genesisMultiplier && pointsData.genesisMultiplier > 0 ? pointsData.genesisMultiplier : 0;
-                        const amyusdt0Mult = tokenData && tokenData.amyusdt0?.multiplier > 1 ? tokenData.amyusdt0.multiplier : 0;
+                        const amyusdt0Mult = tokenData && tokenData.amyusdt0?.multiplier && tokenData.amyusdt0.multiplier > 1 ? tokenData.amyusdt0.multiplier : 0;
                         const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + plskdkMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult + bullasMult + boogaBullasMult + emberMult + genesisMult + amyusdt0Mult);
 
                         let badgeGradient = 'bg-gray-600'; // default for 1x
@@ -928,7 +928,7 @@ export default function PointsPage() {
                         const boogaBullasMult = pointsData?.boogaBullasMultiplier && pointsData.boogaBullasMultiplier > 0 ? pointsData.boogaBullasMultiplier : 0;
                         const emberMult = pointsData?.emberMultiplier && pointsData.emberMultiplier > 0 ? pointsData.emberMultiplier : 0;
                         const genesisMult = pointsData?.genesisMultiplier && pointsData.genesisMultiplier > 0 ? pointsData.genesisMultiplier : 0;
-                        const amyusdt0Mult = tokenData && tokenData.amyusdt0?.multiplier > 1 ? tokenData.amyusdt0.multiplier : 0;
+                        const amyusdt0Mult = tokenData && tokenData.amyusdt0?.multiplier && tokenData.amyusdt0.multiplier > 1 ? tokenData.amyusdt0.multiplier : 0;
                         const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + plskdkMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult + bullasMult + boogaBullasMult + emberMult + genesisMult + amyusdt0Mult);
                         const pointsPerHour = currentTier.pointsPerHour * totalMultiplier;
                         return (
