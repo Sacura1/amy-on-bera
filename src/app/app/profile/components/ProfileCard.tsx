@@ -31,6 +31,7 @@ interface TokenHoldingsData {
   bgt?: TokenHolding;
   snrusd?: TokenHolding;
   jnrusd?: TokenHolding;
+  plskdk?: TokenHolding;
   amyusdt0?: TokenHolding;
   bullas?: NftHolding;
   boogaBullas?: NftHolding;
@@ -138,6 +139,13 @@ function getPlsberaBadgeId(valueUsd: number): string | null {
   if (valueUsd >= 500) return 'plsbera_x10';
   if (valueUsd >= 100) return 'plsbera_x5';
   if (valueUsd >= 10) return 'plsbera_x3';
+  return null;
+}
+
+function getPlskdkBadgeId(valueUsd: number): string | null {
+  if (valueUsd >= 500) return 'plskdk_x10';
+  if (valueUsd >= 100) return 'plskdk_x5';
+  if (valueUsd >= 10) return 'plskdk_x3';
   return null;
 }
 
@@ -389,6 +397,21 @@ export default function ProfileCard({
           name: 'plsBERA',
           title: 'Staking',
           image: '/plsbera.jpg'
+        });
+      }
+    }
+
+    // plsKDK badge
+    if (tokenData && tokenData.plskdk && tokenData.plskdk.isActive && tokenData.plskdk.multiplier > 1) {
+      const valueUsd = tokenData.plskdk.valueUsd || (tokenData.plskdk.multiplier >= 10 ? 500 : tokenData.plskdk.multiplier >= 5 ? 100 : 10);
+      const badgeId = getPlskdkBadgeId(valueUsd);
+      if (badgeId) {
+        active.push({
+          id: badgeId,
+          multiplier: tokenData.plskdk.multiplier,
+          name: 'plsKDK',
+          title: 'Staking',
+          image: '/plskdk.jpg'
         });
       }
     }
