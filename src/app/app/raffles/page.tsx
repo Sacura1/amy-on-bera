@@ -63,6 +63,7 @@ export default function RafflesPage() {
         : `${API_BASE_URL}/api/raffles`;
       const res = await fetch(url);
       const data = await res.json();
+      
       if (data.success) {
         setRaffles(data.data || []);
         setUserEntries(data.userEntries || {});
@@ -90,23 +91,7 @@ export default function RafflesPage() {
       if (data.success) {
         setRaffles(data.data || []);
         setUserEntries(data.userEntries || {});
-        // Build full entry objects by combining raffle data with entry counts
-        const entries: UserEntry[] = (data.data || []).flatMap((r: Raffle) => {
-          const tickets = data.userEntries?.[r.id];
-          if (!tickets) return [];
-          return [{
-            raffle_id: r.id,
-            tickets,
-            points_spent: tickets * (r.ticket_cost || 50),
-            purchased_at: '',
-            title: r.title,
-            status: r.status,
-            ends_at: r.ends_at,
-            winner_wallet: null,
-            image_url: r.image_url,
-          }];
-        });
-        setUserEntriesFull(entries);
+        setUserEntriesFull([]);
       }
     } catch {
       // ignore

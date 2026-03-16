@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { API_BASE_URL } from '@/lib/constants';
+import { useRaffleCountdown } from '../hooks/useRaffleCountdown';
 
 interface Raffle {
   id: number;
@@ -15,6 +16,8 @@ interface Raffle {
   total_tickets: number;
   unique_participants: number;
   total_points_committed: number;
+  slot_id?: string;
+  novelty_name?: string;
 }
 
 interface PrizeCarouselProps {
@@ -37,11 +40,48 @@ const INT_LEFT   = 'var(--carousel-int-left, 12.5%)';
 const INT_RIGHT  = 'var(--carousel-int-right, 12.5%)';
 const INT_BOTTOM = 'var(--carousel-int-bottom, 17%)';
 
+// Small helper for the LIVE timer pill
+function LiveTimerPill({ endsAt }: { endsAt: string }) {
+  const { label } = useRaffleCountdown(endsAt);
+  return (
+    <div 
+      className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap z-[15]"
+      style={{ 
+        bottom: '54%', // Sits consistently above the prize boxes
+        background: 'rgba(0,0,0,0.65)',
+        color: 'white',
+        borderRadius: '10px',
+        padding: '4px 10px',
+        fontSize: 'clamp(10px, 1.2vw, 14px)',
+        fontWeight: 600,
+        border: '1px solid rgba(255,255,255,0.1)'
+      }}
+    >
+      LIVE &bull; {label}
+    </div>
+  );
+}
+
 // Pure display component — no event handlers, pointer-events: none so the
 // transparent wrapper never eats clicks meant for the backdrop.
 function PrizeItem({ raffle, noveltyIndex, noveltyItems }: { raffle: Raffle; noveltyIndex: number; noveltyItems: string[] }) {
   const noveltyIdx = noveltyIndex % noveltyItems.length;
-  const isCooker = noveltyIdx === 3;
+  
+  // Mapping for novelty names to their standard paths
+  const noveltyMap: Record<string, string> = {
+    'Lamp': '/novelty-1.png',
+    'Tennis': '/novelty-2.png',
+    'Speaker': '/novelty-3.png',
+    'Cooker': '/novelty-4.png',
+    'Teddy Bear': '/novelty-5.png'
+  };
+
+  const noveltySrc = raffle.novelty_name && noveltyMap[raffle.novelty_name] 
+    ? noveltyMap[raffle.novelty_name] 
+    : noveltyItems[noveltyIdx];
+
+  const isCooker = noveltySrc.includes('novelty-4');
+  const isLive = raffle.status === 'LIVE' && raffle.ends_at;
 
   return (
     <div
@@ -57,9 +97,12 @@ function PrizeItem({ raffle, noveltyIndex, noveltyItems }: { raffle: Raffle; nov
       <div style={{ position: 'relative', width: '100%', paddingBottom: '115%' }}>
         <div className="absolute inset-0">
 
+          {/* Timer Pill for LIVE raffles */}
+          {isLive && raffle.ends_at && <LiveTimerPill endsAt={raffle.ends_at} />}
+
           {/* Novelty — back of belt, sits behind prize */}
           <img
-            src={noveltyItems[noveltyIdx]}
+            src={noveltySrc}
             alt=""
             className="absolute left-1/2 object-contain drop-shadow-lg"
             style={{
@@ -76,17 +119,31 @@ function PrizeItem({ raffle, noveltyIndex, noveltyItems }: { raffle: Raffle; nov
 
           {/* Prize image — front of belt */}
           {raffle.image_url ? (
-            <img
-              src={raffle.image_url}
-              alt={raffle.title}
-              className="absolute left-1/2 object-contain drop-shadow-xl"
-              style={{ bottom: '-1%', height: '52%', maxWidth: 'none', transform: 'translateX(-50%)', objectPosition: 'bottom', zIndex: 2 }}
-              draggable={false}
-            />
+            <div 
+              className="absolute left-1/2" 
+              style={{ 
+                bottom: '2%', 
+                height: '48%', 
+                width: '100%', 
+                transform: 'translateX(-50%) scale(0.75)', 
+                zIndex: 2 
+              }}
+            >
+              <img
+                src={raffle.image_url}
+                alt={raffle.title}
+                className={`w-full h-full object-contain drop-shadow-xl ${isLive ? 'animate-pulse-subtle' : ''}`}
+                style={{ 
+                  objectPosition: 'bottom',
+                  filter: isLive ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.4))' : 'none'
+                }}
+                draggable={false}
+              />
+            </div>
           ) : (
             <div
-              className="absolute left-1/2 flex items-center justify-center bg-blue-600/80 rounded border-2 border-yellow-400/60"
-              style={{ bottom: '-1%', height: '52%', width: '90%', transform: 'translateX(-50%)', zIndex: 2 }}
+              className={`absolute left-1/2 flex items-center justify-center bg-blue-600/80 rounded border-2 ${isLive ? 'border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'border-yellow-400/60'}`}
+              style={{ bottom: '2%', height: '48%', width: '70%', transform: 'translateX(-50%) scale(0.75)', zIndex: 2 }}
             >
               <span className="text-white font-black text-center leading-tight px-1"
                 style={{ fontSize: 'clamp(7px, 1vw, 10px)' }}>

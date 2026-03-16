@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useRaffleCountdown } from '../hooks/useRaffleCountdown';
 
 interface UserEntry {
   raffle_id: number;
@@ -20,46 +21,6 @@ interface ActiveRafflesProps {
   onBuyMore: (raffleId: number) => void;
 }
 
-function useCompactCountdown(endsAt: string) {
-  const [label, setLabel] = useState('');
-  const [expired, setExpired] = useState(false);
-
-  useEffect(() => {
-    const update = () => {
-      const diff = new Date(endsAt).getTime() - Date.now();
-      if (diff <= 0) { setLabel('Drawing...'); setExpired(true); return; }
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setLabel(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`);
-    };
-    update();
-    const id = setInterval(update, 1000);
-    return () => clearInterval(id);
-  }, [endsAt]);
-
-  return { label, expired };
-}
-
-function EntryBadge({ entry }: { entry: UserEntry }) {
-  const { label, expired } = entry.status === 'LIVE' && entry.ends_at
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    ? useCompactCountdown(entry.ends_at)
-    : { label: '', expired: false };
-
-  return entry.status === 'LIVE' ? (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black leading-none ${
-      expired ? 'bg-purple-600 text-white' : 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/40'
-    }`}>
-      {label}
-    </span>
-  ) : (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black leading-none bg-gray-700 text-gray-300">
-      TNM &middot; Waiting for players
-    </span>
-  );
-}
-
 function EntryImage({ entry, onClick }: { entry: UserEntry; onClick: () => void }) {
   return (
     <div className="w-28 h-28 md:w-44 md:h-44 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-transparent hover:ring-yellow-400/50 transition-all cursor-pointer" onClick={onClick}>
@@ -74,13 +35,31 @@ function EntryImage({ entry, onClick }: { entry: UserEntry; onClick: () => void 
   );
 }
 
+function RaffleStatusBadge({ entry }: { entry: UserEntry }) {
+  if (entry.status === 'LIVE') {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black leading-none bg-yellow-400/20 text-yellow-300 border border-yellow-400/40">
+        LIVE
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black leading-none bg-gray-700 text-gray-300">
+      TNM &middot; Waiting for players
+    </span>
+  );
+}
+
+function RaffleCountdown({ endsAt }: { endsAt: string }) {
+  const { label } = useRaffleCountdown(endsAt);
+  return <span className="text-yellow-400 font-bold ml-1">{label}</span>;
+}
+
 export default function ActiveRaffles({ entries, wallet, onBuyMore }: ActiveRafflesProps) {
   const active = entries.filter(e => e.status === 'TNM' || e.status === 'LIVE');
   const [infoOpen, setInfoOpen] = useState(true);
 
   return (
-    // bg-gray-900 (fully opaque) avoids Safari desktop subpixel blur caused by
-    // semi-transparent bg + overflow:hidden + border-radius compositing
     <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto" style={{ isolation: 'isolate' } as React.CSSProperties}>
       {/* Header */}
       <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-700/50">
@@ -101,34 +80,11 @@ export default function ActiveRaffles({ entries, wallet, onBuyMore }: ActiveRaff
         {infoOpen && (
           <div className="mt-2 space-y-2.5 text-xs text-white/90 leading-relaxed">
             <p>Spend AMY Points to enter raffles and win prizes.<br />Every ticket has the same chance of winning — more tickets simply improve your odds.</p>
-
             <div>
               <p className="text-sm font-bold text-yellow-400">Raffle Flow</p>
               <p className="text-[13px] font-semibold text-gray-400 mt-0.5">Waiting for players → Countdown → Tickets close → Winner drawn</p>
             </div>
-
             <p>Each ticket costs <span className="text-white font-bold">50 AMY Points</span>.</p>
-
-            <div>
-              <p className="text-yellow-400 font-bold">Waiting for players (TNM)</p>
-              <p className="mt-0.5">The raffle is filling up before the countdown begins. Tickets can still be purchased during this stage — every ticket bought brings the raffle closer to activating.</p>
-              <p className="mt-1.5">Once minimum participation is reached, the raffle activates and the countdown begins.</p>
-            </div>
-
-            <div>
-              <p className="text-yellow-400 font-bold">Countdown (Raffle live)</p>
-              <p className="mt-0.5">The clock is running and tickets remain available until the timer reaches zero. Countdown lengths vary by prize — some raffles run for around 24 hours, while others remain open for several days.</p>
-            </div>
-
-            <div>
-              <p className="text-yellow-400 font-bold">Winner drawn</p>
-              <p className="mt-0.5">Around 10 minutes after the countdown ends, a winner is selected automatically.</p>
-              <p className="mt-1.5">Example: if 100 tickets are sold and you hold 10, you have a 10% chance of winning.</p>
-              <p className="mt-1.5">The draw uses on-chain randomness — fully automated, tamper-proof, and independently verifiable by anyone.</p>
-              <p className="mt-1.5">Prizes are typically transferred within 24 hours of the raffle closing.</p>
-            </div>
-
-            <p>New raffles are added regularly as others finish — keep an eye out for new prizes.</p>
           </div>
         )}
       </div>
@@ -145,24 +101,29 @@ export default function ActiveRaffles({ entries, wallet, onBuyMore }: ActiveRaff
           </div>
         ) : (
           active.map((entry) => (
-            <div
-              key={entry.raffle_id}
-              className="px-4 py-4 md:px-5 md:py-4 space-y-2"
-            >
-              {/* Badge on its own row so it doesn't eat horizontal space */}
-              <EntryBadge entry={entry} />
+            <div key={entry.raffle_id} className="px-4 py-4 md:px-5 md:py-4 space-y-2">
+              <RaffleStatusBadge entry={entry} />
 
-              {/* Image + text + button */}
               <div className="flex items-center gap-4 landscape:gap-6 md:gap-12">
                 <EntryImage entry={entry} onClick={() => onBuyMore(entry.raffle_id)} />
 
-                {/* Portrait mobile: text + button right-aligned below */}
-                <div className="flex-1 min-w-0 md:hidden landscape:hidden">
-                  <p className="text-white font-black text-sm leading-snug">{entry.title} <span className="text-gray-500 text-xs font-mono font-normal">#{entry.raffle_id}</span></p>
-                  <p className="text-gray-400 text-xs font-semibold mt-0.5">
-                    Tickets: <span className="text-white font-bold">{entry.tickets}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-black text-sm leading-snug">
+                    {entry.title} <span className="text-gray-500 text-xs font-mono font-normal">#{entry.raffle_id}</span>
                   </p>
-                  <div className="flex justify-end mt-2">
+                  
+                  <div className="mt-1">
+                    <p className="text-gray-400 text-xs font-semibold">
+                      Tickets: <span className="text-white font-bold">{entry.tickets}</span>
+                    </p>
+                    {entry.status === 'LIVE' && entry.ends_at && (
+                      <p className="text-gray-400 text-[11px] font-semibold mt-0.5 uppercase tracking-wider">
+                        Ends in: <RaffleCountdown endsAt={entry.ends_at} />
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end md:justify-start mt-3">
                     <button
                       onClick={() => onBuyMore(entry.raffle_id)}
                       className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-xs font-bold uppercase whitespace-nowrap"
@@ -170,22 +131,6 @@ export default function ActiveRaffles({ entries, wallet, onBuyMore }: ActiveRaff
                       Buy more
                     </button>
                   </div>
-                </div>
-
-                {/* Landscape + Desktop: text + button spread in a row */}
-                <div className="hidden landscape:flex md:flex flex-1 min-w-0 items-center gap-4">
-                  <div className="flex-1 overflow-hidden min-w-0">
-                    <p className="text-white font-black text-sm leading-snug">{entry.title} <span className="text-gray-500 text-xs font-mono font-normal">#{entry.raffle_id}</span></p>
-                    <p className="text-gray-400 text-xs font-semibold mt-0.5">
-                      Tickets: <span className="text-white font-bold">{entry.tickets}</span>
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => onBuyMore(entry.raffle_id)}
-                    className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-xs font-bold uppercase whitespace-nowrap flex-shrink-0 mr-4 md:mr-14"
-                  >
-                    Buy more
-                  </button>
                 </div>
               </div>
             </div>
