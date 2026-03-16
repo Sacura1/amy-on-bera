@@ -91,7 +91,6 @@ export default function RafflesPage() {
       if (data.success) {
         setRaffles(data.data || []);
         setUserEntries(data.userEntries || {});
-        setUserEntriesFull([]);
       }
     } catch {
       // ignore
@@ -126,6 +125,26 @@ export default function RafflesPage() {
       fetchUserEntries();
     }
   }, [wallet, fetchPoints, fetchUserEntries]);
+
+  const buildUserEntries = useCallback(() => {
+    return raffles
+      .filter(r => userEntries[r.id])
+      .map(r => ({
+        raffle_id: r.id,
+        tickets: userEntries[r.id],
+        points_spent: (userEntries[r.id] || 0) * (r.ticket_cost || 50),
+        purchased_at: '',
+        title: r.title,
+        status: r.status,
+        ends_at: r.ends_at,
+        winner_wallet: null,
+        image_url: r.image_url,
+      }));
+  }, [raffles, userEntries]);
+
+  useEffect(() => {
+    setUserEntriesFull(buildUserEntries());
+  }, [buildUserEntries]);
 
   // Poll every 30s so status changes (TNM→LIVE, winner drawn) reflect automatically
   useEffect(() => {
