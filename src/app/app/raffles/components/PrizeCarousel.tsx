@@ -34,6 +34,16 @@ const DEFAULT_NOVELTIES = [
 ];
 const DEFAULT_FRAME = '/frame.png';
 
+const NOVELTY_MAP: Record<string, string> = {
+  lamp: '/novelty-1.png',
+  tennis: '/novelty-2.png',
+  boombox: '/novelty-3.png',
+  cooker: '/novelty-4.png',
+  teddy: '/novelty-5.png',
+  'teddy bear': '/novelty-5.png',
+  speaker: '/novelty-3.png',
+};
+
 // Frame interior viewport — values driven by CSS variables so mobile can override via globals.css
 const INT_TOP    = 'var(--carousel-int-top, 10.5%)';
 const INT_LEFT   = 'var(--carousel-int-left, 12.5%)';
@@ -67,17 +77,9 @@ function LiveTimerPill({ endsAt }: { endsAt: string }) {
 function PrizeItem({ raffle, noveltyIndex, noveltyItems }: { raffle: Raffle; noveltyIndex: number; noveltyItems: string[] }) {
   const noveltyIdx = noveltyIndex % noveltyItems.length;
   
-  // Mapping for novelty names to their standard paths
-  const noveltyMap: Record<string, string> = {
-    'Lamp': '/novelty-1.png',
-    'Tennis': '/novelty-2.png',
-    'Speaker': '/novelty-3.png',
-    'Cooker': '/novelty-4.png',
-    'Teddy Bear': '/novelty-5.png'
-  };
-
-  const noveltySrc = raffle.novelty_name && noveltyMap[raffle.novelty_name] 
-    ? noveltyMap[raffle.novelty_name] 
+  const normalizedNovelty = (raffle.novelty_name || '').trim().toLowerCase();
+  const noveltySrc = normalizedNovelty && NOVELTY_MAP[normalizedNovelty]
+    ? NOVELTY_MAP[normalizedNovelty]
     : noveltyItems[noveltyIdx];
 
   const isCooker = noveltySrc.includes('novelty-4');

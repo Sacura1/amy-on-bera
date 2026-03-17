@@ -78,13 +78,57 @@ export default function ActiveRaffles({ entries, wallet, onBuyMore }: ActiveRaff
         </div>
 
         {infoOpen && (
-          <div className="mt-2 space-y-2.5 text-xs text-white/90 leading-relaxed">
-            <p>Spend AMY Points to enter raffles and win prizes.<br />Every ticket has the same chance of winning — more tickets simply improve your odds.</p>
-            <div>
-              <p className="text-sm font-bold text-yellow-400">Raffle Flow</p>
-              <p className="text-[13px] font-semibold text-gray-400 mt-0.5">Waiting for players → Countdown → Tickets close → Winner drawn</p>
+          <div className="mt-2 text-xs text-white/90 leading-relaxed">
+            <p className="text-sm">
+              Spend AMY Points to enter raffles and win prizes.<br />
+              Every ticket has the same chance of winning — more tickets simply improve your odds.
+            </p>
+
+            <div className="mt-3">
+              <p className="text-sm font-black text-yellow-400">Raffle Flow</p>
+              <p className="text-[13px] font-semibold text-yellow-200  tracking-[0.3em] mt-0.5">
+                Waiting for players → Countdown → Tickets close → Winner drawn
+              </p>
             </div>
-            <p>Each ticket costs <span className="text-white font-bold">50 AMY Points</span>.</p>
+
+            <p className="mt-4">
+              Each ticket costs <span className="text-white font-bold">50 AMY Points</span>.
+            </p>
+
+            <p className="mt-4 text-white font-semibold">Waiting for players (TNM)</p>
+            <p className="mt-1">
+              The raffle is filling up before the countdown begins. Tickets can still be purchased during this stage — every ticket bought brings the raffle closer to activating.
+            </p>
+
+            <p className="mt-2">
+              Once minimum participation is reached, the raffle activates and the countdown begins.
+            </p>
+
+            <p className="mt-3 text-white font-semibold">Countdown (Raffle live)</p>
+            <p className="mt-1">
+              The clock is running and tickets remain available until the timer reaches zero. Countdown lengths vary by prize — some raffles run for around 24 hours, while others remain open for several days.
+            </p>
+
+            <p className="mt-3 text-white font-semibold">Winner drawn</p>
+            <p className="mt-1">
+              Around 10 minutes after the countdown ends, a winner is selected automatically.
+            </p>
+
+            <p className="mt-2">
+              Example: if 100 tickets are sold and you hold 10, you have a 10% chance of winning.
+            </p>
+
+            <p className="mt-2">
+              The draw uses on-chain randomness — fully automated, tamper-proof, and independently verifiable by anyone.
+            </p>
+
+            <p className="mt-2">
+              Prizes are typically transferred within 24 hours of the raffle closing.
+            </p>
+
+            <p className="mt-2">
+              New raffles are added regularly as others finish — keep an eye out for new prizes.
+            </p>
           </div>
         )}
       </div>
