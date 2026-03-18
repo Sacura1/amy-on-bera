@@ -132,70 +132,70 @@ function ProfilePageContent() {
   const fetchUserData = useCallback(async () => {
     if (!walletAddress) return;
 
-    try {
-      // Fetch referral data
-      const response = await fetch(`${API_BASE_URL}/api/referral/${walletAddress}`);
-      const data = await response.json();
+    const referralUrl = `${API_BASE_URL}/api/referral/${walletAddress}`;
+    const pointsUrl = `${API_BASE_URL}/api/points/${walletAddress}`;
+    const socialUrl = `${API_BASE_URL}/api/social/${walletAddress}`;
+    const profileUrl = `${API_BASE_URL}/api/profile/${walletAddress}`;
 
-      if (data.success && data.data) {
-        if (data.data.referralCode) {
-          setUserReferralCode(data.data.referralCode);
+    const safeFetchJson = async (url: string) => {
+      try {
+        const res = await fetch(url);
+        return await res.json();
+      } catch {
+        return null;
+      }
+    };
+
+    try {
+      const [referralData, pointsData, socialData, profileData] = await Promise.all([
+        safeFetchJson(referralUrl),
+        safeFetchJson(pointsUrl),
+        safeFetchJson(socialUrl),
+        safeFetchJson(profileUrl),
+      ]);
+
+      if (referralData?.success && referralData.data) {
+        if (referralData.data.referralCode) {
+          setUserReferralCode(referralData.data.referralCode);
         }
-        if (data.data.referredBy) {
-          setUsedReferralCode(data.data.referredBy);
+        if (referralData.data.referredBy) {
+          setUsedReferralCode(referralData.data.referredBy);
         }
-        if (data.data.referralCount !== undefined) {
-          setReferralCount(data.data.referralCount);
+        if (referralData.data.referralCount !== undefined) {
+          setReferralCount(referralData.data.referralCount);
         }
       }
 
-      // Fetch points data to get tier and multiplier info
-      const pointsRes = await fetch(`${API_BASE_URL}/api/points/${walletAddress}`);
-      const pointsData = await pointsRes.json();
-      if (pointsData.success && pointsData.data) {
+      if (pointsData?.success && pointsData.data) {
         setCurrentTier(pointsData.data.currentTier || 'none');
         setTotalMultiplier(pointsData.data.totalMultiplier || 1);
         setPointsPerHour(pointsData.data.effectivePointsPerHour || pointsData.data.pointsPerHour || 0);
         setUserPoints(pointsData.data.totalPoints || 0);
       }
 
-      // Fetch social connection status
-      try {
-        const socialRes = await fetch(`${API_BASE_URL}/api/social/${walletAddress}`);
-        const socialData = await socialRes.json();
-        if (socialData.success && socialData.data) {
-          const discord = socialData.data.discord || socialData.data.discordUsername;
-          const telegram = socialData.data.telegram || socialData.data.telegramUsername;
-          setDiscordConnected(!!discord);
-          setDiscordUsername(discord || null);
-          setTelegramConnected(!!telegram);
-          setTelegramUsername(telegram || null);
-          setEmailConnected(!!socialData.data.email);
-        }
-      } catch {
-        // Error fetching social data
+      if (socialData?.success && socialData.data) {
+        const discord = socialData.data.discord || socialData.data.discordUsername;
+        const telegram = socialData.data.telegram || socialData.data.telegramUsername;
+        setDiscordConnected(!!discord);
+        setDiscordUsername(discord || null);
+        setTelegramConnected(!!telegram);
+        setTelegramUsername(telegram || null);
+        setEmailConnected(!!socialData.data.email);
       }
 
-      // Fetch customization data
-      try {
-        const profileRes = await fetch(`${API_BASE_URL}/api/profile/${walletAddress}`);
-        const profileData = await profileRes.json();
-        if (profileData.success && profileData.data?.profile) {
-          const profile = profileData.data.profile;
-          if (profile.backgroundId) {
-            setCurrentBackground(profile.backgroundId);
-            // Sync to global context so Background component updates
-            setBackgroundId(profile.backgroundId);
-          }
-          if (profile.filterId) {
-            setCurrentFilter(profile.filterId);
-            // Sync to global context so Background component updates
-            setFilterId(profile.filterId);
-          }
-          if (profile.animationId) setCurrentAnimation(profile.animationId);
+      if (profileData?.success && profileData.data?.profile) {
+        const profile = profileData.data.profile;
+        if (profile.backgroundId) {
+          setCurrentBackground(profile.backgroundId);
+          setBackgroundId(profile.backgroundId);
         }
-      } catch (err) {
-        console.error('Error fetching profile data:', err);
+        if (profile.filterId) {
+          setCurrentFilter(profile.filterId);
+          setFilterId(profile.filterId);
+        }
+        if (profile.animationId) {
+          setCurrentAnimation(profile.animationId);
+        }
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -224,21 +224,13 @@ function ProfilePageContent() {
             xUsername: xUsername || undefined
           })
         });
-        // Refetch points data after balance update
-        const pointsRes = await fetch(`${API_BASE_URL}/api/points/${walletAddress}`);
-        const pointsData = await pointsRes.json();
-        if (pointsData.success && pointsData.data) {
-          setCurrentTier(pointsData.data.currentTier || 'none');
-          setTotalMultiplier(pointsData.data.totalMultiplier || 1);
-          setPointsPerHour(pointsData.data.effectivePointsPerHour || pointsData.data.pointsPerHour || 0);
-          setUserPoints(pointsData.data.totalPoints || 0);
-        }
+        await fetchUserData();
       } catch (err) {
         console.error('Error updating balance:', err);
       }
     };
     updateBalance();
-  }, [walletAddress, balance, xUsername]);
+  }, [walletAddress, balance, xUsername, fetchUserData]);
 
   // Fetch badge lists for admin
   useEffect(() => {

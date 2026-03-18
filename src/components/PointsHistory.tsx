@@ -37,6 +37,8 @@ const CATEGORY_ICONS: Record<string, string> = {
   PREDICTION_REFUND: '+'
 };
 
+const HISTORY_PAGE_SIZE = 20;
+
 interface PointsHistoryProps {
   walletAddress: string | undefined;
 }
@@ -46,18 +48,28 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [historyPage, setHistoryPage] = useState(0);
+  const [hasMoreHistory, setHasMoreHistory] = useState(true);
+  const [isLoadingMoreHistory, setIsLoadingMoreHistory] = useState(false);
 
-  const fetchHistory = useCallback(async () => {
+  const fetchHistory = useCallback(async ({ page = 0, append = false } = {}) => {
     if (!walletAddress) return;
 
-    setIsLoading(true);
-    setError(null);
+    if (append) {
+      setIsLoadingMoreHistory(true);
+    } else {
+      setIsLoading(true);
+      setError(null);
+    }
+
     try {
-      const response = await fetch(`${API_BASE_URL}/api/points/history/${walletAddress}?limit=50`);
+      const response = await fetch(`${API_BASE_URL}/api/points/history/${walletAddress}?limit=${HISTORY_PAGE_SIZE}&offset=${page * HISTORY_PAGE_SIZE}`);
       const data = await response.json();
 
       if (data.success && data.data) {
-        setHistory(data.data);
+        setHistory((prev) => (append ? [...prev, ...data.data] : data.data));
+        setHasMoreHistory(data.data.length === HISTORY_PAGE_SIZE);
+        setHistoryPage(page);
       } else {
         setError('Failed to load history');
       }
@@ -65,7 +77,11 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
       console.error('Error fetching points history:', err);
       setError('Failed to load history');
     } finally {
-      setIsLoading(false);
+      if (append) {
+        setIsLoadingMoreHistory(false);
+      } else {
+        setIsLoading(false);
+      }
     }
   }, [walletAddress]);
 
@@ -75,6 +91,18 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
       fetchHistory();
     }
   }, [isExpanded, walletAddress, fetchHistory, history.length]);
+
+  useEffect(() => {
+    setHistory([]);
+    setHistoryPage(0);
+    setHasMoreHistory(true);
+    setIsLoadingMoreHistory(false);
+  }, [walletAddress]);
+
+  const loadMoreHistory = () => {
+    if (!hasMoreHistory || isLoadingMoreHistory) return;
+    fetchHistory({ page: historyPage + 1, append: true });
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -225,12 +253,15 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
                 </div>
               ))}
 
-              {/* Load More Button (if needed in future) */}
-              {history.length >= 50 && (
-                <div className="text-center pt-4">
-                  <span className="text-sm text-gray-500">
-                    Showing last 50 entries
-                  </span>
+              {hasMoreHistory && history.length > 0 && (
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={loadMoreHistory}
+                    disabled={isLoadingMoreHistory}
+                    className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-full text-sm font-semibold transition-colors disabled:opacity-50"
+                  >
+                    {isLoadingMoreHistory ? 'Loading more history...' : 'Load more history'}
+                  </button>
                 </div>
               )}
             </div>

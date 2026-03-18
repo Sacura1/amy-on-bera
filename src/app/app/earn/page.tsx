@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useActiveAccount } from 'thirdweb/react';
 import { API_BASE_URL } from '@/lib/constants';
 
@@ -331,7 +331,7 @@ const RiskBars = ({ level }: { level: number }) => (
   </div>
 );
 
-const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicData?: DynamicEarnData }) => {
+const StrategyCard = React.memo(({ strategy, dynamicData }: { strategy: Strategy; dynamicData?: DynamicEarnData }) => {
   const router = useRouter();
   const risk = getRiskStyles(strategy.riskCategory);
   const [showInfo, setShowInfo] = useState(false);
@@ -370,9 +370,15 @@ const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicDa
     <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50">
       {/* Header with logo and action button(s) - always visible */}
       <div className="p-4 flex items-center justify-between">
-        <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
-          <img src={strategy.image} alt={strategy.name} className="w-full h-full object-cover" />
-        </div>
+          <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+            <img
+              src={strategy.image}
+              alt={strategy.name}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
         <div className="flex items-center gap-2">
           {strategy.buyUnderlying && (
             <button
@@ -524,7 +530,9 @@ const StrategyCard = ({ strategy, dynamicData }: { strategy: Strategy; dynamicDa
       )}
     </div>
   );
-};
+});
+
+StrategyCard.displayName = 'StrategyCard';
 
 // Active position card for currently earning section
 const ActivePositionCard = ({ lpData }: { lpData: LpData }) => {
@@ -717,7 +725,7 @@ export default function EarnPage() {
     } else {
       setLpData(null);
     }
-  }, [account?.address, fetchLpData]);
+  }, [account?.address, fetchLpData, fetchTokenData]);
 
   // Check if user has active LP position (or TEST_MODE is enabled)
   const hasActiveLp = TEST_MODE || (lpData && lpData.lpValueUsd > 0 && lpData.positionsFound > 0);
@@ -725,53 +733,59 @@ export default function EarnPage() {
   const hasAnyActivePosition = hasActiveLp || hasActiveTokens;
 
   // Helper to get dynamic value for a strategy
-  const getDynamicTvl = (strategy: Strategy) => {
+  const getDynamicTvl = useCallback((strategy: Strategy) => {
     if (strategy.dynamicDataKey && dynamicEarnData) {
       const poolData = dynamicEarnData[strategy.dynamicDataKey as keyof Omit<DynamicEarnData, 'lastUpdated'>];
       return poolData?.tvl || strategy.tvl;
     }
     return strategy.tvl;
-  };
+  }, [dynamicEarnData]);
 
-  const getDynamicApr = (strategy: Strategy) => {
+  const getDynamicApr = useCallback((strategy: Strategy) => {
     if (strategy.dynamicDataKey && dynamicEarnData) {
       const poolData = dynamicEarnData[strategy.dynamicDataKey as keyof Omit<DynamicEarnData, 'lastUpdated'>];
       return poolData?.apr || strategy.apr;
     }
     return strategy.apr;
-  };
+  }, [dynamicEarnData]);
 
   // Get unique chains and tokens
   const availableChains: ('berachain' | 'base')[] = ['berachain', 'base']; // Show all chains regardless of strategies
-  const availableTokens = Array.from(new Set(STRATEGIES.flatMap(s => s.targetTokens))).sort();
+  const availableTokens = useMemo(
+    () => Array.from(new Set(STRATEGIES.flatMap((s) => s.targetTokens))).sort(),
+    []
+  );
 
-  // Filter strategies based on selected chains and tokens
-  const filteredStrategies = STRATEGIES.filter((strategy) => {
-    // If no filters selected, show all
-    const chainMatch = selectedChains.length === 0 || selectedChains.includes(strategy.chain);
-    const tokenMatch = selectedTokens.length === 0 || strategy.targetTokens.some(token => selectedTokens.includes(token));
-    return chainMatch && tokenMatch;
-  });
+  const filteredStrategies = useMemo(() => {
+    return STRATEGIES.filter((strategy) => {
+      const chainMatch = selectedChains.length === 0 || selectedChains.includes(strategy.chain);
+      const tokenMatch = selectedTokens.length === 0 || strategy.targetTokens.some((token) => selectedTokens.includes(token));
+      return chainMatch && tokenMatch;
+    });
+  }, [selectedChains, selectedTokens]);
 
-  // Sort filtered strategies based on selected option
-  const sortedStrategies = [...filteredStrategies].sort((a, b) => {
-    switch (sortBy) {
-      case 'tvl-high':
-        return parseValue(getDynamicTvl(b)) - parseValue(getDynamicTvl(a));
-      case 'tvl-low':
-        return parseValue(getDynamicTvl(a)) - parseValue(getDynamicTvl(b));
-      case 'apr-high':
-        return parseValue(getDynamicApr(b)) - parseValue(getDynamicApr(a));
-      case 'apr-low':
-        return parseValue(getDynamicApr(a)) - parseValue(getDynamicApr(b));
-      case 'points-high':
-        return parsePoints(b.amyPoints) - parsePoints(a.amyPoints);
-      case 'points-low':
-        return parsePoints(a.amyPoints) - parsePoints(b.amyPoints);
-      default:
-        return 0; // Keep original order
-    }
-  });
+  const sortedStrategies = useMemo(() => {
+    const sorted = [...filteredStrategies];
+    sorted.sort((a, b) => {
+      switch (sortBy) {
+        case 'tvl-high':
+          return parseValue(getDynamicTvl(b)) - parseValue(getDynamicTvl(a));
+        case 'tvl-low':
+          return parseValue(getDynamicTvl(a)) - parseValue(getDynamicTvl(b));
+        case 'apr-high':
+          return parseValue(getDynamicApr(b)) - parseValue(getDynamicApr(a));
+        case 'apr-low':
+          return parseValue(getDynamicApr(a)) - parseValue(getDynamicApr(b));
+        case 'points-high':
+          return parsePoints(b.amyPoints) - parsePoints(a.amyPoints);
+        case 'points-low':
+          return parsePoints(a.amyPoints) - parsePoints(b.amyPoints);
+        default:
+          return 0;
+      }
+    });
+    return sorted;
+  }, [filteredStrategies, sortBy, getDynamicTvl, getDynamicApr]);
 
   // Toggle filter selection
   const toggleChain = (chain: string) => {
