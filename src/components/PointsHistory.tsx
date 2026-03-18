@@ -188,15 +188,15 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
               <div className="loading-spinner w-8 h-8" />
             </div>
           ) : error ? (
-            <div className="text-center py-8 text-red-400">
-              {error}
-              <button
-                onClick={fetchHistory}
-                className="ml-2 underline hover:text-red-300"
-              >
-                Retry
-              </button>
-            </div>
+              <div className="text-center py-8 text-red-400">
+                {error}
+                <button
+                  onClick={() => fetchHistory()}
+                  className="ml-2 underline hover:text-red-300"
+                >
+                  Retry
+                </button>
+              </div>
           ) : history.length === 0 ? (
             <div className="text-center py-8 text-gray-400">
               No points history yet. Start earning points by holding $AMY!
