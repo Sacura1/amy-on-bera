@@ -537,6 +537,7 @@ const TierIcon = ({ tier }: { tier: string }) => {
 
 const POINTS_CACHE_PREFIX = 'amy-points-cache';
 const POINTS_LAST_WALLET_KEY = 'amy-points-last-wallet';
+const getLocalStorage = () => (typeof window !== 'undefined' ? window.localStorage : null);
 
 export default function PointsPage() {
   const account = useActiveAccount();
@@ -559,11 +560,21 @@ export default function PointsPage() {
   const getCacheKey = (wallet?: string) =>
     wallet ? `${POINTS_CACHE_PREFIX}:${wallet.toLowerCase()}` : null;
 
-  const getStorage = () => (typeof window !== 'undefined' ? window.localStorage : null);
+  const getLastCachedWallet = useCallback(() => {
+    const storage = getLocalStorage();
+    if (!storage) return null;
+    return storage.getItem(POINTS_LAST_WALLET_KEY) || null;
+  }, []);
+
+  const setLastCachedWallet = useCallback((wallet: string) => {
+    const storage = getLocalStorage();
+    if (!storage) return;
+    storage.setItem(POINTS_LAST_WALLET_KEY, wallet.toLowerCase());
+  }, []);
 
   const loadCachedPoints = useCallback((wallet?: string) => {
     if (!wallet) return false;
-    const storage = getStorage();
+    const storage = getLocalStorage();
     if (!storage) return false;
     const cacheKey = getCacheKey(wallet);
     if (!cacheKey) return false;
@@ -584,7 +595,7 @@ export default function PointsPage() {
       storage.removeItem(cacheKey);
     }
     return false;
-  }, [walletAddress]);
+  }, []);
 
   // Quest/Social state
   const [xConnected, setXConnected] = useState(false);
@@ -611,6 +622,14 @@ export default function PointsPage() {
     questPointsEarned: 0,
   });
   const [completingQuest, setCompletingQuest] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (hasCachedPoints) return;
+    const lastWallet = getLastCachedWallet();
+    if (lastWallet) {
+      loadCachedPoints(lastWallet);
+    }
+  }, [hasCachedPoints, getLastCachedWallet, loadCachedPoints]);
 
   // Calculate Onchain Conviction badge status from API
   const onchainConvictionMultiplier = pointsData?.onchainConvictionMultiplier || 0;
@@ -679,22 +698,28 @@ export default function PointsPage() {
         setHasCachedPoints(true);
 
         const cacheKey = getCacheKey(walletAddress);
-      if (cacheKey && typeof window !== 'undefined') {
-        sessionStorage.setItem(
-          cacheKey,
-          JSON.stringify({
-            pointsData: data.data,
-            displayPoints: initialDisplayPoints
-          })
-        );
-      }
+        const storage = getLocalStorage();
+        if (cacheKey && storage) {
+          try {
+            storage.setItem(
+              cacheKey,
+              JSON.stringify({
+                pointsData: data.data,
+                displayPoints: initialDisplayPoints
+              })
+            );
+            setLastCachedWallet(walletAddress);
+          } catch {
+            storage.removeItem(cacheKey);
+          }
+        }
       }
     } catch (error) {
       console.error('Error fetching points:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [walletAddress, balance]);
+  }, [walletAddress, balance, setLastCachedWallet]);
 
   // Fetch LP data
   const fetchLpData = useCallback(async () => {
@@ -827,8 +852,7 @@ export default function PointsPage() {
   // Fetch points, LP data, token data, X username, and social data when wallet connects
   useEffect(() => {
     if (!walletAddress) return;
-
-    const loadedFromCache = loadCachedPoints();
+    const loadedFromCache = loadCachedPoints(walletAddress);
     fetchPointsData(!loadedFromCache);
     fetchLpData();
     fetchTokenData();

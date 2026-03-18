@@ -102,6 +102,38 @@ type TabType = 'weekly' | 'points';
 
 const WEEKLY_CACHE_KEY = 'amy-weekly-leaderboard';
 const POINTS_CACHE_KEY = 'amy-points-leaderboard';
+const WEEKLY_CACHE_LIMIT = 25;
+const POINTS_CACHE_LIMIT = 25;
+
+const trimLeaderboardEntries = (entries: EnrichedEntry[]) =>
+  entries.slice(0, WEEKLY_CACHE_LIMIT).map(entry => ({
+    xUsername: entry.xUsername,
+    amyBalance: entry.amyBalance,
+    verified: entry.verified,
+    eligible: entry.eligible,
+    originalRank: entry.originalRank,
+    mindshareScore: entry.mindshareScore
+  }));
+
+const trimPointsEntries = (entries: PointsEntry[]) =>
+  entries.slice(0, POINTS_CACHE_LIMIT).map(entry => ({
+    wallet: entry.wallet,
+    xUsername: entry.xUsername,
+    totalPoints: entry.totalPoints,
+    currentTier: entry.currentTier,
+    amyBalance: entry.amyBalance,
+    displayName: entry.displayName,
+    bio: entry.bio
+  }));
+
+const safeSessionStorageSet = (key: string, value: unknown) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    window.sessionStorage.removeItem(key);
+  }
+};
 
 export default function LeaderboardPage() {
   const [activeTab, setActiveTab] = useState<TabType>('weekly');
@@ -278,16 +310,10 @@ export default function LeaderboardPage() {
       const combinedEntries = [...eligibleLeaderboardUsers, ...tokenHoldersToAppend];
       setDisplayEntries(combinedEntries);
       setHasCachedLeaderboard(true);
-      if (typeof window !== 'undefined') {
-      try {
-        sessionStorage.setItem(WEEKLY_CACHE_KEY, JSON.stringify({
-          entries: combinedEntries.slice(0, 40),
-          lastUpdated: leaderboardData.lastUpdated || ''
-        }));
-      } catch {
-        sessionStorage.removeItem(WEEKLY_CACHE_KEY);
-      }
-      }
+      safeSessionStorageSet(WEEKLY_CACHE_KEY, {
+        entries: trimLeaderboardEntries(combinedEntries),
+        lastUpdated: leaderboardData.lastUpdated || ''
+      });
 
     } catch (err) {
       console.error('Error loading leaderboard:', err);
@@ -345,15 +371,9 @@ export default function LeaderboardPage() {
         }
         setPointsEntries(entriesWithProfiles);
         setHasCachedPointsLeaderboard(true);
-        if (typeof window !== 'undefined') {
-        try {
-          sessionStorage.setItem(POINTS_CACHE_KEY, JSON.stringify({
-            entries: entriesWithProfiles.slice(0, 40)
-          }));
-        } catch {
-          sessionStorage.removeItem(POINTS_CACHE_KEY);
-        }
-        }
+        safeSessionStorageSet(POINTS_CACHE_KEY, {
+          entries: trimPointsEntries(entriesWithProfiles)
+        });
       }
     } catch (err) {
       console.error('Error loading points leaderboard:', err);
