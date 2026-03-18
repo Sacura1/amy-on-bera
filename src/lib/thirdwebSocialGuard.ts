@@ -10,8 +10,8 @@ export function initThirdwebSocialFetchGuard() {
 
   const originalFetch = window.fetch.bind(window);
 
-  window.fetch = async (input: RequestInfo, init?: RequestInit) => {
-    const url = typeof input === 'string' ? input : input?.url;
+  window.fetch = async (input, init) => {
+    const resolvedInput = typeof input === 'string' ? input : input?.url;
 
     if (url && url.startsWith(SOCIAL_PROFILE_PREFIX)) {
       const cacheKey = `amy-social-profile:${url}`;
@@ -54,6 +54,7 @@ export function initThirdwebSocialFetchGuard() {
       }
     }
 
-    return originalFetch(input, init);
+        // @ts-expect-error preserve original parameter types
+        return originalFetch(input, init);
   };
 }
