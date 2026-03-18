@@ -279,10 +279,14 @@ export default function LeaderboardPage() {
       setDisplayEntries(combinedEntries);
       setHasCachedLeaderboard(true);
       if (typeof window !== 'undefined') {
+      try {
         sessionStorage.setItem(WEEKLY_CACHE_KEY, JSON.stringify({
-          entries: combinedEntries,
+          entries: combinedEntries.slice(0, 40),
           lastUpdated: leaderboardData.lastUpdated || ''
         }));
+      } catch {
+        sessionStorage.removeItem(WEEKLY_CACHE_KEY);
+      }
       }
 
     } catch (err) {
@@ -342,9 +346,13 @@ export default function LeaderboardPage() {
         setPointsEntries(entriesWithProfiles);
         setHasCachedPointsLeaderboard(true);
         if (typeof window !== 'undefined') {
+        try {
           sessionStorage.setItem(POINTS_CACHE_KEY, JSON.stringify({
-            entries: entriesWithProfiles
+            entries: entriesWithProfiles.slice(0, 40)
           }));
+        } catch {
+          sessionStorage.removeItem(POINTS_CACHE_KEY);
+        }
         }
       }
     } catch (err) {

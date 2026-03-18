@@ -536,6 +536,7 @@ const TierIcon = ({ tier }: { tier: string }) => {
 };
 
 const POINTS_CACHE_PREFIX = 'amy-points-cache';
+const POINTS_LAST_WALLET_KEY = 'amy-points-last-wallet';
 
 export default function PointsPage() {
   const account = useActiveAccount();
@@ -558,27 +559,31 @@ export default function PointsPage() {
   const getCacheKey = (wallet?: string) =>
     wallet ? `${POINTS_CACHE_PREFIX}:${wallet.toLowerCase()}` : null;
 
-  useEffect(() => {
-    if (!walletAddress) return;
-    if (typeof window === 'undefined') return;
+  const getStorage = () => (typeof window !== 'undefined' ? window.localStorage : null);
 
-    const cacheKey = getCacheKey(walletAddress);
-    if (!cacheKey) return;
+  const loadCachedPoints = useCallback((wallet?: string) => {
+    if (!wallet) return false;
+    const storage = getStorage();
+    if (!storage) return false;
+    const cacheKey = getCacheKey(wallet);
+    if (!cacheKey) return false;
 
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (parsed.pointsData) {
-          setPointsData(parsed.pointsData);
-          setDisplayPoints(parsed.displayPoints || 0);
-          setHasCachedPoints(true);
-          setIsLoading(false);
-        }
-      } catch {
-        sessionStorage.removeItem(cacheKey);
+    const cached = storage.getItem(cacheKey);
+    if (!cached) return false;
+
+    try {
+      const parsed = JSON.parse(cached);
+      if (parsed.pointsData) {
+        setPointsData(parsed.pointsData);
+        setDisplayPoints(parsed.displayPoints || 0);
+        setHasCachedPoints(true);
+        setIsLoading(false);
+        return true;
       }
+    } catch {
+      storage.removeItem(cacheKey);
     }
+    return false;
   }, [walletAddress]);
 
   // Quest/Social state
@@ -626,10 +631,10 @@ export default function PointsPage() {
     : null;
 
   // Fetch points data
-  const fetchPointsData = useCallback(async () => {
+  const fetchPointsData = useCallback(async (showLoading = true) => {
     if (!walletAddress || TEST_MODE) return;
 
-    if (!hasCachedPoints) {
+    if (showLoading) {
       setIsLoading(true);
     }
     try {
@@ -689,7 +694,7 @@ export default function PointsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [walletAddress, balance, hasCachedPoints]);
+  }, [walletAddress, balance]);
 
   // Fetch LP data
   const fetchLpData = useCallback(async () => {
@@ -821,14 +826,15 @@ export default function PointsPage() {
 
   // Fetch points, LP data, token data, X username, and social data when wallet connects
   useEffect(() => {
-    if (walletAddress) {
-      fetchPointsData();
-      fetchLpData();
-      fetchTokenData();
-      fetchXUsername();
-      fetchSocialData();
-    }
-  }, [walletAddress, fetchPointsData, fetchLpData, fetchTokenData, fetchXUsername, fetchSocialData]);
+    if (!walletAddress) return;
+
+    const loadedFromCache = loadCachedPoints();
+    fetchPointsData(!loadedFromCache);
+    fetchLpData();
+    fetchTokenData();
+    fetchXUsername();
+    fetchSocialData();
+  }, [walletAddress, fetchPointsData, fetchLpData, fetchTokenData, fetchXUsername, fetchSocialData, loadCachedPoints]);
 
   // Animate points counter (increment based on points per hour)
   useEffect(() => {
