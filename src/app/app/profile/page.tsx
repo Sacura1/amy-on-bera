@@ -147,56 +147,61 @@ function ProfilePageContent() {
     };
 
     try {
-      const [referralData, pointsData, socialData, profileData] = await Promise.all([
-        safeFetchJson(referralUrl),
-        safeFetchJson(pointsUrl),
-        safeFetchJson(socialUrl),
-        safeFetchJson(profileUrl),
-      ]);
+      safeFetchJson(referralUrl).then((referralData) => {
+        if (referralData?.success && referralData.data) {
+          if (referralData.data.referralCode) {
+            setUserReferralCode(referralData.data.referralCode);
+          }
+          if (referralData.data.referredBy) {
+            setUsedReferralCode(referralData.data.referredBy);
+          }
+          if (referralData.data.referralCount !== undefined) {
+            setReferralCount(referralData.data.referralCount);
+          }
+        }
+      });
 
-      if (referralData?.success && referralData.data) {
-        if (referralData.data.referralCode) {
-          setUserReferralCode(referralData.data.referralCode);
+      safeFetchJson(pointsUrl).then((pointsData) => {
+        if (pointsData?.success && pointsData.data) {
+          setCurrentTier(pointsData.data.currentTier || 'none');
+          setTotalMultiplier(pointsData.data.totalMultiplier || 1);
+          setPointsPerHour(
+            pointsData.data.effectivePointsPerHour || pointsData.data.pointsPerHour || 0
+          );
+          setUserPoints(pointsData.data.totalPoints || 0);
         }
-        if (referralData.data.referredBy) {
-          setUsedReferralCode(referralData.data.referredBy);
-        }
-        if (referralData.data.referralCount !== undefined) {
-          setReferralCount(referralData.data.referralCount);
-        }
-      }
+      });
 
-      if (pointsData?.success && pointsData.data) {
-        setCurrentTier(pointsData.data.currentTier || 'none');
-        setTotalMultiplier(pointsData.data.totalMultiplier || 1);
-        setPointsPerHour(pointsData.data.effectivePointsPerHour || pointsData.data.pointsPerHour || 0);
-        setUserPoints(pointsData.data.totalPoints || 0);
-      }
+      safeFetchJson(socialUrl).then((socialData) => {
+        if (socialData?.success && socialData.data) {
+          const discord =
+            socialData.data.discord || socialData.data.discordUsername;
+          const telegram =
+            socialData.data.telegram || socialData.data.telegramUsername;
+          setDiscordConnected(!!discord);
+          setDiscordUsername(discord || null);
+          setTelegramConnected(!!telegram);
+          setTelegramUsername(telegram || null);
+          setEmailConnected(!!socialData.data.email);
+        }
+      });
 
-      if (socialData?.success && socialData.data) {
-        const discord = socialData.data.discord || socialData.data.discordUsername;
-        const telegram = socialData.data.telegram || socialData.data.telegramUsername;
-        setDiscordConnected(!!discord);
-        setDiscordUsername(discord || null);
-        setTelegramConnected(!!telegram);
-        setTelegramUsername(telegram || null);
-        setEmailConnected(!!socialData.data.email);
-      }
-
-      if (profileData?.success && profileData.data?.profile) {
-        const profile = profileData.data.profile;
-        if (profile.backgroundId) {
-          setCurrentBackground(profile.backgroundId);
-          setBackgroundId(profile.backgroundId);
+      safeFetchJson(profileUrl).then((profileData) => {
+        if (profileData?.success && profileData.data?.profile) {
+          const profile = profileData.data.profile;
+          if (profile.backgroundId) {
+            setCurrentBackground(profile.backgroundId);
+            setBackgroundId(profile.backgroundId);
+          }
+          if (profile.filterId) {
+            setCurrentFilter(profile.filterId);
+            setFilterId(profile.filterId);
+          }
+          if (profile.animationId) {
+            setCurrentAnimation(profile.animationId);
+          }
         }
-        if (profile.filterId) {
-          setCurrentFilter(profile.filterId);
-          setFilterId(profile.filterId);
-        }
-        if (profile.animationId) {
-          setCurrentAnimation(profile.animationId);
-        }
-      }
+      });
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
