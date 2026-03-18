@@ -265,63 +265,75 @@ export default function ProfileCard({
 
   const { discordConnected, telegramConnected, emailConnected } = socialConnections || {};
 
-  useEffect(() => {
-    if (!wallet) return;
+    useEffect(() => {
+      if (!wallet) return;
+      let cancelled = false;
 
-    const fetchData = async () => {
-      try {
+      const fetchProfile = async () => {
         setIsLoading(true);
-
-        // Fetch profile data
-        const profileRes = await fetch(`${API_BASE_URL}/api/profile/${wallet}`);
-        const profileData = await profileRes.json();
-        if (profileData.success) {
-          setProfile(profileData.data.profile);
-          setEquippedBadges(profileData.data.badges?.equipped || []);
-          // Store social data with usernames
-          if (profileData.data.social) {
-            setSocialData(profileData.data.social);
+        try {
+          const profileRes = await fetch(`${API_BASE_URL}/api/profile/${wallet}`);
+          const profileData = await profileRes.json();
+          if (profileData.success) {
+            setProfile(profileData.data.profile);
+            setEquippedBadges(profileData.data.badges?.equipped || []);
+            if (profileData.data.social) {
+              setSocialData(profileData.data.social);
+            }
           }
+        } catch (error) {
+          console.error('Error fetching profile data:', error);
+        } finally {
+          if (!cancelled) setIsLoading(false);
         }
+      };
 
-        // Fetch LP data for Bulla badge
-        const lpRes = await fetch(`${API_BASE_URL}/api/lp/${wallet}`);
-        const lpDataResponse = await lpRes.json();
-        if (lpDataResponse.success && lpDataResponse.data) {
-          setLpData(lpDataResponse.data);
+      const fetchBadgeMultipliers = async () => {
+        try {
+          const [lpRes, tokenRes, pointsRes] = await Promise.all([
+            fetch(`${API_BASE_URL}/api/lp/${wallet}`),
+            fetch(`${API_BASE_URL}/api/tokens/${wallet}`),
+            fetch(`${API_BASE_URL}/api/points/${wallet}`)
+          ]);
+
+          const [lpDataResponse, tokenDataResponse, pointsDataResponse] = await Promise.all([
+            lpRes.json(),
+            tokenRes.json(),
+            pointsRes.json()
+          ]);
+
+          if (lpDataResponse.success && lpDataResponse.data) {
+            setLpData(lpDataResponse.data);
+          }
+
+          if (tokenDataResponse.success && tokenDataResponse.data) {
+            setTokenData(tokenDataResponse.data);
+          }
+
+          if (pointsDataResponse.success && pointsDataResponse.data) {
+            setPointsData({
+              raidsharkMultiplier: pointsDataResponse.data.raidsharkMultiplier,
+              onchainConvictionMultiplier: pointsDataResponse.data.onchainConvictionMultiplier,
+              referralMultiplier: pointsDataResponse.data.referralMultiplier,
+              swapperMultiplier: pointsDataResponse.data.swapperMultiplier,
+              telegramModMultiplier: pointsDataResponse.data.telegramModMultiplier,
+              discordModMultiplier: pointsDataResponse.data.discordModMultiplier,
+              emberMultiplier: pointsDataResponse.data.emberMultiplier,
+              genesisMultiplier: pointsDataResponse.data.genesisMultiplier
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching badge multipliers:', error);
         }
+      };
 
-        // Fetch token data for SAIL.r and plvHEDGE badges
-        const tokenRes = await fetch(`${API_BASE_URL}/api/tokens/${wallet}`);
-        const tokenDataResponse = await tokenRes.json();
-        if (tokenDataResponse.success && tokenDataResponse.data) {
-          setTokenData(tokenDataResponse.data);
-        }
+      fetchProfile();
+      fetchBadgeMultipliers();
 
-        // Fetch points data for RaidShark, Conviction, Referral, and Swapper badges
-        const pointsRes = await fetch(`${API_BASE_URL}/api/points/${wallet}`);
-        const pointsDataResponse = await pointsRes.json();
-        if (pointsDataResponse.success && pointsDataResponse.data) {
-          setPointsData({
-            raidsharkMultiplier: pointsDataResponse.data.raidsharkMultiplier,
-            onchainConvictionMultiplier: pointsDataResponse.data.onchainConvictionMultiplier,
-            referralMultiplier: pointsDataResponse.data.referralMultiplier,
-            swapperMultiplier: pointsDataResponse.data.swapperMultiplier,
-            telegramModMultiplier: pointsDataResponse.data.telegramModMultiplier,
-            discordModMultiplier: pointsDataResponse.data.discordModMultiplier,
-            emberMultiplier: pointsDataResponse.data.emberMultiplier,
-            genesisMultiplier: pointsDataResponse.data.genesisMultiplier
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching profile data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [wallet]);
+      return () => {
+        cancelled = true;
+      };
+    }, [wallet]);
 
   // Get active badges with their multipliers - using correct backend badge IDs
   const getActiveBadges = () => {
