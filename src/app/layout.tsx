@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThirdwebProvider } from "thirdweb/react";
+import SocialFetchGuard from '@/components/SocialFetchGuard';
 import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({
         <link rel="preload" as="image" href="/image.png" />
       </head>
       <body className="min-h-screen text-white relative">
+        <SocialFetchGuard />
         <ThirdwebProvider>{children}</ThirdwebProvider>
         <Analytics />
       </body>
