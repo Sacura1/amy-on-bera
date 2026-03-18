@@ -552,6 +552,7 @@ export default function PointsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingLp, setIsLoadingLp] = useState(false);
   const [displayPoints, setDisplayPoints] = useState(TEST_MODE ? MOCK_POINTS_DATA.totalPoints : 0);
+  const [hasCachedPoints, setHasCachedPoints] = useState(false);
   const [xUsername, setXUsername] = useState<string | null>(null);
 
   const getCacheKey = (wallet?: string) =>
@@ -571,6 +572,7 @@ export default function PointsPage() {
         if (parsed.pointsData) {
           setPointsData(parsed.pointsData);
           setDisplayPoints(parsed.displayPoints || 0);
+          setHasCachedPoints(true);
           setIsLoading(false);
         }
       } catch {
@@ -627,7 +629,9 @@ export default function PointsPage() {
   const fetchPointsData = useCallback(async () => {
     if (!walletAddress || TEST_MODE) return;
 
-    setIsLoading(true);
+    if (!hasCachedPoints) {
+      setIsLoading(true);
+    }
     try {
       // Start updating the balance on backend without awaiting its completion
       (async () => {
@@ -665,9 +669,11 @@ export default function PointsPage() {
         initialDisplayPoints = basePoints + simulatedPoints;
       }
 
-      setDisplayPoints(initialDisplayPoints);
+        setDisplayPoints(initialDisplayPoints);
 
-      const cacheKey = getCacheKey(walletAddress);
+        setHasCachedPoints(true);
+
+        const cacheKey = getCacheKey(walletAddress);
       if (cacheKey && typeof window !== 'undefined') {
         sessionStorage.setItem(
           cacheKey,
@@ -683,7 +689,7 @@ export default function PointsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [walletAddress, balance]);
+  }, [walletAddress, balance, hasCachedPoints]);
 
   // Fetch LP data
   const fetchLpData = useCallback(async () => {

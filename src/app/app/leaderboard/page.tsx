@@ -100,6 +100,9 @@ interface PointsEntry {
 
 type TabType = 'weekly' | 'points';
 
+const WEEKLY_CACHE_KEY = 'amy-weekly-leaderboard';
+const POINTS_CACHE_KEY = 'amy-points-leaderboard';
+
 export default function LeaderboardPage() {
   const [activeTab, setActiveTab] = useState<TabType>('weekly');
   const [displayEntries, setDisplayEntries] = useState<EnrichedEntry[]>([]);
@@ -108,12 +111,46 @@ export default function LeaderboardPage() {
   const [isPointsLoading, setIsPointsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [hasCachedLeaderboard, setHasCachedLeaderboard] = useState(false);
+  const [hasCachedPointsLeaderboard, setHasCachedPointsLeaderboard] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem(WEEKLY_CACHE_KEY);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed.entries)) {
+            setDisplayEntries(parsed.entries);
+            setLastUpdated(parsed.lastUpdated || '');
+            setHasCachedLeaderboard(true);
+            setIsLoading(false);
+          }
+        } catch {
+          sessionStorage.removeItem(WEEKLY_CACHE_KEY);
+        }
+      }
+    }
     loadLeaderboard();
   }, []);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem(POINTS_CACHE_KEY);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed.entries)) {
+            setPointsEntries(parsed.entries);
+            setHasCachedPointsLeaderboard(true);
+            setIsPointsLoading(false);
+          }
+        } catch {
+          sessionStorage.removeItem(POINTS_CACHE_KEY);
+        }
+      }
+    }
+
     if (activeTab === 'points' && pointsEntries.length === 0) {
       loadPointsLeaderboard();
     }
@@ -240,6 +277,13 @@ export default function LeaderboardPage() {
       // Combine: first leaderboard users, then token holders
       const combinedEntries = [...eligibleLeaderboardUsers, ...tokenHoldersToAppend];
       setDisplayEntries(combinedEntries);
+      setHasCachedLeaderboard(true);
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(WEEKLY_CACHE_KEY, JSON.stringify({
+          entries: combinedEntries,
+          lastUpdated: leaderboardData.lastUpdated || ''
+        }));
+      }
 
     } catch (err) {
       console.error('Error loading leaderboard:', err);
@@ -296,6 +340,12 @@ export default function LeaderboardPage() {
           entriesWithProfiles.push(...batchResults);
         }
         setPointsEntries(entriesWithProfiles);
+        setHasCachedPointsLeaderboard(true);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(POINTS_CACHE_KEY, JSON.stringify({
+            entries: entriesWithProfiles
+          }));
+        }
       }
     } catch (err) {
       console.error('Error loading points leaderboard:', err);
