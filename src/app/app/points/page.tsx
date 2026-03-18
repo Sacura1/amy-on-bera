@@ -535,6 +535,8 @@ const TierIcon = ({ tier }: { tier: string }) => {
   );
 };
 
+const POINTS_CACHE_PREFIX = 'amy-points-cache';
+
 export default function PointsPage() {
   const account = useActiveAccount();
   const { balance: realBalance, walletAddress: realWalletAddress } = useAmyBalance();
@@ -551,6 +553,31 @@ export default function PointsPage() {
   const [isLoadingLp, setIsLoadingLp] = useState(false);
   const [displayPoints, setDisplayPoints] = useState(TEST_MODE ? MOCK_POINTS_DATA.totalPoints : 0);
   const [xUsername, setXUsername] = useState<string | null>(null);
+
+  const getCacheKey = (wallet?: string) =>
+    wallet ? `${POINTS_CACHE_PREFIX}:${wallet.toLowerCase()}` : null;
+
+  useEffect(() => {
+    if (!walletAddress) return;
+    if (typeof window === 'undefined') return;
+
+    const cacheKey = getCacheKey(walletAddress);
+    if (!cacheKey) return;
+
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed.pointsData) {
+          setPointsData(parsed.pointsData);
+          setDisplayPoints(parsed.displayPoints || 0);
+          setIsLoading(false);
+        }
+      } catch {
+        sessionStorage.removeItem(cacheKey);
+      }
+    }
+  }, [walletAddress]);
 
   // Quest/Social state
   const [xConnected, setXConnected] = useState(false);
@@ -602,18 +629,23 @@ export default function PointsPage() {
 
     setIsLoading(true);
     try {
-      // First update the balance on backend
-      await fetch(`${API_BASE_URL}/api/points/update-balance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          wallet: walletAddress,
-          amyBalance: balance,
-          xUsername: null
-        })
-      });
+      // Start updating the balance on backend without awaiting its completion
+      (async () => {
+        try {
+          await fetch(`${API_BASE_URL}/api/points/update-balance`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              wallet: walletAddress,
+              amyBalance: balance,
+              xUsername: null
+            })
+          });
+        } catch (err) {
+          console.error('Error updating balance:', err);
+        }
+      })();
 
-      // Then fetch the points data
       const response = await fetch(`${API_BASE_URL}/api/points/${walletAddress}`);
       const data = await response.json();
 
@@ -629,11 +661,22 @@ export default function PointsPage() {
           const now = Date.now();
           const elapsedSeconds = (now - lastUpdate) / 1000;
           const pointsPerSecond = data.data.pointsPerHour / 3600;
-          const simulatedPoints = elapsedSeconds * pointsPerSecond;
-          initialDisplayPoints = basePoints + simulatedPoints;
-        }
+        const simulatedPoints = elapsedSeconds * pointsPerSecond;
+        initialDisplayPoints = basePoints + simulatedPoints;
+      }
 
-        setDisplayPoints(initialDisplayPoints);
+      setDisplayPoints(initialDisplayPoints);
+
+      const cacheKey = getCacheKey(walletAddress);
+      if (cacheKey && typeof window !== 'undefined') {
+        sessionStorage.setItem(
+          cacheKey,
+          JSON.stringify({
+            pointsData: data.data,
+            displayPoints: initialDisplayPoints
+          })
+        );
+      }
       }
     } catch (error) {
       console.error('Error fetching points:', error);
