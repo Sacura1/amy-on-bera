@@ -11,10 +11,17 @@ export function initThirdwebSocialFetchGuard() {
   const originalFetch = window.fetch.bind(window);
 
   window.fetch = async (input, init) => {
-    const resolvedInput = typeof input === 'string' ? input : input?.url;
+    const resolvedInput =
+      typeof input === 'string'
+        ? input
+        : input instanceof Request
+        ? input.url
+        : input instanceof URL
+        ? input.toString()
+        : undefined;
 
-    if (url && url.startsWith(SOCIAL_PROFILE_PREFIX)) {
-      const cacheKey = `amy-social-profile:${url}`;
+    if (resolvedInput && resolvedInput.startsWith(SOCIAL_PROFILE_PREFIX)) {
+      const cacheKey = `amy-social-profile:${resolvedInput}`;
       if (typeof sessionStorage !== 'undefined') {
         const cached = sessionStorage.getItem(cacheKey);
         if (cached) {
@@ -54,7 +61,6 @@ export function initThirdwebSocialFetchGuard() {
       }
     }
 
-        // @ts-expect-error preserve original parameter types
-        return originalFetch(input, init);
+    return originalFetch(input, init);
   };
 }
