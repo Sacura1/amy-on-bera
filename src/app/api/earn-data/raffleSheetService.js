@@ -16,6 +16,11 @@ class RaffleSheetService {
     this.pool = null;
   }
 
+  _sanitizeHeader(key) {
+    if (!key) return '';
+    return key.replace(/\s*\(.*?\)$/, '').trim().toLowerCase();
+  }
+
   async initialize(pool) {
     this.pool = pool;
     try {
@@ -139,11 +144,11 @@ class RaffleSheetService {
 
       const res = await this.sheets.spreadsheets.values.get({
         spreadsheetId: this.spreadsheetId,
-        range: `${this.ledgerSheetName}!A1:Z1000`,
+        range: `${this.ledgerSheetName}!A1:AD1000`,
       });
       const rows = res.data.values || [];
       const headerMap = this._mapHeaders(rows);
-      
+
       // Map existing raffle_id to row index
       const existingRows = {};
       rows.forEach((row, i) => {
@@ -156,8 +161,9 @@ class RaffleSheetService {
         // Fill row based on headers
         Object.keys(headerMap).forEach(key => {
           const idx = headerMap[key];
+          const normalizedKey = this._sanitizeHeader(key);
           let val = '';
-          switch(key) {
+          switch(normalizedKey) {
             case 'raffle_id': val = r.id; break;
             case 'slot_id': val = r.slot_id; break;
             case 'novelty_name': val = r.novelty_name; break;
