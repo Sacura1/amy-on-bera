@@ -1233,7 +1233,7 @@ export default function PointsPage() {
               name="plsBERA"
               title="Staked"
               image="/plsbera.jpg"
-              description="Stake BERA into plsBERA via Plutus. Your plsBERA balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
+              description="Stake BERA into plsBERA via Plutus.\n\nTraditionally, staking BERA requires a vesting period. plsBERA removes that constraint, remaining liquid while being overcollateralized. plsBERA is a liquid wrapper of BERA that distributes yield in the form of plsBERA rewards.\n\nThe asset maintains its peg to BERA, reinforced through protocol buybacks, while allowing holders to stay flexible. Yield is sourced from Berachain PoL tax incentives and distributed as rewards, rather than reflected through an appreciating exchange rate."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
                 { requirement: '$100+', multiplier: 'x5' },
@@ -1250,7 +1250,7 @@ export default function PointsPage() {
               name="plsKDK"
               title="Staked"
               image="/plskdk.jpg"
-              description="Stake KDK into plsKDK via Plutus. Your plsKDK balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
+              description="Stake KDK into plsKDK via Plutus.\n\nTraditionally, KDK must be converted into xKDK and locked to access governance and rewards. plsKDK removes that constraint, providing liquid exposure to xKDK while remaining overcollateralized.\n\nplsKDK is a liquid wrapper that distributes yield in the form of plsKDK rewards. The asset maintains its peg to KDK, reinforced through protocol buybacks, while allowing holders to stay flexible.\n\nYield is sourced from Kodiak ecosystem incentives and distributed as rewards, rather than reflected through an appreciating exchange rate."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
                 { requirement: '$100+', multiplier: 'x5' },
@@ -1267,7 +1267,7 @@ export default function PointsPage() {
               name="plvHEDGE"
               title="Vault"
               image="/plvhedge.jpg"
-              description="Deposit into the plvHEDGE vault. Your plvHEDGE balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
+              description="Deposit into the plvHEDGE delta-neutral vault via Plutus.\n\nplvHEDGE deploys capital across a mix of market-neutral strategies, including funding rate arbitrage and cross-chain yield opportunities. The vault maintains a delta-neutral stance through offsetting long and short positions, reducing sensitivity to market price movements rather than relying on directional exposure.\n\nThis is a stake-less experience—you simply hold plvHEDGE and benefit from advanced, automated strategies running in the background. No locking, no active management. Yield is generated from market structure, not token emissions, and is not distributed as liquid rewards. Instead, it is auto-compounded into the vault, increasing the value of the plvHEDGE token over time.\n\nYou can enter or exit at any time while maintaining liquidity. Your multiplier tier is based on the live USD value of your position."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
                 { requirement: '$100+', multiplier: 'x5' },
@@ -1537,8 +1537,8 @@ export default function PointsPage() {
               ]}
               isActive={(pointsData?.bullasMultiplier || 0) > 0}
               currentMultiplier={(pointsData?.bullasMultiplier || 0) > 0 ? `x${pointsData?.bullasMultiplier}` : undefined}
-              actionUrl="https://magiceden.io/collections/berachain/0x333814f5e16eee61d0c0b03a5b6abbd424b381c2"
-              actionLabel="View on Magic Eden"
+              actionUrl="https://opensea.io/collection/bullas-5"
+              actionLabel="View on OpenSea"
             />
 
             {/* Booga Bullas NFT – Active */}
@@ -1554,8 +1554,8 @@ export default function PointsPage() {
               ]}
               isActive={(pointsData?.boogaBullasMultiplier || 0) > 0}
               currentMultiplier={(pointsData?.boogaBullasMultiplier || 0) > 0 ? `x${pointsData?.boogaBullasMultiplier}` : undefined}
-              actionUrl="https://magiceden.io/collections/berachain/0x5a30c392714a9a9a8177c7998d9d59c3dd120917"
-              actionLabel="View on Magic Eden"
+              actionUrl="https://opensea.io/collection/booga-bullas-official"
+              actionLabel="View on OpenSea"
             />
 
             {/* Coming Soon placeholders */}

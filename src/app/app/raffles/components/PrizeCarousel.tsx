@@ -4,13 +4,15 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { API_BASE_URL } from '@/lib/constants';
 import { useRaffleCountdown } from '../hooks/useRaffleCountdown';
 
+type RaffleStatus = 'TNM' | 'LIVE' | 'DRAW_PENDING' | 'COMPLETED' | 'CANCELLED';
+
 interface Raffle {
   id: number;
   title: string;
   prize_description: string;
   image_url: string;
   ticket_cost: number;
-  status: 'TNM' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
+  status: RaffleStatus;
   countdown_hours: number;
   ends_at: string | null;
   total_tickets: number;
@@ -51,8 +53,9 @@ const INT_RIGHT  = 'var(--carousel-int-right, 12.5%)';
 const INT_BOTTOM = 'var(--carousel-int-bottom, 17%)';
 
 // Small helper for the LIVE timer pill
-function LiveTimerPill({ endsAt }: { endsAt: string }) {
-  const { label } = useRaffleCountdown(endsAt);
+function LiveTimerPill({ endsAt, status }: { endsAt?: string | null; status: RaffleStatus }) {
+  const countdown = useRaffleCountdown(endsAt || '');
+  const label = status === 'LIVE' && endsAt ? countdown.label : '';
   return (
     <div 
       className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap z-[15]"
@@ -67,7 +70,7 @@ function LiveTimerPill({ endsAt }: { endsAt: string }) {
         border: '1px solid rgba(255,255,255,0.1)'
       }}
     >
-      LIVE &bull; {label}
+      {status === 'DRAW_PENDING' ? 'Being drawn' : `Live • ${label}`}
     </div>
   );
 }
@@ -84,6 +87,7 @@ function PrizeItem({ raffle, noveltyIndex, noveltyItems }: { raffle: Raffle; nov
 
   const isCooker = noveltySrc.includes('novelty-4');
   const isLive = raffle.status === 'LIVE' && raffle.ends_at;
+  const isDrawPending = raffle.status === 'DRAW_PENDING';
 
   return (
     <div
@@ -100,7 +104,9 @@ function PrizeItem({ raffle, noveltyIndex, noveltyItems }: { raffle: Raffle; nov
         <div className="absolute inset-0">
 
           {/* Timer Pill for LIVE raffles */}
-          {isLive && raffle.ends_at && <LiveTimerPill endsAt={raffle.ends_at} />}
+          {(isLive || isDrawPending) && (
+            <LiveTimerPill endsAt={raffle.ends_at} status={raffle.status} />
+          )}
 
           {/* Novelty — back of belt, sits behind prize */}
           <img

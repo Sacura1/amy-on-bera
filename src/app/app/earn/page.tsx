@@ -187,7 +187,7 @@ const STRATEGIES: Strategy[] = [
     riskCategory: 'hedge',
     actionType: 'deposit',
     actionUrl: 'https://plutus.fi/Assets/a/plsBERA/tab/stake',
-    description: 'Stake BERA into plsBERA via Plutus. plsBERA uses an appreciating token model — your token balance stays constant, but each plsBERA increases in value relative to BERA as staking rewards accrue. Yield is generated from Berachain staking rewards and reflected in the rising exchange rate.\n\nYour multiplier tier is based on the live USD value of this position.',
+    description: 'Stake BERA into plsBERA via Plutus.\n\nTraditionally, staking BERA requires a vesting period. plsBERA removes that constraint, remaining liquid while being overcollateralized. plsBERA is a liquid wrapper of BERA that distributes yield in the form of plsBERA rewards.\n\nThe asset maintains its peg to BERA, reinforced through protocol buybacks, while allowing holders to stay flexible. Yield is sourced from Berachain PoL tax incentives and distributed as rewards, rather than reflected through an appreciating exchange rate.',
     buyUnderlying: {
       token: '0xc66D1a2460De7b96631f4AC37ce906aCFa6A3c30', // plsBERA
       fromToken: 'HONEY',
@@ -208,7 +208,7 @@ const STRATEGIES: Strategy[] = [
     riskCategory: 'hedge',
     actionType: 'deposit',
     actionUrl: 'https://plutus.fi/Assets/a/plsKDK/tab/convert',
-    description: 'Stake KDK into plsKDK via Plutus. plsKDK is a liquid wrapper for Kodiak\'s governance token (KDK). Normally KDK must be converted to xKDK and locked to participate in Kodiak governance and rewards.\n\nplsKDK keeps your exposure to the Kodiak ecosystem while remaining liquid. The token uses an appreciating model — your token balance stays constant, but the value of each plsKDK increases over time as rewards accrue.\n\nYield is generated from Kodiak ecosystem incentives and reflected in the rising exchange rate.\n\nYour multiplier tier is based on the live USD value of this position.',
+    description: 'Stake KDK into plsKDK via Plutus.\n\nTraditionally, KDK must be converted into xKDK and locked to access governance and rewards. plsKDK removes that constraint, providing liquid exposure to xKDK while remaining overcollateralized.\n\nplsKDK is a liquid wrapper that distributes yield in the form of plsKDK rewards. The asset maintains its peg to KDK, reinforced through protocol buybacks, while allowing holders to stay flexible.\n\nYield is sourced from Kodiak ecosystem incentives and distributed as rewards, rather than reflected through an appreciating exchange rate.',
     buyUnderlying: {
       token: '0xC6173A3405Fdb1f5c42004D2d71Cba9Bf1Cfa522', // plsKDK (buy KDK with HONEY)
       fromToken: 'HONEY',
@@ -230,7 +230,7 @@ const STRATEGIES: Strategy[] = [
     actionType: 'buy',
     buyToken: '0x28602B1ae8cA0ff5CD01B96A36f88F72FeBE727A',
     fromToken: 'HONEY',
-    description: 'Deposit into the plvHEDGE delta-neutral vault via Plutus. The strategy sources yield across onchain markets and is designed to stay neutral to market price movements. Yield from the strategy is auto-compounded and reflected in the increasing value of the plvHEDGE vault token, which you can enter or exit at any time.\n\nYour multiplier tier is based on the live USD value of this position.',
+    description: 'Deposit into the plvHEDGE delta-neutral vault via Plutus.\n\nplvHEDGE deploys capital across a mix of market-neutral strategies, including funding rate arbitrage and cross-chain yield opportunities. The vault maintains a delta-neutral stance through offsetting long and short positions, reducing sensitivity to market price movements rather than relying on directional exposure.\n\nThis is a stake-less experience—you simply hold plvHEDGE and benefit from advanced, automated strategies running in the background. No locking, no active management. Yield is generated from market structure, not token emissions, and is not distributed as liquid rewards. Instead, it is auto-compounded into the vault, increasing the value of the plvHEDGE token over time.\n\nYou can enter or exit at any time while maintaining liquidity. Your multiplier tier is based on the live USD value of your position.',
     protocolUrl: 'https://plutus.fi/Vaults/v/plvHEDGE/chain/berachain',
     dynamicDataKey: 'plvhedge',
     chain: 'berachain',
