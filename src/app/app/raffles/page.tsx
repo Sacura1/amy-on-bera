@@ -7,22 +7,7 @@ import PrizeCarousel from './components/PrizeCarousel';
 import TicketModal from './components/TicketModal';
 import ActiveRaffles from './components/ActiveRaffles';
 import RaffleHistory from './components/RaffleHistory';
-
-type RaffleStatus = 'TNM' | 'LIVE' | 'DRAW_PENDING' | 'COMPLETED' | 'CANCELLED';
-
-interface Raffle {
-  id: number;
-  title: string;
-  prize_description: string;
-  image_url: string;
-  ticket_cost: number;
-  status: RaffleStatus;
-  countdown_hours: number;
-  ends_at: string | null;
-  total_tickets: number;
-  unique_participants: number;
-  total_points_committed: number;
-}
+import { Raffle, RaffleStatus } from './types';
 
 interface UserEntry {
   raffle_id: number;
@@ -30,7 +15,7 @@ interface UserEntry {
   points_spent: number;
   purchased_at: string;
   title: string;
-  status: 'TNM' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
+  status: RaffleStatus;
   ends_at: string | null;
   winner_wallet: string | null;
   image_url: string;

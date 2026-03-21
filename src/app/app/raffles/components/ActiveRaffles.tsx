@@ -3,13 +3,15 @@
 import React, { useState } from 'react';
 import { useRaffleCountdown } from '../hooks/useRaffleCountdown';
 
+import { RaffleStatus } from '../types';
+
 interface UserEntry {
   raffle_id: number;
   tickets: number;
   points_spent: number;
   purchased_at: string;
   title: string;
-  status: 'TNM' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
+  status: RaffleStatus;
   ends_at: string | null;
   winner_wallet: string | null;
   image_url: string;

@@ -2,20 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { API_BASE_URL } from '@/lib/constants';
-
-interface Raffle {
-  id: number;
-  title: string;
-  prize_description: string;
-  image_url: string;
-  ticket_cost: number;
-  status: 'TNM' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
-  countdown_hours: number;
-  ends_at: string | null;
-  total_tickets: number;
-  unique_participants: number;
-  total_points_committed: number;
-}
+import { Raffle } from '../types';
 
 interface TicketModalProps {
   raffle: Raffle;
