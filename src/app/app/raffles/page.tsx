@@ -8,13 +8,15 @@ import TicketModal from './components/TicketModal';
 import ActiveRaffles from './components/ActiveRaffles';
 import RaffleHistory from './components/RaffleHistory';
 
+type RaffleStatus = 'TNM' | 'LIVE' | 'DRAW_PENDING' | 'COMPLETED' | 'CANCELLED';
+
 interface Raffle {
   id: number;
   title: string;
   prize_description: string;
   image_url: string;
   ticket_cost: number;
-  status: 'TNM' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
+  status: RaffleStatus;
   countdown_hours: number;
   ends_at: string | null;
   total_tickets: number;
