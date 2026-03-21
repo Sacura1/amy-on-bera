@@ -18,7 +18,7 @@ class RaffleSheetService {
 
   _sanitizeHeader(key) {
     if (!key) return '';
-    return key.replace(/\s*\(.*?\)$/, '').trim().toLowerCase();
+    return key.replace(/\s*\(.*?\)$/, '').trim().toLowerCase().replace(/\s+/g, '_');
   }
 
   async initialize(pool) {
