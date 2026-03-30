@@ -285,7 +285,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'AMY/HONEY',
           title: 'LP',
-          image: '/bulla.jpg',
+          image: '/amyhoney.png',
           multiplier: lpData.lpMultiplier
         });
       }
@@ -300,7 +300,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'AMY/USDT0',
           title: 'LP',
-          image: '/usdt0.jpg',
+          image: '/usdt0.png',
           multiplier: tokenData.amyusdt0.multiplier
         });
       }
@@ -315,7 +315,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'plvHEDGE',
           title: 'Vault',
-          image: '/plvhedge.jpg',
+          image: '/plvhedge.png',
           multiplier: tokenData.plvhedge.multiplier
         });
       }
@@ -330,7 +330,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'SAIL.r',
           title: 'Royalty',
-          image: '/sail.jpg',
+          image: '/sail.png',
           multiplier: tokenData.sailr.multiplier
         });
       }
@@ -345,7 +345,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'plsBERA',
           title: 'Staked',
-          image: '/plsbera.jpg',
+          image: '/plsbera.png',
           multiplier: tokenData.plsbera.multiplier
         });
       }
@@ -360,7 +360,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'plsKDK',
           title: 'Staked',
-          image: '/plskdk.jpg',
+          image: '/plskdk.png',
           multiplier: tokenData.plskdk.multiplier
         });
       }
@@ -375,7 +375,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'HONEY',
           title: 'Lent',
-          image: '/honey.jpg',
+          image: '/honey.png',
           multiplier: tokenData.honeybend.multiplier
         });
       }
@@ -405,7 +405,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'BGT',
           title: 'Holder',
-          image: '/bgt.jpg',
+          image: '/bgt.png',
           multiplier: tokenData.bgt.multiplier
         });
       }
@@ -420,7 +420,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'snrUSD',
           title: 'Vault',
-          image: '/snr.jpg',
+          image: '/snr.png',
           multiplier: tokenData.snrusd.multiplier
         });
       }
@@ -435,7 +435,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'jnrUSD',
           title: 'Vault',
-          image: '/jnr.jpg',
+          image: '/jnr.png',
           multiplier: tokenData.jnrusd.multiplier
         });
       }
@@ -449,7 +449,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'Raider',
           title: 'Monthly',
-          image: '/shark.jpg',
+          image: '/Raider.png',
           multiplier: pointsData.raidsharkMultiplier
         });
       }
@@ -491,7 +491,7 @@ export default function BadgeSelector({
           id: badgeId,
           name: 'Swapper',
           title: 'Monthly',
-          image: '/swapper.jpg',
+          image: '/swapper.png',
           multiplier: pointsData.swapperMultiplier
         });
       }
@@ -514,7 +514,7 @@ export default function BadgeSelector({
         id: `discord_mod_x${pointsData.discordModMultiplier}`,
         name: 'Discord',
         title: 'Mod',
-        image: '/dc.jpg',
+        image: '/dc.png',
         multiplier: pointsData.discordModMultiplier
       });
     }

@@ -1207,7 +1207,7 @@ export default function PointsPage() {
             <MultiplierBadge
               name="AMY/HONEY"
               title="LP"
-              image="/bulla.jpg"
+              image="/amyhoney.png"
               description="Provide liquidity to the AMY/HONEY pool on Bulla Exchange. Your AMY/HONEY LP balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x5' },
@@ -1224,7 +1224,7 @@ export default function PointsPage() {
             <MultiplierBadge
               name="AMY/USDT0"
               title="LP"
-              image="/usdt0.jpg"
+              image="/usdt0.png"
               description="Provide liquidity to the AMY/USDT0 pool on Kodiak. Your AMY/USDT0 LP balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x5' },
@@ -1241,7 +1241,7 @@ export default function PointsPage() {
             <MultiplierBadge
               name="plsBERA"
               title="Staked"
-              image="/plsbera.jpg"
+              image="/plsbera.png"
               description={`Stake BERA into plsBERA via Plutus.
 
 Your plsBERA balance is tracked in USD and updates automatically as it changes.
@@ -1262,7 +1262,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="plsKDK"
               title="Staked"
-              image="/plskdk.jpg"
+              image="/plskdk.png"
               description={`Stake KDK into plsKDK via Plutus.
 
 Your plsKDK balance is tracked in USD and updates automatically as it changes.
@@ -1283,7 +1283,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="plvHEDGE"
               title="Vault"
-              image="/plvhedge.jpg"
+              image="/plvhedge.png"
               description={`Deposit into the plvHEDGE delta-neutral vault via Plutus.
 
 Your plvHEDGE balance is tracked in USD and updates automatically as it changes.
@@ -1304,7 +1304,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="SAIL.r"
               title="Royalty"
-              image="/sail.jpg"
+              image="/sail.png"
               description="Hold SAIL.r in your wallet. Your SAIL.r balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
@@ -1321,7 +1321,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="jnrUSD"
               title="Vault"
-              image="/jnr.jpg"
+              image="/jnr.png"
               description="Deposit into the jnrUSD vault. Your jnrUSD vault balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
@@ -1338,7 +1338,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="snrUSD"
               title="Vault"
-              image="/snr.jpg"
+              image="/snr.png"
               description="Deposit into the snrUSD vault. Your snrUSD vault balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
@@ -1355,7 +1355,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="HONEY"
               title="Lent"
-              image="/honey.jpg"
+              image="/honey.png"
               description="Lend HONEY on Bend. Your HONEY lending balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
@@ -1389,7 +1389,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="BGT"
               title="Holder"
-              image="/bgt.jpg"
+              image="/bgt.png"
               description="Hold BGT in your wallet. BGT is earned through participation in Berachain and represents governance power. Your BGT balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
@@ -1481,7 +1481,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="Swapper"
               title="Monthly"
-              image="/swapper.jpg"
+              image="/swapper.png"
               description="Based on your swap volume through Amy during the current month. Activity this month determines your badge for next month. Once assigned, it stays active for the entire month."
               multipliers={[
                 { requirement: '$250+', multiplier: 'x3' },
@@ -1498,7 +1498,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="Raider"
               title="Monthly"
-              image="/shark.jpg"
+              image="/Raider.png"
               description="Based on your raid activity during the current month. Raid points are tracked through the Amy Telegram bot. Activity this month determines your badge for next month. Once assigned, it stays active for the entire month."
               multipliers={[
                 { requirement: '75+ pts', multiplier: 'x3' },
@@ -1532,7 +1532,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="Discord"
               title="Mod"
-              image="/dc.jpg"
+              image="/dc.png"
               description="Assigned to active Discord moderators who support the community. Level is determined by the team and may be updated over time based on contribution."
               multipliers={[
                 { requirement: 'Guardian', multiplier: 'x3' },

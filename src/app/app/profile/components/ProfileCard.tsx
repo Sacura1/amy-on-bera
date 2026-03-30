@@ -348,7 +348,7 @@ export default function ProfileCard({
           multiplier: lpData.lpMultiplier,
           name: 'Bulla Exchange',
           title: 'AMY/HONEY LP',
-          image: '/bulla.jpg'
+          image: '/amyhoney.png'
         });
       }
     }
@@ -363,7 +363,7 @@ export default function ProfileCard({
           multiplier: tokenData.amyusdt0.multiplier,
           name: 'AMY/USDT0',
           title: 'Kodiak LP',
-          image: '/usdt0.jpg'
+          image: '/usdt0.png'
         });
       }
     }
@@ -378,7 +378,7 @@ export default function ProfileCard({
           multiplier: tokenData.plvhedge.multiplier,
           name: 'plvHEDGE',
           title: 'Vault',
-          image: '/plvhedge.jpg'
+          image: '/plvhedge.png'
         });
       }
     }
@@ -393,7 +393,7 @@ export default function ProfileCard({
           multiplier: tokenData.sailr.multiplier,
           name: 'SAIL.r',
           title: 'Royalty',
-          image: '/sail.jpg'
+          image: '/sail.png'
         });
       }
     }
@@ -408,7 +408,7 @@ export default function ProfileCard({
           multiplier: tokenData.plsbera.multiplier,
           name: 'plsBERA',
           title: 'Staking',
-          image: '/plsbera.jpg'
+          image: '/plsbera.png'
         });
       }
     }
@@ -423,7 +423,7 @@ export default function ProfileCard({
           multiplier: tokenData.plskdk.multiplier,
           name: 'plsKDK',
           title: 'Staking',
-          image: '/plskdk.jpg'
+          image: '/plskdk.png'
         });
       }
     }
@@ -438,7 +438,7 @@ export default function ProfileCard({
           multiplier: tokenData.honeybend.multiplier,
           name: 'HONEY Bend',
           title: 'Lending',
-          image: '/honey.jpg'
+          image: '/honey.png'
         });
       }
     }
@@ -483,7 +483,7 @@ export default function ProfileCard({
           multiplier: tokenData.snrusd.multiplier,
           name: 'snrUSD',
           title: 'Senior',
-          image: '/snr.jpg'
+          image: '/snr.png'
         });
       }
     }
@@ -498,7 +498,7 @@ export default function ProfileCard({
           multiplier: tokenData.jnrusd.multiplier,
           name: 'jnrUSD',
           title: 'Junior',
-          image: '/jnr.jpg'
+          image: '/jnr.png'
         });
       }
     }
@@ -512,7 +512,7 @@ export default function ProfileCard({
           multiplier: pointsData.raidsharkMultiplier,
           name: 'RaidShark',
           title: 'Raider',
-          image: '/shark.jpg'
+          image: '/Raider.png'
         });
       }
     }
@@ -554,7 +554,7 @@ export default function ProfileCard({
           multiplier: pointsData.swapperMultiplier,
           name: 'Swapper',
           title: 'Seasoned',
-          image: '/swapper.jpg'
+          image: '/swapper.png'
         });
       }
     }
@@ -577,7 +577,7 @@ export default function ProfileCard({
         multiplier: pointsData.discordModMultiplier,
         name: 'Discord',
         title: 'Mod',
-        image: '/dc.jpg'
+        image: '/dc.png'
       });
     }
 
