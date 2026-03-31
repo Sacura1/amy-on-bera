@@ -111,8 +111,10 @@ export default function Background() {
   // Show background image if we have valid preview images (including bg_default)
   const hasCustomBg = !!(bg?.previewMobile || bg?.previewDesktop);
   const hasFilter = filter && (filter.color !== 'transparent' || filter.image) && filterId !== 'filter_none';
-  // Only show cyan overlay on landing page (when not in CustomizationProvider)
-  const isLandingPage = customization === null;
+  
+  // Show the cyan overlay if we are on the landing page OR if we are using the default background
+  // This ensures a consistent "Amy" look for new users across the entire app
+  const showOverlay = (customization === undefined || customization === null) || backgroundId === 'bg_default';
 
   // Fill the viewport and extend beyond for iOS Safari address bar
   const extendedStyle: React.CSSProperties = {
@@ -125,21 +127,26 @@ export default function Background() {
     minHeight: 'calc(100vh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px))',
   };
 
+  // If we are on landing page or don't have a custom bg set yet, use the default pool background images
+  const finalPreview = hasCustomBg ? preview : (isMobile ? BACKGROUNDS.bg_default.previewMobile : BACKGROUNDS.bg_default.previewDesktop);
+  const finalBgStyle: React.CSSProperties = {
+    backgroundImage: `url(${finalPreview})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center top',
+    ...(isMobile ? {} : { backgroundAttachment: 'fixed' }),
+  };
+
   return (
     <>
-      {/* Default pattern background - hidden when custom bg is set */}
-      {!hasCustomBg && <div className="bg-pattern" />}
-
-      {/* Custom background image */}
-      {hasCustomBg && (
-        <div
-          style={{
-            ...extendedStyle,
-            ...bgStyle,
-            zIndex: -2,
-          }}
-        />
-      )}
+      {/* Custom or Default background image */}
+      <div
+        className="bg-standard-pool"
+        style={{
+          ...extendedStyle,
+          ...finalBgStyle,
+          zIndex: -2,
+        }}
+      />
 
       {/* Filter overlay - only render if there's an active filter */}
       {hasFilter && (
@@ -153,8 +160,8 @@ export default function Background() {
         />
       )}
 
-      {/* Default overlay for contrast - ONLY on landing page */}
-      {isLandingPage && <div className="bg-overlay" />}
+      {/* Default overlay for contrast - shown on landing page OR when using default bg */}
+      {showOverlay && <div className="bg-overlay" />}
     </>
   );
 }

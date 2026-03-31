@@ -1649,14 +1649,12 @@ Multiplier adjusts automatically as your position value changes.`}
                         Complete
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={connectX}
-                        disabled={!walletAddress}
+                      <Link
+                        href="/app/profile"
                         className="text-[10px] bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-3 py-1 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Connect
-                      </button>
+                      </Link>
                     )}
                   </div>
                 </div>
@@ -1685,14 +1683,12 @@ Multiplier adjusts automatically as your position value changes.`}
                         Complete
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={connectDiscord}
-                        disabled={!walletAddress}
+                      <Link
+                        href="/app/profile"
                         className="text-[10px] bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-3 py-1 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Connect
-                      </button>
+                      </Link>
                     )}
                   </div>
                 </div>
