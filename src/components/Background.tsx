@@ -112,9 +112,9 @@ export default function Background() {
   const hasCustomBg = !!(bg?.previewMobile || bg?.previewDesktop);
   const hasFilter = filter && (filter.color !== 'transparent' || filter.image) && filterId !== 'filter_none';
   
-  // Show the cyan overlay if we are on the landing page OR if we are using the default background
-  // This ensures a consistent "Amy" look for new users across the entire app
-  const showOverlay = (customization === undefined || customization === null) || backgroundId === 'bg_default';
+  // Show the cyan overlay ONLY on internal app pages if they are using the default background.
+  // We do NOT show it on the landing page (customization === null) to avoid the "green filter" bug.
+  const showOverlay = (customization !== undefined && customization !== null) && backgroundId === 'bg_default';
 
   // Fill the viewport and extend beyond for iOS Safari address bar
   const extendedStyle: React.CSSProperties = {
@@ -159,9 +159,6 @@ export default function Background() {
           }}
         />
       )}
-
-      {/* Default overlay for contrast - shown on landing page OR when using default bg */}
-      {showOverlay && <div className="bg-overlay" />}
     </>
   );
 }

@@ -114,7 +114,7 @@ const STRATEGIES: Strategy[] = [
     id: 'amy-usdt0',
     name: 'AMY/USDT0 – LP',
     subtitle: 'Kodiak',
-    image: '/usdt0.png',
+    image: '/usdto.png',
     tvl: 'TBC',
     apr: 'TBC',
     amyPoints: 'Earn up to 100x',

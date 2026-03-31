@@ -1224,7 +1224,7 @@ export default function PointsPage() {
             <MultiplierBadge
               name="AMY/USDT0"
               title="LP"
-              image="/usdt0.png"
+              image="/usdto.png"
               description="Provide liquidity to the AMY/USDT0 pool on Kodiak. Your AMY/USDT0 LP balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x5' },
