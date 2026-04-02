@@ -34,6 +34,7 @@ interface PointsData {
   boogaBullasMultiplier?: number;
   emberMultiplier?: number;
   genesisMultiplier?: number;
+  totalMultiplier?: number;
   // Dawn season (historical)
   dawnReferralCount?: number;
   dawnReferralMultiplier?: number;

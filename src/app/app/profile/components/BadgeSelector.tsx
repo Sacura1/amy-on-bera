@@ -294,7 +294,7 @@ export default function BadgeSelector({
 
     // AMY/USDT0 badge
     if (tokenData && tokenData.amyusdt0 && tokenData.amyusdt0.isActive) {
-      const badgeId = getAmyUsdt0LpBadgeId(tokenData.amyusdt0.valueUsd);
+      const badgeId = getAmyUsdt0LpBadgeId(tokenData.amyusdt0.valueUsd ?? 0);
       if (badgeId) {
         active.push({
           id: badgeId,
@@ -398,7 +398,7 @@ export default function BadgeSelector({
 
     // BGT badge
     if (tokenData && tokenData.bgt && tokenData.bgt.isActive) {
-      const badgeId = getBgtBadgeId(tokenData.bgt.valueUsd);
+      const badgeId = getBgtBadgeId(tokenData.bgt.valueUsd ?? 0);
       if (badgeId) {
         active.push({
           id: badgeId,
