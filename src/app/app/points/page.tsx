@@ -997,7 +997,7 @@ export default function PointsPage() {
                         // Calculate total multiplier from all badges (additive)
                         const lpMult = lpData && lpData.lpMultiplier > 1 ? lpData.lpMultiplier : 0;
                         const sailrMult = tokenData && tokenData.sailr?.multiplier > 1 ? tokenData.sailr.multiplier : 0;
-                        const totalMultiplier = pointsData.totalMultiplier || 1;
+                        const totalMultiplier = pointsData?.totalMultiplier || 1;
                         const pointsPerHour = currentTier.pointsPerHour * totalMultiplier;
                         return (
                           <div className="flex flex-col items-center">
