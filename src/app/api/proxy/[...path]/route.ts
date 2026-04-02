@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_BASE_URL = 'https://amy-production-fd10.up.railway.app';
+const API_BASE_URL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:3001'
+  : 'https://amy-production-fd10.up.railway.app';
 
 export async function GET(
   request: NextRequest,

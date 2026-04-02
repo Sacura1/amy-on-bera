@@ -997,27 +997,7 @@ export default function PointsPage() {
                         // Calculate total multiplier from all badges (additive)
                         const lpMult = lpData && lpData.lpMultiplier > 1 ? lpData.lpMultiplier : 0;
                         const sailrMult = tokenData && tokenData.sailr?.multiplier > 1 ? tokenData.sailr.multiplier : 0;
-                        const plvhedgeMult = tokenData && tokenData.plvhedge?.multiplier > 1 ? tokenData.plvhedge.multiplier : 0;
-                        const plsberaMult = tokenData && tokenData.plsbera?.multiplier > 1 ? tokenData.plsbera.multiplier : 0;
-                        const plskdkMult = tokenData && tokenData.plskdk?.multiplier > 1 ? tokenData.plskdk.multiplier : 0;
-                        const honeybendMult = tokenData && tokenData.honeybend?.multiplier > 1 ? tokenData.honeybend.multiplier : 0;
-                        const stakedberaMult = tokenData && tokenData.stakedbera?.multiplier > 1 ? tokenData.stakedbera.multiplier : 0;
-                        const bgtMult = tokenData && tokenData.bgt?.multiplier > 1 ? tokenData.bgt.multiplier : 0;
-                        const snrusdMult = tokenData && tokenData.snrusd?.multiplier > 1 ? tokenData.snrusd.multiplier : 0;
-                        const jnrusdMult = tokenData && tokenData.jnrusd?.multiplier > 1 ? tokenData.jnrusd.multiplier : 0;
-                        const raidMult = pointsData?.raidsharkMultiplier && pointsData.raidsharkMultiplier > 0 ? pointsData.raidsharkMultiplier : 0;
-                        const convMult = pointsData?.onchainConvictionMultiplier && pointsData.onchainConvictionMultiplier > 0 ? pointsData.onchainConvictionMultiplier : 0;
-                        const refMult = pointsData?.referralMultiplier && pointsData.referralMultiplier > 0 ? pointsData.referralMultiplier : 0;
-                        const swapMult = pointsData?.swapperMultiplier && pointsData.swapperMultiplier > 0 ? pointsData.swapperMultiplier : 0;
-                        const tgModMult = pointsData?.telegramModMultiplier && pointsData.telegramModMultiplier > 0 ? pointsData.telegramModMultiplier : 0;
-                        const dcModMult = pointsData?.discordModMultiplier && pointsData.discordModMultiplier > 0 ? pointsData.discordModMultiplier : 0;
-                        const dawnMult = pointsData?.dawnReferralMultiplier && pointsData.dawnReferralMultiplier > 0 ? pointsData.dawnReferralMultiplier : 0;
-                        const bullasMult = pointsData?.bullasMultiplier && pointsData.bullasMultiplier > 0 ? pointsData.bullasMultiplier : 0;
-                        const boogaBullasMult = pointsData?.boogaBullasMultiplier && pointsData.boogaBullasMultiplier > 0 ? pointsData.boogaBullasMultiplier : 0;
-                        const emberMult = pointsData?.emberMultiplier && pointsData.emberMultiplier > 0 ? pointsData.emberMultiplier : 0;
-                        const genesisMult = pointsData?.genesisMultiplier && pointsData.genesisMultiplier > 0 ? pointsData.genesisMultiplier : 0;
-                        const amyusdt0Mult = tokenData && tokenData.amyusdt0?.multiplier && tokenData.amyusdt0.multiplier > 1 ? tokenData.amyusdt0.multiplier : 0;
-                        const totalMultiplier = Math.max(1, lpMult + sailrMult + plvhedgeMult + plsberaMult + plskdkMult + honeybendMult + stakedberaMult + bgtMult + snrusdMult + jnrusdMult + raidMult + convMult + refMult + swapMult + tgModMult + dcModMult + dawnMult + bullasMult + boogaBullasMult + emberMult + genesisMult + amyusdt0Mult);
+                        const totalMultiplier = pointsData.totalMultiplier || 1;
                         const pointsPerHour = currentTier.pointsPerHour * totalMultiplier;
                         return (
                           <div className="flex flex-col items-center">

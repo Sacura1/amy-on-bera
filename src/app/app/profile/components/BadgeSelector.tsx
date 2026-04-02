@@ -248,14 +248,15 @@ export default function BadgeSelector({
           setPointsData({
             raidsharkMultiplier: pointsDataResponse.data.raidsharkMultiplier,
             onchainConvictionMultiplier: pointsDataResponse.data.onchainConvictionMultiplier,
-            referralMultiplier: pointsDataResponse.data.referralMultiplier,
+            referralMultiplier: pointsDataResponse.data.dawnReferralMultiplier || 0,
             swapperMultiplier: pointsDataResponse.data.swapperMultiplier,
             telegramModMultiplier: pointsDataResponse.data.telegramModMultiplier,
             discordModMultiplier: pointsDataResponse.data.discordModMultiplier,
             emberMultiplier: pointsDataResponse.data.emberMultiplier,
-            genesisMultiplier: pointsDataResponse.data.genesisMultiplier
+            genesisMultiplier: pointsDataResponse.data.genesisMultiplier || 0
           });
         }
+
       } catch (error) {
         console.error('Error fetching badges:', error);
       } finally {
@@ -292,15 +293,14 @@ export default function BadgeSelector({
     }
 
     // AMY/USDT0 badge
-    if (tokenData && tokenData.amyusdt0 && tokenData.amyusdt0.isActive && tokenData.amyusdt0.multiplier > 1) {
-      const valueUsd = tokenData.amyusdt0.valueUsd || (tokenData.amyusdt0.multiplier >= 100 ? 500 : tokenData.amyusdt0.multiplier >= 10 ? 100 : 10);
-      const badgeId = getAmyUsdt0LpBadgeId(valueUsd);
+    if (tokenData && tokenData.amyusdt0 && tokenData.amyusdt0.isActive) {
+      const badgeId = getAmyUsdt0LpBadgeId(tokenData.amyusdt0.valueUsd);
       if (badgeId) {
         active.push({
           id: badgeId,
           name: 'AMY/USDT0',
-          title: 'LP',
-          image: '/usdt0.png',
+          title: 'LP x' + tokenData.amyusdt0.multiplier,
+          image: '/usdto.png',
           multiplier: tokenData.amyusdt0.multiplier
         });
       }
@@ -396,15 +396,14 @@ export default function BadgeSelector({
       }
     }
 
-    // BGT badge (uses balance thresholds, not USD value)
-    if (tokenData && tokenData.bgt && tokenData.bgt.isActive && tokenData.bgt.multiplier > 1) {
-      const balance = tokenData.bgt.balance || (tokenData.bgt.multiplier >= 10 ? 1 : tokenData.bgt.multiplier >= 5 ? 0.1 : 0.01);
-      const badgeId = getBgtBadgeId(balance);
+    // BGT badge
+    if (tokenData && tokenData.bgt && tokenData.bgt.isActive) {
+      const badgeId = getBgtBadgeId(tokenData.bgt.valueUsd);
       if (badgeId) {
         active.push({
           id: badgeId,
           name: 'BGT',
-          title: 'Holder',
+          title: 'Holder x' + tokenData.bgt.multiplier,
           image: '/bgt.png',
           multiplier: tokenData.bgt.multiplier
         });
@@ -548,21 +547,21 @@ export default function BadgeSelector({
     }
 
     // Bullas NFT badge (count-based)
-    if (tokenData && tokenData.bullas && tokenData.bullas.isActive && tokenData.bullas.multiplier > 1) {
+    if (tokenData && tokenData.bullas && tokenData.bullas.isActive) {
       const badgeId = getBullasBadgeId(tokenData.bullas.count);
       if (badgeId) {
         active.push({
           id: badgeId,
           name: 'Bullas',
           title: 'NFT',
-          image: '/bulla.png',
+          image: '/amyhoney.png',
           multiplier: tokenData.bullas.multiplier
         });
       }
     }
 
     // Booga Bullas NFT badge (count-based)
-    if (tokenData && tokenData.boogaBullas && tokenData.boogaBullas.isActive && tokenData.boogaBullas.multiplier > 1) {
+    if (tokenData && tokenData.boogaBullas && tokenData.boogaBullas.isActive) {
       const badgeId = getBoogaBullasBadgeId(tokenData.boogaBullas.count);
       if (badgeId) {
         active.push({

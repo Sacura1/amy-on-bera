@@ -765,11 +765,11 @@ export default function ProfileCard({
             </div>
             <div>
               <span className="text-gray-400">Multiplier:</span>{' '}
-              <span className="text-yellow-400 font-semibold">{totalMultiplier || 1}x</span>
+              <span className="text-yellow-400 font-semibold">{Number(totalMultiplier || 1).toFixed(1)}x</span>
             </div>
             <div>
               <span className="text-gray-400">Points/hr:</span>{' '}
-              <span className="text-green-400 font-semibold">{Number(pointsPerHour || 0).toFixed(2)}</span>
+              <span className="text-green-400 font-semibold">{Number(pointsPerHour || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
           </div>
 

@@ -873,7 +873,7 @@ export default function EarnPage() {
                               </div>
                               <div className="bg-gray-800/60 rounded-lg p-3">
                                 <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                                <div className="text-xl font-bold text-white">{pos.data!.balance.toFixed(2)}</div>
+                                <div className="text-xl font-bold text-white">{(pos.data!.balance ?? 0).toFixed(2)}</div>
                               </div>
                               <div className="bg-gray-800/60 rounded-lg p-3">
                                 <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
