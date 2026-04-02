@@ -36,7 +36,7 @@ interface TokenHoldingsData {
   bgt: TokenHolding;
   snrusd: TokenHolding;
   jnrusd: TokenHolding;
-  amyusdt0?: TokenHolding;
+  amyusdt0?: TokenHolding & { count?: number };
 }
 interface DynamicPoolData {
   tvl: string;
@@ -849,11 +849,13 @@ export default function EarnPage() {
 
                 tokenPositions.forEach((pos) => {
                   if (pos.data?.isActive) {
+                    const isLp = pos.key === 'amyusdt0';
+                    const lpData = isLp ? (pos.data as TokenHolding & { count?: number }) : null;
                     positions.push({
                       key: pos.key,
                       valueUsd: pos.data.valueUsd || 0,
                       element: (
-                        <div className="bg-gray-900/80 rounded-2xl border border-green-500/30 overflow-hidden mt-4">
+                        <div className={`bg-gray-900/80 rounded-2xl border overflow-hidden mt-4 ${pos.data.isActive ? 'border-green-500/30' : 'border-gray-700/50'}`}>
                           <div className="p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
@@ -872,12 +874,26 @@ export default function EarnPage() {
                                 <div className="text-xl font-bold text-white">${pos.data!.valueUsd.toFixed(2)}</div>
                               </div>
                               <div className="bg-gray-800/60 rounded-lg p-3">
-                                <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
-                                <div className="text-xl font-bold text-white">{(pos.data!.balance ?? 0).toFixed(2)}</div>
+                                {isLp ? (
+                                  <>
+                                    <div className="text-xs text-gray-500 uppercase mb-1">Positions</div>
+                                    <div className="text-xl font-bold text-white">
+                                      {lpData?.count ?? 0}/{lpData?.count ?? 0}
+                                      <span className="text-sm text-gray-400 ml-1">in range</span>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="text-xs text-gray-500 uppercase mb-1">Balance</div>
+                                    <div className="text-xl font-bold text-white">
+                                      {pos.data!.balance != null ? pos.data!.balance.toFixed(2) : '—'}
+                                    </div>
+                                  </>
+                                )}
                               </div>
                               <div className="bg-gray-800/60 rounded-lg p-3">
                                 <div className="text-xs text-gray-500 uppercase mb-1">Points Multiplier</div>
-                                <div className="text-xl font-bold text-yellow-400">{pos.data!.multiplier}x</div>
+                                <div className={`text-xl font-bold ${pos.data.isActive ? 'text-yellow-400' : 'text-gray-500'}`}>{pos.data!.multiplier}x</div>
                               </div>
                             </div>
                           </div>
