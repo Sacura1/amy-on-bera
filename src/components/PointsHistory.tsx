@@ -3,6 +3,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { API_BASE_URL } from '@/lib/constants';
 
+interface MultiplierEntry {
+  name: string;
+  multiplier: number;
+}
+
+interface ParsedDescription {
+  total_multiplier: number;
+  multiplier_breakdown: MultiplierEntry[];
+}
+
 interface HistoryEntry {
   pointsEarned: number;
   reason: string;
@@ -130,9 +140,19 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
     return entry.reason || 'Points Update';
   };
 
+  const parseDescription = (entry: HistoryEntry): ParsedDescription | null => {
+    if (!entry.description) return null;
+    try {
+      const parsed = JSON.parse(entry.description);
+      if (parsed.total_multiplier && Array.isArray(parsed.multiplier_breakdown)) return parsed;
+    } catch {}
+    return null;
+  };
+
   const getDescription = (entry: HistoryEntry): string => {
+    const parsed = parseDescription(entry);
+    if (parsed) return `${parsed.total_multiplier}x total multiplier`;
     if (entry.description) return entry.description;
-    // Fallback for legacy entries
     return getDisplayCategory(entry);
   };
 
@@ -217,39 +237,56 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
                   key={index}
                   className="bg-gray-800/40 rounded-xl p-3 md:p-4 hover:bg-gray-800/60 transition-colors"
                 >
-                  {/* Mobile Layout */}
-                  <div className="md:hidden space-y-2">
-                    <div className="flex justify-between items-start">
-                      <div className="text-xs text-gray-400">
-                        {formatDate(entry.createdAt)}
-                      </div>
-                      <div className={`text-lg font-bold ${getPointsColor(entry.pointsEarned)}`}>
-                        {formatPoints(entry.pointsEarned)}
-                      </div>
-                    </div>
-                    <div className="text-sm font-medium text-yellow-300">
-                      {getDisplayCategory(entry)}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      {getDescription(entry)}
-                    </div>
-                  </div>
+                  {(() => {
+                    const parsed = parseDescription(entry);
+                    return (
+                      <>
+                        {/* Mobile Layout */}
+                        <div className="md:hidden space-y-2">
+                          <div className="flex justify-between items-start">
+                            <div className="text-xs text-gray-400">{formatDate(entry.createdAt)}</div>
+                            <div className={`text-lg font-bold ${getPointsColor(entry.pointsEarned)}`}>{formatPoints(entry.pointsEarned)}</div>
+                          </div>
+                          <div className="text-sm font-medium text-yellow-300">{getDisplayCategory(entry)}</div>
+                          {parsed ? (
+                            <div className="text-xs text-gray-400">
+                              <span className="text-white font-semibold">{parsed.total_multiplier}x</span> total
+                              {parsed.multiplier_breakdown.length > 0 && (
+                                <div className="mt-1 flex flex-wrap gap-1">
+                                  {parsed.multiplier_breakdown.map((b, i) => (
+                                    <span key={i} className="bg-gray-700/60 rounded px-1.5 py-0.5">{b.name} {b.multiplier}x</span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-xs text-gray-400">{getDescription(entry)}</div>
+                          )}
+                        </div>
 
-                  {/* Desktop Layout */}
-                  <div className="hidden md:grid grid-cols-4 gap-4 items-center">
-                    <div className="text-sm text-gray-300">
-                      {formatDate(entry.createdAt)}
-                    </div>
-                    <div className="text-sm font-medium text-yellow-300">
-                      {getDisplayCategory(entry)}
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      {getDescription(entry)}
-                    </div>
-                    <div className={`text-right text-lg font-bold ${getPointsColor(entry.pointsEarned)}`}>
-                      {formatPoints(entry.pointsEarned)}
-                    </div>
-                  </div>
+                        {/* Desktop Layout */}
+                        <div className="hidden md:grid grid-cols-4 gap-4 items-start">
+                          <div className="text-sm text-gray-300">{formatDate(entry.createdAt)}</div>
+                          <div className="text-sm font-medium text-yellow-300">{getDisplayCategory(entry)}</div>
+                          <div className="text-sm text-gray-400">
+                            {parsed ? (
+                              <>
+                                <span className="text-white font-semibold">{parsed.total_multiplier}x</span> total
+                                {parsed.multiplier_breakdown.length > 0 && (
+                                  <div className="mt-1 flex flex-wrap gap-1">
+                                    {parsed.multiplier_breakdown.map((b, i) => (
+                                      <span key={i} className="bg-gray-700/60 rounded px-1.5 py-0.5 text-xs">{b.name} {b.multiplier}x</span>
+                                    ))}
+                                  </div>
+                                )}
+                              </>
+                            ) : getDescription(entry)}
+                          </div>
+                          <div className={`text-right text-lg font-bold ${getPointsColor(entry.pointsEarned)}`}>{formatPoints(entry.pointsEarned)}</div>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               ))}
 

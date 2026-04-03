@@ -835,7 +835,7 @@ export default function EarnPage() {
 
                 // Token positions
                 const tokenPositions = [
-                  { key: 'amyusdt0', data: tokenData?.amyusdt0, name: 'AMY/USDT0 – LP', subtitle: 'Kodiak', image: '/usdt0.png', valueLabel: 'Your LP Value', manageText: 'Manage your position on Kodiak', link: 'https://app.kodiak.finance/#/explore/v3/pools/0xed1bb27281a8bbf296270ed5bb08acf7ecab5c17?chain=berachain_mainnet', linkText: 'View Position →' },
+                  { key: 'amyusdt0', data: tokenData?.amyusdt0, name: 'AMY/USDT0 – LP', subtitle: 'Kodiak', image: '/usdto.png', valueLabel: 'Your LP Value', manageText: 'Manage your position on Kodiak', link: 'https://app.kodiak.finance/#/explore/v3/pools/0xed1bb27281a8bbf296270ed5bb08acf7ecab5c17?chain=berachain_mainnet', linkText: 'View Position →' },
                   { key: 'sailr', data: tokenData?.sailr, name: 'SAIL.r – Royalty', subtitle: 'Liquid Royalty', image: '/sail.png', valueLabel: 'Your Token Value', manageText: 'Manage your position on Liquid Royalty', link: 'https://www.liquidroyalty.com/invest/sail', linkText: 'View Position →' },
                   { key: 'plvhedge', data: tokenData?.plvhedge, name: 'plvHEDGE – Vault', subtitle: 'Plutus', image: '/plvhedge.png', valueLabel: 'Your Token Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Vaults/v/plvHEDGE/chain/berachain', linkText: 'View Position →' },
                   { key: 'plsbera', data: tokenData?.plsbera, name: 'plsBERA – Staked', subtitle: 'Plutus', image: '/plsbera.png', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Assets/a/plsBERA/tab/stake', linkText: 'View Position →' },

@@ -35,6 +35,7 @@ interface PointsData {
   emberMultiplier?: number;
   genesisMultiplier?: number;
   totalMultiplier?: number;
+  multiplierBreakdown?: { name: string; multiplier: number }[];
   // Dawn season (historical)
   dawnReferralCount?: number;
   dawnReferralMultiplier?: number;
