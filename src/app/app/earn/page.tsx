@@ -850,7 +850,7 @@ export default function EarnPage() {
                 tokenPositions.forEach((pos) => {
                   if (pos.data?.isActive) {
                     const isLp = pos.key === 'amyusdt0';
-                    const lpData = isLp ? (pos.data as TokenHolding & { count?: number }) : null;
+                    const lpData = isLp ? (pos.data as TokenHolding & { count?: number; inRangeCount?: number }) : null;
                     positions.push({
                       key: pos.key,
                       valueUsd: pos.data.valueUsd || 0,
