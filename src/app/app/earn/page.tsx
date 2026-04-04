@@ -36,7 +36,7 @@ interface TokenHoldingsData {
   bgt: TokenHolding;
   snrusd: TokenHolding;
   jnrusd: TokenHolding;
-  amyusdt0?: TokenHolding & { count?: number };
+  amyusdt0?: TokenHolding & { count?: number; inRangeCount?: number };
 }
 interface DynamicPoolData {
   tvl: string;
@@ -878,7 +878,7 @@ export default function EarnPage() {
                                   <>
                                     <div className="text-xs text-gray-500 uppercase mb-1">Positions</div>
                                     <div className="text-xl font-bold text-white">
-                                      {lpData?.count ?? 0}/{lpData?.count ?? 0}
+                                      {lpData?.inRangeCount ?? lpData?.count ?? 0}/{lpData?.count ?? 0}
                                       <span className="text-sm text-gray-400 ml-1">in range</span>
                                     </div>
                                   </>

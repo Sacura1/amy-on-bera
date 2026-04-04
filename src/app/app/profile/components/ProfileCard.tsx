@@ -3,49 +3,14 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '@/lib/constants';
 
-interface LpData {
-  lpValueUsd: number;
-  lpMultiplier: number;
-  isInRange: boolean;
-}
-
-interface TokenHolding {
-  multiplier: number;
-  isActive: boolean;
-  valueUsd?: number;
-  balance?: number;
-}
-
-interface NftHolding {
-  count: number;
-  multiplier: number;
-  isActive: boolean;
-}
-
-interface TokenHoldingsData {
-  sailr: TokenHolding;
-  plvhedge: TokenHolding;
-  plsbera: TokenHolding;
-  honeybend?: TokenHolding;
-  stakedbera?: TokenHolding;
-  bgt?: TokenHolding;
-  snrusd?: TokenHolding;
-  jnrusd?: TokenHolding;
-  plskdk?: TokenHolding;
-  amyusdt0?: TokenHolding;
-  bullas?: NftHolding;
-  boogaBullas?: NftHolding;
-}
-
-interface PointsData {
-  raidsharkMultiplier?: number;
-  onchainConvictionMultiplier?: number;
-  referralMultiplier?: number;
-  swapperMultiplier?: number;
-  telegramModMultiplier?: number;
-  discordModMultiplier?: number;
-  emberMultiplier?: number;
-  genesisMultiplier?: number;
+interface BadgeData {
+  badge_id: string;
+  badge_title: string;
+  badge_image: string;
+  is_active: boolean;
+  current_tier_level: 0 | 1 | 2 | 3;
+  current_tier_name: 'inactive' | 'bronze' | 'silver' | 'gold';
+  current_multiplier: number;
 }
 
 interface EquippedBadge {
@@ -90,155 +55,11 @@ interface ProfileCardProps {
   socialConnections: SocialConnections;
 }
 
-// Helper to get the correct backend badge ID based on value tier
-function getLpBadgeId(valueUsd: number): string | null {
-  if (valueUsd >= 500) return 'lp_x10';
-  if (valueUsd >= 100) return 'lp_x5';
-  if (valueUsd >= 10) return 'lp_x3';
-  return null;
-}
-
-function getAmyUsdt0LpBadgeId(valueUsd: number): string | null {
-  if (valueUsd >= 500) return 'amyusdt0_x100';
-  if (valueUsd >= 100) return 'amyusdt0_x10';
-  if (valueUsd >= 10) return 'amyusdt0_x5';
-  return null;
-}
-
-function getSailrBadgeId(valueUsd: number): string | null {
-  if (valueUsd >= 500) return 'sailr_x10';
-  if (valueUsd >= 100) return 'sailr_x5';
-  if (valueUsd >= 10) return 'sailr_x3';
-  return null;
-}
-
-// Get ring color based on tier
-function getTierRingColor(tier: string): string {
-  switch (tier) {
-    case 'platinum':
-      return 'border-cyan-400';
-    case 'gold':
-      return 'border-yellow-400';
-    case 'silver':
-      return 'border-slate-300';
-    case 'bronze':
-      return 'border-amber-600';
-    default:
-      return 'border-gray-500';
-  }
-}
-
-function getPlvhedgeBadgeId(valueUsd: number): string | null {
-  if (valueUsd >= 500) return 'plvhedge_x10';
-  if (valueUsd >= 100) return 'plvhedge_x5';
-  if (valueUsd >= 10) return 'plvhedge_x3';
-  return null;
-}
-
-function getPlsberaBadgeId(valueUsd: number): string | null {
-  if (valueUsd >= 500) return 'plsbera_x10';
-  if (valueUsd >= 100) return 'plsbera_x5';
-  if (valueUsd >= 10) return 'plsbera_x3';
-  return null;
-}
-
-function getPlskdkBadgeId(valueUsd: number): string | null {
-  if (valueUsd >= 500) return 'plskdk_x10';
-  if (valueUsd >= 100) return 'plskdk_x5';
-  if (valueUsd >= 10) return 'plskdk_x3';
-  return null;
-}
-
-function getHoneybendBadgeId(valueUsd: number): string | null {
-  if (valueUsd >= 500) return 'honeybend_x10';
-  if (valueUsd >= 100) return 'honeybend_x5';
-  if (valueUsd >= 10) return 'honeybend_x3';
-  return null;
-}
-
-function getStakedberaBadgeId(valueUsd: number): string | null {
-  if (valueUsd >= 500) return 'stakedbera_x10';
-  if (valueUsd >= 100) return 'stakedbera_x5';
-  if (valueUsd >= 10) return 'stakedbera_x3';
-  return null;
-}
-
-function getBgtBadgeId(valueUsd: number): string | null {
-  if (valueUsd >= 500) return 'bgt_x10';
-  if (valueUsd >= 100) return 'bgt_x5';
-  if (valueUsd >= 10) return 'bgt_x3';
-  return null;
-}
-
-function getSnrusdBadgeId(valueUsd: number): string | null {
-  if (valueUsd >= 500) return 'snrusd_x10';
-  if (valueUsd >= 100) return 'snrusd_x5';
-  if (valueUsd >= 10) return 'snrusd_x3';
-  return null;
-}
-
-function getJnrusdBadgeId(valueUsd: number): string | null {
-  if (valueUsd >= 500) return 'jnrusd_x10';
-  if (valueUsd >= 100) return 'jnrusd_x5';
-  if (valueUsd >= 10) return 'jnrusd_x3';
-  return null;
-}
-
-function getRaidsharkBadgeId(multiplier: number): string | null {
-  if (multiplier >= 15) return 'raidshark_x15';
-  if (multiplier >= 7) return 'raidshark_x7';
-  if (multiplier >= 3) return 'raidshark_x3';
-  return null;
-}
-
-function getConvictionBadgeId(multiplier: number): string | null {
-  if (multiplier >= 10) return 'conviction_x10';
-  if (multiplier >= 5) return 'conviction_x5';
-  if (multiplier >= 3) return 'conviction_x3';
-  return null;
-}
-
-function getReferralBadgeId(multiplier: number): string | null {
-  if (multiplier >= 10) return 'referral_x10';
-  if (multiplier >= 5) return 'referral_x5';
-  if (multiplier >= 3) return 'referral_x3';
-  return null;
-}
-
-function getSwapperBadgeId(multiplier: number): string | null {
-  if (multiplier >= 10) return 'swapper_x10';
-  if (multiplier >= 5) return 'swapper_x5';
-  if (multiplier >= 3) return 'swapper_x3';
-  return null;
-}
-
-function getEmberBadgeId(multiplier: number): string | null {
-  if (multiplier >= 10) return 'ember_x10';
-  if (multiplier >= 5) return 'ember_x5';
-  if (multiplier >= 3) return 'ember_x3';
-  return null;
-}
-
-function getGenesisBadgeId(multiplier: number): string | null {
-  if (multiplier >= 10) return 'genesis_x10';
-  if (multiplier >= 5) return 'genesis_x5';
-  if (multiplier >= 3) return 'genesis_x3';
-  return null;
-}
-
-function getBullasBadgeId(count: number): string | null {
-  if (count >= 28) return 'bullas_x15';
-  if (count >= 8) return 'bullas_x5';
-  if (count >= 2) return 'bullas_x3';
-  return null;
-}
-
-function getBoogaBullasBadgeId(count: number): string | null {
-  if (count >= 42) return 'booga_bullas_x15';
-  if (count >= 13) return 'booga_bullas_x5';
-  if (count >= 3) return 'booga_bullas_x3';
-  return null;
-}
+const BADGE_RING: Record<string, string> = {
+  bronze: 'ring-4 ring-amber-600 shadow-[0_0_8px_rgba(217,119,6,0.5)]',
+  silver: 'ring-4 ring-slate-300 shadow-[0_0_8px_rgba(203,213,225,0.5)]',
+  gold:   'ring-4 ring-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]',
+};
 
 export default function ProfileCard({
   wallet,
@@ -257,9 +78,7 @@ export default function ProfileCard({
 }: ProfileCardProps) {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [equippedBadges, setEquippedBadges] = useState<EquippedBadge[]>([]);
-  const [lpData, setLpData] = useState<LpData | null>(null);
-  const [tokenData, setTokenData] = useState<TokenHoldingsData | null>(null);
-  const [pointsData, setPointsData] = useState<PointsData | null>(null);
+  const [activeBadges, setActiveBadges] = useState<BadgeData[]>([]);
   const [socialData, setSocialData] = useState<SocialData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -288,55 +107,29 @@ export default function ProfileCard({
         }
       };
 
-      const fetchBadgeMultipliers = async () => {
+      const fetchActiveBadges = async () => {
         try {
-          const [lpRes, tokenRes, pointsRes] = await Promise.all([
-            fetch(`${API_BASE_URL}/api/lp/${wallet}`),
-            fetch(`${API_BASE_URL}/api/tokens/${wallet}`),
-            fetch(`${API_BASE_URL}/api/points/${wallet}`)
-          ]);
-
-          const [lpDataResponse, tokenDataResponse, pointsDataResponse] = await Promise.all([
-            lpRes.json(),
-            tokenRes.json(),
-            pointsRes.json()
-          ]);
-
-          if (lpDataResponse.success && lpDataResponse.data) {
-            setLpData(lpDataResponse.data);
-          }
-
-          if (tokenDataResponse.success && tokenDataResponse.data) {
-            setTokenData(tokenDataResponse.data);
-          }
-
-          if (pointsDataResponse.success && pointsDataResponse.data) {
-            setPointsData({
-              raidsharkMultiplier: pointsDataResponse.data.raidsharkMultiplier,
-              onchainConvictionMultiplier: pointsDataResponse.data.onchainConvictionMultiplier,
-              referralMultiplier: pointsDataResponse.data.referralMultiplier,
-              swapperMultiplier: pointsDataResponse.data.swapperMultiplier,
-              telegramModMultiplier: pointsDataResponse.data.telegramModMultiplier,
-              discordModMultiplier: pointsDataResponse.data.discordModMultiplier,
-              emberMultiplier: pointsDataResponse.data.emberMultiplier,
-              genesisMultiplier: pointsDataResponse.data.genesisMultiplier
-            });
+          const res  = await fetch(`${API_BASE_URL}/api/badges/${wallet}/active`);
+          const data = await res.json();
+          if (data.success) {
+            setActiveBadges(data.data.filter((b: BadgeData) => b.is_active));
           }
         } catch (error) {
-          console.error('Error fetching badge multipliers:', error);
+          console.error('Error fetching active badges:', error);
         }
       };
 
       fetchProfile();
-      fetchBadgeMultipliers();
+      fetchActiveBadges();
 
       return () => {
         cancelled = true;
       };
     }, [wallet]);
 
-  // Get active badges with their multipliers - using correct backend badge IDs
-  const getActiveBadges = () => {
+  // --- old getActiveBadges removed: badges now come from /api/badges/:wallet/active ---
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _unused = () => {
     const active: { id: string; multiplier: number; name: string; title: string; image: string }[] = [];
 
     // Bulla Exchange (LP) badge - use correct tier ID
@@ -637,31 +430,17 @@ export default function ProfileCard({
       }
     }
 
-    return active;
+    return [];
   };
 
-  const activeBadges = getActiveBadges();
-
-  // Get badge for slot
-  const getBadgeForSlot = (slotNumber: number) => {
+  const getBadgeForSlot = (slotNumber: number): BadgeData | null => {
     const equipped = equippedBadges.find(b => b.slotNumber === slotNumber);
     if (!equipped) return null;
-    return activeBadges.find(b => b.id === equipped.badgeId) || null;
+    return activeBadges.find(b => b.badge_id === equipped.badgeId) || null;
   };
 
-  // Get ring color based on multiplier tier (gold/silver/bronze)
-  const getMultiplierRingColor = (multiplier: number, badgeId?: string) => {
-    // For LP badges (both Bulla and Kodiak)
-    if (badgeId?.startsWith('lp_') || badgeId?.startsWith('amyusdt0_')) {
-      if (multiplier >= 100) return 'ring-4 ring-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]'; // Gold - $500+ (100x)
-      if (multiplier >= 10) return 'ring-4 ring-slate-300 shadow-[0_0_8px_rgba(203,213,225,0.5)]';  // Silver - $100+ (10x)
-      return 'ring-4 ring-amber-600 shadow-[0_0_8px_rgba(217,119,6,0.5)]';                         // Bronze - $10+ (5x)
-    }
-    // For other badges
-    if (multiplier >= 10) return 'ring-4 ring-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]'; // Gold (10x)
-    if (multiplier >= 5) return 'ring-4 ring-slate-300 shadow-[0_0_8px_rgba(203,213,225,0.5)]';  // Silver (5x)
-    return 'ring-4 ring-amber-600 shadow-[0_0_8px_rgba(217,119,6,0.5)]';                         // Bronze (3x)
-  };
+  const badgeRing = (b: BadgeData) =>
+    BADGE_RING[b.current_tier_name] ?? 'ring-4 ring-gray-600';
 
   const getAvatarUrl = () => {
     // Prioritize base64 data (stored in PostgreSQL, persists across deploys)
@@ -734,12 +513,12 @@ export default function ProfileCard({
                   key={slotNumber}
                   className={`relative w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${
                     badge
-                      ? `bg-white ${getMultiplierRingColor(badge.multiplier, badge.id)}`
+                      ? `bg-white ${badgeRing(badge)}`
                       : 'border-2 border-gray-600/50 bg-gray-800/50 border-dashed'
                   }`}
                 >
                   {badge ? (
-                    <img src={badge.image} alt={badge.name} className="w-full h-full object-cover rounded-full" />
+                    <img src={badge.badge_image} alt={badge.badge_title} className="w-full h-full object-cover rounded-full" />
                   ) : (
                     <span className="text-[10px] text-gray-600">{slotNumber}</span>
                   )}
