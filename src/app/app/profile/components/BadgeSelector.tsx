@@ -93,7 +93,7 @@ export default function BadgeSelector({
   const isBadgeEquipped = (badgeId: string) =>
     equippedBadges.some(b => b.badgeId === badgeId);
 
-  const multTier   = (b: BadgeData) => b.current_multiplier >= 100 ? 'gold' : b.current_multiplier >= 10 ? 'silver' : 'bronze';
+  const multTier   = (b: BadgeData) => b.current_multiplier >= 100 ? 'gold' : b.current_multiplier >= 5 ? 'silver' : 'bronze';
   const tierRing   = (b: BadgeData) => TIER_RING[multTier(b)]   ?? 'ring-gray-600';
   const tierBanner = (b: BadgeData) => TIER_BANNER[multTier(b)] ?? '';
   const badgeSubtitle = (b: BadgeData) => b.badge_title.split(' – ')[1] ?? '';

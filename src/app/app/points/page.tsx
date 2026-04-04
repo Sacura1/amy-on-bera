@@ -331,11 +331,11 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
           const n = parseInt(currentMultiplier.replace(/[^0-9]/g, ''), 10);
           const label = `${n}x`;
 
-          let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // bronze (x3–x9)
+          let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // bronze (x3–x4)
           if (n >= 100) {
             badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300'; // gold   (x100)
-          } else if (n >= 10) {
-            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200';    // silver (x10–x99)
+          } else if (n >= 5) {
+            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200';    // silver (x5–x99)
           }
 
           return (

@@ -134,7 +134,7 @@ export default function ProfileCard({
   };
 
   const badgeRing = (b: BadgeData) => {
-    const tier = b.current_multiplier >= 100 ? 'gold' : b.current_multiplier >= 10 ? 'silver' : 'bronze';
+    const tier = b.current_multiplier >= 100 ? 'gold' : b.current_multiplier >= 5 ? 'silver' : 'bronze';
     return BADGE_RING[tier] ?? 'ring-4 ring-gray-600';
   };
 
