@@ -480,7 +480,7 @@ export default function ProfileCard({
       <div className="flex flex-col sm:flex-row gap-6">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 ${getTierRingColor(tier)} overflow-hidden`}>
+          <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 ${BADGE_RING[tier] ?? 'border-gray-600'} overflow-hidden`}>
             {getAvatarUrl() ? (
               <img
                 src={getAvatarUrl()!}

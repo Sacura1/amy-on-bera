@@ -93,8 +93,10 @@ export default function BadgeSelector({
   const isBadgeEquipped = (badgeId: string) =>
     equippedBadges.some(b => b.badgeId === badgeId);
 
-  const tierRing   = (b: BadgeData) => TIER_RING[b.current_tier_name]   ?? 'ring-gray-600';
-  const tierBanner = (b: BadgeData) => TIER_BANNER[b.current_tier_name] ?? '';
+  const multTier   = (b: BadgeData) => b.current_multiplier >= 100 ? 'gold' : b.current_multiplier >= 10 ? 'silver' : 'bronze';
+  const tierRing   = (b: BadgeData) => TIER_RING[multTier(b)]   ?? 'ring-gray-600';
+  const tierBanner = (b: BadgeData) => TIER_BANNER[multTier(b)] ?? '';
+  const badgeSubtitle = (b: BadgeData) => b.badge_title.split(' – ')[1] ?? '';
 
   const equipBadge = async () => {
     if (selectedSlot === null || selectedBadge === null) return;
@@ -256,10 +258,10 @@ export default function BadgeSelector({
                               </div>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-white text-sm truncate capitalize">
-                                {badge.current_tier_name}
+                              <p className="font-semibold text-white text-sm truncate">
+                                {badge.badge_title}
                               </p>
-                              <p className="text-xs text-gray-400 truncate">{badge.badge_title}</p>
+                              <p className="text-xs text-gray-400 truncate">{badgeSubtitle(badge)}</p>
                             </div>
                             {isEquipped ? (
                               <span className="text-green-400 text-sm font-bold whitespace-nowrap">Already equipped</span>

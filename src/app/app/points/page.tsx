@@ -328,31 +328,19 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
 
         {/* Multiplier badge corner */}
         {isActive && currentMultiplier && (() => {
-          const multiplierNum = parseInt(currentMultiplier.replace(/[^0-9]/g, ''), 10);
+          const n = parseInt(currentMultiplier.replace(/[^0-9]/g, ''), 10);
+          const label = `${n}x`;
 
-          // Determine tier level (1=bronze, 2=silver, 3=gold) based on badge's own multiplier list
-          let tierLevel = 1;
-          if (multipliers && multipliers.length > 0) {
-            const tierValues = multipliers.map(m => parseInt(m.multiplier.replace(/[^0-9]/g, ''), 10));
-            const matchIndex = tierValues.indexOf(multiplierNum);
-            if (matchIndex >= 0) {
-              tierLevel = matchIndex + 1;
-            } else {
-              // Fallback: find closest tier
-              tierLevel = tierValues.filter(v => multiplierNum >= v).length || 1;
-            }
-          }
-
-          let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // Level 1 - Bronze
-          if (tierLevel >= 3) {
-            badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300'; // Level 3 - Gold
-          } else if (tierLevel >= 2) {
-            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200'; // Level 2 - Silver
+          let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // bronze (x3–x9)
+          if (n >= 100) {
+            badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300'; // gold   (x100)
+          } else if (n >= 10) {
+            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200';    // silver (x10–x99)
           }
 
           return (
             <div className={`absolute -top-2 -left-2 text-xs font-black px-2 py-1 rounded-md z-10 shadow-lg border-2 ${badgeColors}`}>
-              {currentMultiplier}
+              {label}
             </div>
           );
         })()}
@@ -1166,7 +1154,7 @@ export default function PointsPage() {
             <MultiplierBadge
               name="AMY/HONEY"
               title="LP"
-              image="/amyhoney.png"
+              image="/image/amy_honey.png"
               description="Provide liquidity to the AMY/HONEY pool on Bulla Exchange. Your AMY/HONEY LP balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x5' },
@@ -1183,7 +1171,7 @@ export default function PointsPage() {
             <MultiplierBadge
               name="AMY/USDT0"
               title="LP"
-              image="/usdto.png"
+              image="/image/amy_usdto.png"
               description="Provide liquidity to the AMY/USDT0 pool on Kodiak. Your AMY/USDT0 LP balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x5' },
@@ -1200,7 +1188,7 @@ export default function PointsPage() {
             <MultiplierBadge
               name="plsBERA"
               title="Staked"
-              image="/plsbera.png"
+              image="/image/plsbera.png"
               description={`Stake BERA into plsBERA via Plutus.
 
 Your plsBERA balance is tracked in USD and updates automatically as it changes.
@@ -1221,7 +1209,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="plsKDK"
               title="Staked"
-              image="/plskdk.png"
+              image="/image/plskdk.png"
               description={`Stake KDK into plsKDK via Plutus.
 
 Your plsKDK balance is tracked in USD and updates automatically as it changes.
@@ -1242,7 +1230,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="plvHEDGE"
               title="Vault"
-              image="/plvhedge.png"
+              image="/image/plvhedge.png"
               description={`Deposit into the plvHEDGE delta-neutral vault via Plutus.
 
 Your plvHEDGE balance is tracked in USD and updates automatically as it changes.
@@ -1263,7 +1251,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="SAIL.r"
               title="Royalty"
-              image="/sail.png"
+              image="/image/sailr.png"
               description="Hold SAIL.r in your wallet. Your SAIL.r balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
@@ -1280,7 +1268,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="jnrUSD"
               title="Vault"
-              image="/jnr.png"
+              image="/image/jnrusd.png"
               description="Deposit into the jnrUSD vault. Your jnrUSD vault balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
@@ -1297,7 +1285,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="snrUSD"
               title="Vault"
-              image="/snr.png"
+              image="/image/snrusd.png"
               description="Deposit into the snrUSD vault. Your snrUSD vault balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
@@ -1314,7 +1302,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="HONEY"
               title="Lent"
-              image="/honey.png"
+              image="/image/honey.png"
               description="Lend HONEY on Bend. Your HONEY lending balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
@@ -1331,7 +1319,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="BERA"
               title="Staked"
-              image="/BERA.png"
+              image="/image/swebera.png"
               description="Stake BERA to receive sWBERA. Your staked BERA balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
@@ -1348,7 +1336,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="BGT"
               title="Holder"
-              image="/bgt.png"
+              image="/image/bgt.png"
               description="Hold BGT in your wallet. BGT is earned through participation in Berachain and represents governance power. Your BGT balance is tracked in USD and updates automatically as it changes. Multiplier adjusts automatically as your position value changes."
               multipliers={[
                 { requirement: '$10+', multiplier: 'x3' },
@@ -1363,7 +1351,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="Kodiak"
               title="Legacy"
-              image="/kodiak.jpg"
+              image="/image/kodiak.png"
               description="Earned during the Amy × Kodiak Perps competition (Dec 2025). This badge is permanent for participants and rewards early supporters."
               multipliers={[
                 { requirement: 'Level 1', multiplier: 'TBC' },
@@ -1377,7 +1365,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="Dawn"
               title="Legacy"
-              image="/ref.jpg"
+              image="/image/dawn.png"
               description="Earned during the Dawn referral campaign (Dec – Jan 2025). This badge is permanent for participants and rewards early supporters."
               multipliers={[
                 { requirement: '1 referral', multiplier: 'x3' },
@@ -1385,14 +1373,14 @@ Multiplier adjusts automatically as your position value changes.`}
                 { requirement: '3+ referrals', multiplier: 'x10' },
               ]}
               isActive={(pointsData?.dawnReferralMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.dawnReferralMultiplier || 0) > 0 ? `x${pointsData?.dawnReferralMultiplier}` : undefined}
+              currentMultiplier={(pointsData?.dawnReferralMultiplier || 0) > 0 ? `${pointsData?.dawnReferralMultiplier}x` : undefined}
             />
 
             {/* Ember – Legacy (inactive until 22 March 2026) */}
             <MultiplierBadge
               name="Ember"
               title="Legacy"
-              image="/Ember.png"
+              image="/image/ember.png"
               description="Earned during the Ember referral season. Multipliers activate after 22 March 2026. This badge is permanent for eligible participants."
               multipliers={[
                 { requirement: 'Level 1', multiplier: 'TBC' },
@@ -1400,14 +1388,14 @@ Multiplier adjusts automatically as your position value changes.`}
                 { requirement: 'Level 3', multiplier: 'TBC' },
               ]}
               isActive={(pointsData?.emberMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.emberMultiplier || 0) > 0 ? `x${pointsData?.emberMultiplier}` : undefined}
+              currentMultiplier={(pointsData?.emberMultiplier || 0) > 0 ? `${pointsData?.emberMultiplier}x` : undefined}
             />
 
             {/* Genesis – OGs (inactive) */}
             <MultiplierBadge
               name="Genesis"
               title="OGs"
-              image="/genesis.png"
+              image="/image/genesis.png"
               description="Reserved for the earliest and most dedicated community members. Top 50/20/10 holders earn this badge."
               multipliers={[
                 { requirement: 'Top 50', multiplier: 'x3' },
@@ -1415,14 +1403,14 @@ Multiplier adjusts automatically as your position value changes.`}
                 { requirement: 'Top 10', multiplier: 'x10' },
               ]}
               isActive={(pointsData?.genesisMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.genesisMultiplier || 0) > 0 ? `x${pointsData?.genesisMultiplier}` : undefined}
+              currentMultiplier={(pointsData?.genesisMultiplier || 0) > 0 ? `${pointsData?.genesisMultiplier}x` : undefined}
             />
 
             {/* 12. Conviction – Monthly */}
             <MultiplierBadge
               name="Conviction"
               title="Monthly"
-              image="/convic.jpg"
+              image="/image/conviction_monthly.png"
               description="Assigned monthly based on your onchain activity across Web3. Activity this month determines your badge for next month. Once assigned, it stays active for the entire month."
               multipliers={[
                 { requirement: 'Level 1', multiplier: 'x3' },
@@ -1440,7 +1428,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="Swapper"
               title="Monthly"
-              image="/swapper.png"
+              image="/image/swapper.png"
               description="Based on your swap volume through Amy during the current month. Activity this month determines your badge for next month. Once assigned, it stays active for the entire month."
               multipliers={[
                 { requirement: '$250+', multiplier: 'x3' },
@@ -1448,7 +1436,7 @@ Multiplier adjusts automatically as your position value changes.`}
                 { requirement: '$3,000+', multiplier: 'x10' },
               ]}
               isActive={(pointsData?.swapperMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.swapperMultiplier || 0) > 0 ? `x${pointsData?.swapperMultiplier}` : undefined}
+              currentMultiplier={(pointsData?.swapperMultiplier || 0) > 0 ? `${pointsData?.swapperMultiplier}x` : undefined}
               actionUrl="/app/trade"
               actionLabel="Start Swapping"
             />
@@ -1457,7 +1445,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="Raider"
               title="Monthly"
-              image="/Raider.png"
+              image="/image/raider.png"
               description="Based on your raid activity during the current month. Raid points are tracked through the Amy Telegram bot. Activity this month determines your badge for next month. Once assigned, it stays active for the entire month."
               multipliers={[
                 { requirement: '75+ pts', multiplier: 'x3' },
@@ -1474,7 +1462,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="Telegram"
               title="Mod"
-              image="/tg.png"
+              image="/image/telegram.png"
               description="Assigned to active Telegram moderators who support the community. Level is determined by the team and may be updated over time based on contribution."
               multipliers={[
                 { requirement: 'Guardian', multiplier: 'x3' },
@@ -1482,7 +1470,7 @@ Multiplier adjusts automatically as your position value changes.`}
                 { requirement: 'Archlord', multiplier: 'x15' },
               ]}
               isActive={(pointsData?.telegramModMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.telegramModMultiplier || 0) > 0 ? `x${pointsData?.telegramModMultiplier}` : undefined}
+              currentMultiplier={(pointsData?.telegramModMultiplier || 0) > 0 ? `${pointsData?.telegramModMultiplier}x` : undefined}
               actionUrl="https://t.me/amy_on_bera"
               actionLabel="Join Telegram"
             />
@@ -1491,7 +1479,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="Discord"
               title="Mod"
-              image="/dc.png"
+              image="/image/discord.png"
               description="Assigned to active Discord moderators who support the community. Level is determined by the team and may be updated over time based on contribution."
               multipliers={[
                 { requirement: 'Guardian', multiplier: 'x3' },
@@ -1499,7 +1487,7 @@ Multiplier adjusts automatically as your position value changes.`}
                 { requirement: 'Archlord', multiplier: 'x15' },
               ]}
               isActive={(pointsData?.discordModMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.discordModMultiplier || 0) > 0 ? `x${pointsData?.discordModMultiplier}` : undefined}
+              currentMultiplier={(pointsData?.discordModMultiplier || 0) > 0 ? `${pointsData?.discordModMultiplier}x` : undefined}
               actionUrl="https://discord.com/invite/9Y3UzP93r3"
               actionLabel="Join Discord"
             />
@@ -1508,7 +1496,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="Bullas"
               title="NFT"
-              image="/bulla.png"
+              image="/image/bulla.png"
               description="Hold Bullas NFTs to earn a multiplier. Multiplier is based on how many NFTs you hold in your connected wallet."
               multipliers={[
                 { requirement: 'Hold 2+', multiplier: 'x3' },
@@ -1516,7 +1504,7 @@ Multiplier adjusts automatically as your position value changes.`}
                 { requirement: 'Hold 28+', multiplier: 'x15' },
               ]}
               isActive={(pointsData?.bullasMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.bullasMultiplier || 0) > 0 ? `x${pointsData?.bullasMultiplier}` : undefined}
+              currentMultiplier={(pointsData?.bullasMultiplier || 0) > 0 ? `${pointsData?.bullasMultiplier}x` : undefined}
               actionUrl="https://opensea.io/collection/bullas-5"
               actionLabel="View on OpenSea"
             />
@@ -1525,7 +1513,7 @@ Multiplier adjusts automatically as your position value changes.`}
             <MultiplierBadge
               name="Booga Bullas"
               title="NFT"
-              image="/booga.png"
+              image="/image/booga_bulla.png"
               description="Hold Booga Bullas NFTs to earn a multiplier. Multiplier is based on how many NFTs you hold in your connected wallet."
               multipliers={[
                 { requirement: 'Hold 3+', multiplier: 'x3' },
@@ -1533,7 +1521,7 @@ Multiplier adjusts automatically as your position value changes.`}
                 { requirement: 'Hold 42+', multiplier: 'x15' },
               ]}
               isActive={(pointsData?.boogaBullasMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.boogaBullasMultiplier || 0) > 0 ? `x${pointsData?.boogaBullasMultiplier}` : undefined}
+              currentMultiplier={(pointsData?.boogaBullasMultiplier || 0) > 0 ? `${pointsData?.boogaBullasMultiplier}x` : undefined}
               actionUrl="https://opensea.io/collection/booga-bullas-official"
               actionLabel="View on OpenSea"
             />

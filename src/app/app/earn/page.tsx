@@ -92,7 +92,7 @@ const STRATEGIES: Strategy[] = [
     id: 'amy-honey',
     name: 'AMY/HONEY – LP',
     subtitle: 'Bulla Exchange',
-    image: '/amyhoney.png',
+    image: '/image/amy_honey.png',
     tvl: '$1.17K',
     apr: '2.11%',
     amyPoints: 'Earn up to 100x',
@@ -114,7 +114,7 @@ const STRATEGIES: Strategy[] = [
     id: 'amy-usdt0',
     name: 'AMY/USDT0 – LP',
     subtitle: 'Kodiak',
-    image: '/usdto.png',
+    image: '/image/amy_usdto.png',
     tvl: 'TBC',
     apr: 'TBC',
     amyPoints: 'Earn up to 100x',
@@ -136,7 +136,7 @@ const STRATEGIES: Strategy[] = [
     id: 'honeybend',
     name: 'HONEY – Lent',
     subtitle: 'Bend Protocol',
-    image: '/honey.png',
+    image: '/image/honey.png',
     tvl: '$12.5M',
     apr: '8%',
     amyPoints: 'Earn up to 10x',
@@ -158,7 +158,7 @@ const STRATEGIES: Strategy[] = [
     id: 'stakedbera',
     name: 'BERA – Staked',
     subtitle: 'Berachain Staking',
-    image: '/BERA.png',
+    image: '/image/swebera.png',
     tvl: '$85M',
     apr: '21%',
     amyPoints: 'Earn up to 10x',
@@ -180,7 +180,7 @@ const STRATEGIES: Strategy[] = [
     id: 'plsbera',
     name: 'plsBERA – Staked',
     subtitle: 'Plutus',
-    image: '/plsbera.png',
+    image: '/image/plsbera.png',
     tvl: '$22K',
     apr: '31.91%',
     amyPoints: 'Earn up to 10x',
@@ -201,7 +201,7 @@ const STRATEGIES: Strategy[] = [
     id: 'plskdk',
     name: 'plsKDK – Staked',
     subtitle: 'Plutus',
-    image: '/plskdk.png',
+    image: '/image/plskdk.png',
     tvl: '$0',
     apr: '0%',
     amyPoints: 'Earn up to 10x',
@@ -222,7 +222,7 @@ const STRATEGIES: Strategy[] = [
     id: 'plvhedge',
     name: 'plvHEDGE – Vault',
     subtitle: 'Plutus',
-    image: '/plvhedge.png',
+    image: '/image/plvhedge.png',
     tvl: '$271.91K',
     apr: '22.54%',
     amyPoints: 'Earn up to 10x',
@@ -241,7 +241,7 @@ const STRATEGIES: Strategy[] = [
     id: 'sailr',
     name: 'SAIL.r – Royalty',
     subtitle: 'Liquid Royalty',
-    image: '/sail.png',
+    image: '/image/sailr.png',
     tvl: '$4.32M',
     apr: '30%',
     amyPoints: 'Earn up to 10x',
@@ -260,7 +260,7 @@ const STRATEGIES: Strategy[] = [
     id: 'snrusd',
     name: 'snrUSD – Vault',
     subtitle: 'Liquid Royalty',
-    image: '/snr.png',
+    image: '/image/snrusd.png',
     tvl: '$2.13M',
     apr: '13%',
     amyPoints: 'Earn up to 10x',
@@ -282,7 +282,7 @@ const STRATEGIES: Strategy[] = [
     id: 'jnrusd',
     name: 'jnrUSD – Vault',
     subtitle: 'Liquid Royalty',
-    image: '/jnr.png',
+    image: '/image/jnrusd.png',
     tvl: '$2.12M',
     apr: '93%',
     amyPoints: 'Earn up to 10x',
@@ -542,7 +542,7 @@ const ActivePositionCard = ({ lpData }: { lpData: LpData }) => {
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
-            <img src="/amyhoney.png" alt="Bulla Exchange" className="w-full h-full object-cover" />
+            <img src="/image/amy_honey.png" alt="Bulla Exchange" className="w-full h-full object-cover" />
           </div>
           <div>
             <div className="text-white font-bold">AMY/HONEY – LP</div>
@@ -835,16 +835,16 @@ export default function EarnPage() {
 
                 // Token positions
                 const tokenPositions = [
-                  { key: 'amyusdt0', data: tokenData?.amyusdt0, name: 'AMY/USDT0 – LP', subtitle: 'Kodiak', image: '/usdto.png', valueLabel: 'Your LP Value', manageText: 'Manage your position on Kodiak', link: 'https://app.kodiak.finance/#/explore/v3/pools/0xed1bb27281a8bbf296270ed5bb08acf7ecab5c17?chain=berachain_mainnet', linkText: 'View Position →' },
-                  { key: 'sailr', data: tokenData?.sailr, name: 'SAIL.r – Royalty', subtitle: 'Liquid Royalty', image: '/sail.png', valueLabel: 'Your Token Value', manageText: 'Manage your position on Liquid Royalty', link: 'https://www.liquidroyalty.com/invest/sail', linkText: 'View Position →' },
-                  { key: 'plvhedge', data: tokenData?.plvhedge, name: 'plvHEDGE – Vault', subtitle: 'Plutus', image: '/plvhedge.png', valueLabel: 'Your Token Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Vaults/v/plvHEDGE/chain/berachain', linkText: 'View Position →' },
-                  { key: 'plsbera', data: tokenData?.plsbera, name: 'plsBERA – Staked', subtitle: 'Plutus', image: '/plsbera.png', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Assets/a/plsBERA/tab/stake', linkText: 'View Position →' },
-                  { key: 'plskdk', data: tokenData?.plskdk, name: 'plsKDK – Staked', subtitle: 'Plutus', image: '/plskdk.png', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Assets/a/plsKDK/tab/convert', linkText: 'View Position →' },
-                  { key: 'honeybend', data: tokenData?.honeybend, name: 'HONEY – Lent', subtitle: 'Bend Protocol', image: '/honey.png', valueLabel: 'Your Deposit Value', manageText: 'Manage your position on Berachain', link: 'https://bend.berachain.com/lend/80094/0x30BbA9CD9Eb8c95824aa42Faa1Bb397b07545bc1', linkText: 'View Position →' },
-                  { key: 'stakedbera', data: tokenData?.stakedbera, name: 'BERA – Staked', subtitle: 'Berachain Staking', image: '/BERA.png', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Berachain', link: 'https://hub.berachain.com/stake', linkText: 'View Position →' },
-                  { key: 'bgt', data: tokenData?.bgt, name: 'BGT', subtitle: 'Berachain Governance Token', image: '/BERA.png', valueLabel: 'Your Token Value', manageText: 'BGT earnings from liquidity provision', link: 'https://hub.berachain.com/', linkText: 'View Hub →' },
-                  { key: 'snrusd', data: tokenData?.snrusd, name: 'snrUSD – Vault', subtitle: 'Liquid Royalty', image: '/snr.png', valueLabel: 'Your Token Value', manageText: 'Manage your position on Liquid Royalty', link: 'https://www.liquidroyalty.com/vaults', linkText: 'View Position →' },
-                  { key: 'jnrusd', data: tokenData?.jnrusd, name: 'jnrUSD – Vault', subtitle: 'Liquid Royalty', image: '/jnr.png', valueLabel: 'Your Token Value', manageText: 'Manage your position on Liquid Royalty', link: 'https://www.liquidroyalty.com/vaults', linkText: 'View Position →' },
+                  { key: 'amyusdt0', data: tokenData?.amyusdt0, name: 'AMY/USDT0 – LP', subtitle: 'Kodiak', image: '/image/amy_usdto.png', valueLabel: 'Your LP Value', manageText: 'Manage your position on Kodiak', link: 'https://app.kodiak.finance/#/explore/v3/pools/0xed1bb27281a8bbf296270ed5bb08acf7ecab5c17?chain=berachain_mainnet', linkText: 'View Position →' },
+                  { key: 'sailr', data: tokenData?.sailr, name: 'SAIL.r – Royalty', subtitle: 'Liquid Royalty', image: '/image/sailr.png', valueLabel: 'Your Token Value', manageText: 'Manage your position on Liquid Royalty', link: 'https://www.liquidroyalty.com/invest/sail', linkText: 'View Position →' },
+                  { key: 'plvhedge', data: tokenData?.plvhedge, name: 'plvHEDGE – Vault', subtitle: 'Plutus', image: '/image/plvhedge.png', valueLabel: 'Your Token Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Vaults/v/plvHEDGE/chain/berachain', linkText: 'View Position →' },
+                  { key: 'plsbera', data: tokenData?.plsbera, name: 'plsBERA – Staked', subtitle: 'Plutus', image: '/image/plsbera.png', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Assets/a/plsBERA/tab/stake', linkText: 'View Position →' },
+                  { key: 'plskdk', data: tokenData?.plskdk, name: 'plsKDK – Staked', subtitle: 'Plutus', image: '/image/plskdk.png', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Plutus', link: 'https://plutus.fi/Assets/a/plsKDK/tab/convert', linkText: 'View Position →' },
+                  { key: 'honeybend', data: tokenData?.honeybend, name: 'HONEY – Lent', subtitle: 'Bend Protocol', image: '/image/honey.png', valueLabel: 'Your Deposit Value', manageText: 'Manage your position on Berachain', link: 'https://bend.berachain.com/lend/80094/0x30BbA9CD9Eb8c95824aa42Faa1Bb397b07545bc1', linkText: 'View Position →' },
+                  { key: 'stakedbera', data: tokenData?.stakedbera, name: 'BERA – Staked', subtitle: 'Berachain Staking', image: '/image/swebera.png', valueLabel: 'Your Staked Value', manageText: 'Manage your position on Berachain', link: 'https://hub.berachain.com/stake', linkText: 'View Position →' },
+                  { key: 'bgt', data: tokenData?.bgt, name: 'BGT', subtitle: 'Berachain Governance Token', image: '/image/bgt.png', valueLabel: 'Your Token Value', manageText: 'BGT earnings from liquidity provision', link: 'https://hub.berachain.com/', linkText: 'View Hub →' },
+                  { key: 'snrusd', data: tokenData?.snrusd, name: 'snrUSD – Vault', subtitle: 'Liquid Royalty', image: '/image/snrusd.png', valueLabel: 'Your Token Value', manageText: 'Manage your position on Liquid Royalty', link: 'https://www.liquidroyalty.com/vaults', linkText: 'View Position →' },
+                  { key: 'jnrusd', data: tokenData?.jnrusd, name: 'jnrUSD – Vault', subtitle: 'Liquid Royalty', image: '/image/jnrusd.png', valueLabel: 'Your Token Value', manageText: 'Manage your position on Liquid Royalty', link: 'https://www.liquidroyalty.com/vaults', linkText: 'View Position →' },
                 ];
 
                 tokenPositions.forEach((pos) => {
