@@ -133,8 +133,10 @@ export default function ProfileCard({
     return activeBadges.find(b => b.badge_id === equipped.badgeId) || null;
   };
 
-  const badgeRing = (b: BadgeData) =>
-    BADGE_RING[b.current_tier_name] ?? 'ring-4 ring-gray-600';
+  const badgeRing = (b: BadgeData) => {
+    const tier = b.current_multiplier >= 100 ? 'gold' : b.current_multiplier >= 10 ? 'silver' : 'bronze';
+    return BADGE_RING[tier] ?? 'ring-4 ring-gray-600';
+  };
 
   const getAvatarUrl = () => {
     // Prioritize base64 data (stored in PostgreSQL, persists across deploys)
