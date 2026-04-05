@@ -266,9 +266,9 @@ const STRATEGIES: Strategy[] = [
     amyPoints: 'Earn up to 10x',
     riskCategory: 'stable',
     actionType: 'deposit',
-    actionUrl: 'https://www.liquidroyalty.com/vaults',
+    actionUrl: 'https://www.liquidroyalty.com/vaults?tranche=senior',
     description: 'Deposit into the snrUSD vault via Liquid Royalty. snrUSD is designed for more stable returns within a structured RWA strategy. It prioritises capital stability and predictable yield over higher upside.\n\nYour multiplier tier is based on the live USD value of this position.',
-    protocolUrl: 'https://www.liquidroyalty.com/vaults',
+    protocolUrl: 'https://www.liquidroyalty.com/vaults?tranche=senior',
     buyUnderlying: {
       token: '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34', // USDe
       fromToken: 'HONEY',
@@ -288,9 +288,9 @@ const STRATEGIES: Strategy[] = [
     amyPoints: 'Earn up to 10x',
     riskCategory: 'hedge',
     actionType: 'deposit',
-    actionUrl: 'https://www.liquidroyalty.com/vaults',
+    actionUrl: 'https://www.liquidroyalty.com/vaults?tranche=junior',
     description: 'Deposit into the jnrUSD vault via Liquid Royalty. jnrUSD is the higher-return side of a structured RWA strategy. Returns are variable and depend on overall strategy performance. As the junior tranche, it takes on more risk in exchange for greater upside potential.\n\nYour multiplier tier is based on the live USD value of this position.',
-    protocolUrl: 'https://www.liquidroyalty.com/vaults',
+    protocolUrl: 'https://www.liquidroyalty.com/vaults?tranche=junior',
     buyUnderlying: {
       token: '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34', // USDe
       fromToken: 'HONEY',

@@ -1354,9 +1354,9 @@ Multiplier adjusts automatically as your position value changes.`}
               image="/image/kodiak.png"
               description="Earned during the Amy × Kodiak Perps competition (Dec 2025). This badge is permanent for participants and rewards early supporters."
               multipliers={[
-                { requirement: 'Level 1', multiplier: 'TBC' },
-                { requirement: 'Level 2', multiplier: 'TBC' },
-                { requirement: 'Level 3', multiplier: 'TBC' },
+                { requirement: 'Level 1', multiplier: 'x3' },
+                { requirement: 'Level 2', multiplier: 'x5' },
+                { requirement: 'Level 3', multiplier: 'x10' },
               ]}
               isActive={false}
             />
@@ -1381,7 +1381,7 @@ Multiplier adjusts automatically as your position value changes.`}
               name="Ember"
               title="Legacy"
               image="/image/ember.png"
-              description="Earned during the Ember referral season. Multipliers activate after 22 March 2026. This badge is permanent for eligible participants."
+              description="Earned during the Ember referral season. Multipliers activate after 03 May 2026. This badge is permanent for eligible participants."
               multipliers={[
                 { requirement: 'Level 1', multiplier: 'TBC' },
                 { requirement: 'Level 2', multiplier: 'TBC' },
