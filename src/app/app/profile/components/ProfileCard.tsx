@@ -61,6 +61,15 @@ const BADGE_RING: Record<string, string> = {
   gold:   'ring-4 ring-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]',
 };
 
+// Avatar border — keyed by AMY holder tier (bronze/silver/gold/platinum/none)
+const HOLDER_RING: Record<string, string> = {
+  platinum: 'border-cyan-400',
+  gold:     'border-yellow-400',
+  silver:   'border-slate-400',
+  bronze:   'border-orange-500',
+  none:     'border-gray-600',
+};
+
 export default function ProfileCard({
   wallet,
   xUsername,
@@ -134,7 +143,7 @@ export default function ProfileCard({
   };
 
   const badgeRing = (b: BadgeData) => {
-    const tier = b.current_multiplier >= 100 ? 'gold' : b.current_multiplier >= 5 ? 'silver' : 'bronze';
+    const tier = b.current_multiplier >= 10 ? 'gold' : b.current_multiplier >= 5 ? 'silver' : 'bronze';
     return BADGE_RING[tier] ?? 'ring-4 ring-gray-600';
   };
 
@@ -176,7 +185,7 @@ export default function ProfileCard({
       <div className="flex flex-col sm:flex-row gap-6">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 ${BADGE_RING[tier] ?? 'border-gray-600'} overflow-hidden`}>
+          <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 ${HOLDER_RING[tier] ?? 'border-gray-600'} overflow-hidden`}>
             {getAvatarUrl() ? (
               <img
                 src={getAvatarUrl()!}

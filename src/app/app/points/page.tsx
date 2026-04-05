@@ -332,10 +332,10 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
           const label = `${n}x`;
 
           let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // bronze (x3–x4)
-          if (n >= 100) {
-            badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300'; // gold   (x100)
+          if (n >= 10) {
+            badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300'; // gold   (x10+)
           } else if (n >= 5) {
-            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200';    // silver (x5–x99)
+            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200';    // silver (x5–x9)
           }
 
           return (

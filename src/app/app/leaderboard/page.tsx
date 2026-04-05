@@ -66,7 +66,7 @@ const TierRingAvatar = ({
   // For X leaderboard: always use X profile picture
   // For Amy Points: use uploaded profile image, fallback to letter
   const imageSrc = useXProfile
-    ? (xUsername ? `https://unavatar.io/twitter/${xUsername}` : null)
+    ? (xUsername ? `https://unavatar.io/x/${xUsername}` : null)
     : profileImage;
 
   return (
