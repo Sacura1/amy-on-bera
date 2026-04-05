@@ -63,11 +63,10 @@ const TierRingAvatar = ({
     lg: 'w-14 h-14'
   };
 
-  // For X leaderboard: always use X profile picture
-  // For Amy Points: use uploaded profile image, fallback to letter
-  const imageSrc = useXProfile
-    ? (xUsername ? `https://unavatar.io/x/${xUsername}` : null)
-    : profileImage;
+  // X leaderboard: always use X profile picture
+  // Amy Points: use uploaded avatar, fallback to X profile picture
+  const xPic = xUsername ? `https://unavatar.io/x/${xUsername}` : null;
+  const imageSrc = useXProfile ? xPic : (profileImage || xPic);
 
   return (
     <div className={`${sizeClasses[size]} rounded-full ring-2 ring-offset-1 ring-offset-gray-900 ${tier.ringColor} overflow-hidden flex-shrink-0 bg-gray-700`}>
