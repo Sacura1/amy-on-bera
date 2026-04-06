@@ -1358,7 +1358,8 @@ Multiplier adjusts automatically as your position value changes.`}
                 { requirement: 'Level 2', multiplier: 'x5' },
                 { requirement: 'Level 3', multiplier: 'x10' },
               ]}
-              isActive={false}
+              isActive={(pointsData?.kodiakMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.kodiakMultiplier || 0) > 0 ? `${pointsData?.kodiakMultiplier}x` : undefined}
             />
 
             {/* 11. Dawn – Legacy */}
@@ -1372,8 +1373,8 @@ Multiplier adjusts automatically as your position value changes.`}
                 { requirement: '2 referrals', multiplier: 'x5' },
                 { requirement: '3+ referrals', multiplier: 'x10' },
               ]}
-              isActive={(pointsData?.dawnReferralMultiplier || 0) > 0}
-              currentMultiplier={(pointsData?.dawnReferralMultiplier || 0) > 0 ? `${pointsData?.dawnReferralMultiplier}x` : undefined}
+              isActive={(pointsData?.dawnMultiplier || 0) > 0}
+              currentMultiplier={(pointsData?.dawnMultiplier || 0) > 0 ? `${pointsData?.dawnMultiplier}x` : undefined}
             />
 
             {/* Ember – Legacy (inactive until 22 March 2026) */}
