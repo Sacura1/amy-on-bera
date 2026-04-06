@@ -29,6 +29,8 @@ interface CompletedRaffle {
   winner_wallet: string | null;
   ends_at: string | null;
   total_tickets: number;
+  user_tickets?: number;
+  winner_probability?: number;
 }
 
 export default function RafflesPage() {
@@ -62,13 +64,14 @@ export default function RafflesPage() {
 
   const fetchHistory = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/raffles/history`);
+      const walletParam = wallet ? `?wallet=${encodeURIComponent(wallet)}` : '';
+      const res = await fetch(`${API_BASE_URL}/api/raffles/history${walletParam}`);
       const data = await res.json();
       if (data.success) setHistory(data.data || []);
     } catch {
       // ignore
     }
-  }, []);
+  }, [wallet]);
 
   const fetchUserEntries = useCallback(async () => {
     if (!wallet) return;
@@ -184,7 +187,7 @@ export default function RafflesPage() {
 
         {/* Raffle History — always visible */}
         <section className="px-5 landscape:px-12 md:px-0">
-          <RaffleHistory history={history} />
+          <RaffleHistory history={history} wallet={wallet} />
         </section>
       </div>
 

@@ -411,7 +411,7 @@ const StrategyCard = React.memo(({ strategy, dynamicData }: { strategy: Strategy
               <div className="text-lg font-bold text-white">{displayTvl || '—'}</div>
             </div>
             <div>
-              <div className="text-xs text-gray-500 uppercase">APR (est.)</div>
+              <div className="text-xs text-gray-500 uppercase">APR (7D)</div>
               <div className="text-lg font-bold text-green-400">{displayApr}</div>
             </div>
           </div>

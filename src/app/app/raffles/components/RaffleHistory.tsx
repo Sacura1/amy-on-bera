@@ -10,10 +10,13 @@ interface CompletedRaffle {
   winner_wallet: string | null;
   ends_at: string | null;
   total_tickets: number;
+  user_tickets?: number;
+  winner_probability?: number;
 }
 
 interface RaffleHistoryProps {
   history: CompletedRaffle[];
+  wallet?: string | null;
 }
 
 function formatDate(ts: string | null) {
@@ -26,12 +29,18 @@ function formatDate(ts: string | null) {
   }) + ' — ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
 }
 
+function formatProbability(value?: number | null) {
+  const num = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+  return num.toFixed(1);
+}
+
 function truncateWallet(w: string) {
   return `${w.slice(0, 6)}...${w.slice(-4)}`;
 }
 
-export default function RaffleHistory({ history }: RaffleHistoryProps) {
+export default function RaffleHistory({ history, wallet }: RaffleHistoryProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const normalizedWallet = wallet?.trim().toLowerCase() || null;
 
   return (
     <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden max-w-4xl mx-auto" style={{ transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', willChange: 'transform' } as React.CSSProperties}>
@@ -62,8 +71,15 @@ export default function RaffleHistory({ history }: RaffleHistoryProps) {
             All completed raffles are recorded here for transparency
           </p>
           <div className="divide-y divide-gray-700/30">
-          {history.map((raffle) => (
-            <div key={raffle.id} className="flex items-center gap-4 p-4">
+          {history.map((raffle) => {
+            const winnerProbability = formatProbability(raffle.winner_probability);
+            const userTickets = raffle.user_tickets ?? 0;
+            const youWon =
+              normalizedWallet &&
+              raffle.winner_wallet &&
+              normalizedWallet === raffle.winner_wallet.toLowerCase();
+            return (
+              <div key={raffle.id} className="flex items-center gap-4 p-4">
               {raffle.image_url ? (
                 <img
                   src={raffle.image_url}
@@ -92,13 +108,21 @@ export default function RaffleHistory({ history }: RaffleHistoryProps) {
                     <p className="text-gray-500 text-xs">
                       Drawn: {formatDate(raffle.ends_at)} &middot; {raffle.total_tickets} tickets
                     </p>
+                    <p className="text-gray-400 text-xs font-semibold">Winner chance: {winnerProbability}%</p>
+                    <p className="text-gray-400 text-xs flex gap-2 font-semibold">
+                      <span>Your tickets: {userTickets}</span>
+                      {youWon && (
+                        <span className="text-green-400 font-semibold text-xs">You won!</span>
+                      )}
+                    </p>
                   </>
                 ) : (
                   <p className="text-red-400 text-xs font-bold">CANCELLED</p>
                 )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           </div>
           </>
           )}
