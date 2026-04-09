@@ -109,12 +109,14 @@ export default function RaffleHistory({ history, wallet }: RaffleHistoryProps) {
                       Drawn: {formatDate(raffle.ends_at)} &middot; {raffle.total_tickets} tickets
                     </p>
                     <p className="text-gray-400 text-xs font-semibold">Winner chance: {winnerProbability}%</p>
-                    <p className="text-gray-400 text-xs flex gap-2 font-semibold">
-                      <span>Your tickets: {userTickets}</span>
-                      {youWon && (
-                        <span className="text-green-400 font-semibold text-xs">You won!</span>
-                      )}
-                    </p>
+                    {raffle.user_tickets !== null && (
+                      <p className="text-gray-400 text-xs flex gap-2 font-semibold">
+                        <span>Your tickets: {userTickets}</span>
+                        {youWon && (
+                          <span className="text-green-400 font-semibold text-xs">You won!</span>
+                        )}
+                      </p>
+                    )}
                   </>
                 ) : (
                   <p className="text-red-400 text-xs font-bold">CANCELLED</p>

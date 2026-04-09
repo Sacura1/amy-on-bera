@@ -28,8 +28,8 @@ export async function GET() {
         'plskdk': backendData['plskdk'] || { tvl: 'TBC', apr: '0%' },
         'plsbera': backendData['plsbera'] || { tvl: 'TBC', apr: '0%' },
         'plvhedge': backendData['plvhedge'] || { tvl: 'TBC', apr: '0%' },
-        'honeybend': backendData['honeybend'] || { tvl: '$12.5M', apr: '8%' },
-        'stakedbera': backendData['stakedbera'] || { tvl: '$85M', apr: '21%' },
+        'honeybend': backendData['honeybend'] || { tvl: 'TBC', apr: '0%' },
+        'stakedbera': backendData['stakedbera'] || { tvl: 'TBC', apr: '0%' },
         lastUpdated: data.lastUpdated || new Date().toISOString()
       }
     });
@@ -44,8 +44,8 @@ export async function GET() {
         'jnrusd': { tvl: 'TBC', apr: '0%' },
         'snrusd': { tvl: 'TBC', apr: '0%' },
         'plskdk': { tvl: 'TBC', apr: '0%' },
-        'honeybend': { tvl: '$12.5M', apr: '8%' },
-        'stakedbera': { tvl: '$85M', apr: '21%' },
+        'honeybend': { tvl: 'TBC', apr: '0%' },
+        'stakedbera': { tvl: 'TBC', apr: '0%' },
         lastUpdated: new Date().toISOString()
       },
       error: 'Backend unavailable, using fallback values'
