@@ -4,6 +4,16 @@ const API_BASE_URL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:3001'
   : 'https://amy-production-fd10.up.railway.app';
 
+const ADMIN_WALLETS = (process.env.NEXT_PUBLIC_ADMIN_WALLETS || '')
+  .split(',').map(w => w.trim().toLowerCase()).filter(Boolean);
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY || '';
+
+function injectAdminKey(headers: HeadersInit, walletAddress: string | null) {
+  if (walletAddress && ADMIN_WALLETS.includes(walletAddress.toLowerCase()) && ADMIN_API_KEY) {
+    (headers as Record<string, string>)['x-admin-key'] = ADMIN_API_KEY;
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
@@ -26,11 +36,9 @@ export async function GET(
       headers['Accept'] = 'application/json';
     }
 
-    // Forward x-wallet-address for admin auth
+    // Inject admin key server-side — never trust the client to supply it
     const walletAddress = request.headers.get('x-wallet-address');
-    if (walletAddress) {
-      headers['x-wallet-address'] = walletAddress;
-    }
+    injectAdminKey(headers, walletAddress);
 
     const response = await fetch(url, { headers });
 
@@ -107,16 +115,14 @@ export async function POST(
         body = {};
       }
 
-      // Build headers, forwarding x-wallet-address for admin auth
+      // Build headers, injecting admin key server-side if wallet is an admin
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       };
 
       const walletAddress = request.headers.get('x-wallet-address');
-      if (walletAddress) {
-        headers['x-wallet-address'] = walletAddress;
-      }
+      injectAdminKey(headers, walletAddress);
 
       response = await fetch(url, {
         method: 'POST',
