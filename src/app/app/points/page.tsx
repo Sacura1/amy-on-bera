@@ -213,6 +213,7 @@ interface BadgeProps {
   description?: string;
   multipliers?: MultiplierTier[];
   currentMultiplier?: string;
+  tierName?: string;
   isActive: boolean;
   isPlaceholder?: boolean;
   actionUrl?: string;
@@ -220,7 +221,7 @@ interface BadgeProps {
   actionLinks?: ActionLink[];
 }
 
-const MultiplierBadge = ({ name, title, image, description, multipliers, currentMultiplier, isActive, isPlaceholder, actionUrl, actionLabel, actionLinks }: BadgeProps) => {
+const MultiplierBadge = ({ name, title, image, description, multipliers, currentMultiplier, tierName, isActive, isPlaceholder, actionUrl, actionLabel, actionLinks }: BadgeProps) => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupStyle, setPopupStyle] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const cardRef = React.useRef<HTMLDivElement>(null);
@@ -331,11 +332,12 @@ const MultiplierBadge = ({ name, title, image, description, multipliers, current
           const n = parseInt(currentMultiplier.replace(/[^0-9]/g, ''), 10);
           const label = `${n}x`;
 
-          let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // bronze (x3–x4)
-          if (n >= 10) {
-            badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300'; // gold   (x10+)
-          } else if (n >= 5) {
-            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200';    // silver (x5–x9)
+          const tier = tierName || (n >= 10 ? 'gold' : n >= 5 ? 'silver' : 'bronze');
+          let badgeColors = 'bg-amber-700 text-amber-200 border-amber-500'; // bronze
+          if (tier === 'gold') {
+            badgeColors = 'bg-yellow-500 text-yellow-950 border-yellow-300';
+          } else if (tier === 'silver') {
+            badgeColors = 'bg-slate-400 text-slate-900 border-slate-200';
           }
 
           return (
@@ -1163,6 +1165,7 @@ export default function PointsPage() {
               ]}
               isActive={lpData ? lpData.lpMultiplier > 1 : false}
               currentMultiplier={lpData && lpData.lpMultiplier > 1 ? `${lpData.lpMultiplier}x` : undefined}
+              tierName={lpData && lpData.lpMultiplier > 1 ? (lpData.lpMultiplier >= 100 ? 'gold' : lpData.lpMultiplier >= 10 ? 'silver' : 'bronze') : undefined}
               actionUrl="/app/earn"
               actionLabel="View on Earn"
             />
@@ -1180,6 +1183,7 @@ export default function PointsPage() {
               ]}
               isActive={!!tokenData?.amyusdt0?.isActive}
               currentMultiplier={tokenData?.amyusdt0?.multiplier && tokenData.amyusdt0.multiplier > 1 ? `${tokenData.amyusdt0.multiplier}x` : undefined}
+              tierName={tokenData?.amyusdt0?.multiplier && tokenData.amyusdt0.multiplier > 1 ? (tokenData.amyusdt0.multiplier >= 100 ? 'gold' : tokenData.amyusdt0.multiplier >= 10 ? 'silver' : 'bronze') : undefined}
               actionUrl="/app/earn"
               actionLabel="View on Earn"
             />
