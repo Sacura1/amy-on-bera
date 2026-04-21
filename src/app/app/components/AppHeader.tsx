@@ -193,6 +193,8 @@ const TILES: Tile[] = [
   { label: 'Exclusive\nAccess',    href: '/app/exclusive',   icon: <ExclusiveIcon /> },
   { label: 'Partners\n& Investors', href: '/app/partners',   icon: <PartnersIcon /> },
   { disabled: true },
+  { disabled: true },
+  { disabled: true },
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -375,8 +377,16 @@ export default function AppHeader() {
           {TILES.map((tile, i) => {
             if (tile.disabled) {
               return (
-                <div key={i} className="h-[64px] rounded-xl"
-                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }} />
+                <div key={i} className="flex items-center gap-2 h-[64px] w-full px-3 rounded-xl transition-all duration-200"
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(40,45,58,0.92), rgba(20,24,32,0.97))',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.25)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    cursor: 'not-allowed',
+                  }}>
+                  <div className="flex-shrink-0 w-7 h-7" />
+                  <span className="text-[11px] font-semibold leading-tight whitespace-pre-line" />
+                </div>
               );
             }
             return (

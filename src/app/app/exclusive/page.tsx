@@ -809,7 +809,7 @@ export default function ExclusivePage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <div className="relative py-16 md:py-24 text-center px-4">
+      <div className="relative py-8 md:py-12 text-center px-4">
         <div className="relative z-10">
           <h1 className="text-4xl md:text-5xl font-extrabold text-yellow-400 mb-3 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
             Exclusive Access. Better Opportunities.
@@ -826,7 +826,7 @@ export default function ExclusivePage() {
       {/* Available Perks */}
       <div className="max-w-6xl mx-auto px-4 pb-20">
         {/* Section header */}
-        <div className="flex justify-center items-center mb-8 gap-1">
+        <div className="flex justify-center items-center mb-6 gap-1">
           <div style={{ width: '126px', height: '2px', background: 'linear-gradient(to left, rgba(212,175,55,0.7), rgba(212,175,55,0))', borderRadius: '2px' }} />
           <div style={{
             background: 'rgba(10, 25, 22, 0.85)',
