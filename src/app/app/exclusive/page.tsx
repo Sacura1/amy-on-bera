@@ -589,11 +589,17 @@ function PerkCard({
               Allocation Full
             </div>
           ) : isDisplayOnly ? (
-            <div className="w-full py-3 rounded-xl text-center text-sm font-semibold flex items-center justify-center gap-2"
-              style={requiresGoldStyle}>
-              <span>🔒</span>
-              <span>Requires <strong>Gold</strong> (10,000 AMY)</span>
-            </div>
+            <button
+              disabled
+              className="w-full py-3 rounded-xl text-sm font-semibold cursor-not-allowed opacity-40"
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#aaaaaa',
+              }}
+            >
+              Deposit
+            </button>
           ) : locked ? (
             <div className="w-full py-3 rounded-xl text-center text-sm font-semibold flex items-center justify-center gap-2"
               style={requiresGoldStyle}>
