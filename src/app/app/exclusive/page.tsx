@@ -172,7 +172,7 @@ function JnrusdModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const [step, setStep] = useState<'amount' | 'done'>('amount');
+  const [step, setStep] = useState<'amount' | 'quote' | 'done'>('amount');
   const [usdeAmount, setUsdeAmount] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -180,10 +180,13 @@ function JnrusdModal({
 
   const account = useActiveAccount();
 
-  const units = usdeAmount ? (parseFloat(usdeAmount) / sharePrice).toFixed(6) : '—';
+  const parsedAmount = parseFloat(usdeAmount);
+  const units = parsedAmount > 0 ? (parsedAmount / sharePrice).toFixed(6) : '—';
 
   async function handleDeposit() {
     if (!account) { setError('Wallet not connected'); return; }
+    const escrowOk = escrowWallet && escrowWallet !== 'false' && escrowWallet.startsWith('0x') && escrowWallet.length === 42;
+    if (!escrowOk) { setError('Deposits are temporarily disabled. Please check back soon.'); return; }
     setLoading(true);
     setError('');
     try {
@@ -195,7 +198,7 @@ function JnrusdModal({
       const res = await fetch(`${API_BASE_URL}/api/exclusive/jnrusd/confirm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet, depositUsde: parseFloat(usdeAmount), depositTxHash: txHash }),
+        body: JSON.stringify({ wallet, depositUsde: parsedAmount, depositTxHash: txHash }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to confirm');
@@ -231,7 +234,7 @@ function JnrusdModal({
           {step === 'amount' && (
             <>
               <div>
-                <label className="text-sm text-gray-400 mb-1.5 block">Amount to deposit (USDE)</label>
+                <label className="text-sm text-gray-400 mb-1.5 block">USDE amount to deposit</label>
                 <input
                   type="number"
                   value={usdeAmount}
@@ -241,33 +244,51 @@ function JnrusdModal({
                   className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500"
                 />
               </div>
+              <div className="bg-gray-800/40 rounded-xl p-4 text-xs text-gray-400 space-y-1">
+                <div className="flex items-center gap-2"><span className="text-yellow-400">✦</span> Earn yield from the moment your position is active</div>
+                <div className="flex items-center gap-2"><span className="text-yellow-400">✦</span> Exit any time — 7-day cooldown before withdrawal</div>
+                <div className="flex items-center gap-2"><span className="text-yellow-400">✦</span> Position value grows as the share price increases</div>
+              </div>
+              {error && <p className="text-red-400 text-sm">{error}</p>}
+              <button
+                onClick={() => setStep('quote')}
+                disabled={!usdeAmount || parsedAmount <= 0}
+                className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
+              >
+                Review Deposit
+              </button>
+            </>
+          )}
 
-              {usdeAmount && parseFloat(usdeAmount) > 0 && (
-                <div className="bg-gray-800/60 rounded-xl p-4 space-y-2 text-sm">
-                  <div className="flex justify-between text-gray-400">
-                    <span>Entry share price</span>
-                    <span className="text-white">${sharePrice.toFixed(6)}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-400">
-                    <span>You deposit</span>
-                    <span className="text-white">{parseFloat(usdeAmount).toLocaleString()} USDE</span>
-                  </div>
-                  <div className="flex justify-between font-semibold border-t border-gray-700 pt-2 mt-2">
-                    <span className="text-gray-300">Unit quantity</span>
-                    <span className="text-yellow-400">{units} units</span>
-                  </div>
-                  <p className="text-gray-500 text-xs">Your position value grows as the share price increases.</p>
+          {step === 'quote' && (
+            <>
+              <div className="bg-gray-800/60 rounded-xl p-4 space-y-2 text-sm">
+                <div className="flex justify-between text-gray-400">
+                  <span>Current share price</span>
+                  <span className="text-white">${sharePrice.toFixed(6)}</span>
                 </div>
-              )}
+                <div className="flex justify-between text-gray-400">
+                  <span>USDE you deposit</span>
+                  <span className="text-white">{parsedAmount.toLocaleString()} USDE</span>
+                </div>
+                <div className="flex justify-between font-semibold border-t border-gray-700 pt-2 mt-2">
+                  <span className="text-gray-300">jnrUSD units you receive</span>
+                  <span className="text-yellow-400">{units} jnrUSD</span>
+                </div>
+                <p className="text-gray-500 text-xs mt-1">Units appreciate over time as the vault grows.</p>
+              </div>
 
               {error && <p className="text-red-400 text-sm">{error}</p>}
 
               <button
                 onClick={handleDeposit}
-                disabled={loading || !usdeAmount || parseFloat(usdeAmount) <= 0}
+                disabled={loading}
                 className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
               >
-                {loading ? 'Waiting for wallet...' : 'Deposit USDE'}
+                {loading ? 'Waiting for wallet...' : 'Confirm & Send USDE'}
+              </button>
+              <button onClick={() => { setStep('amount'); setError(''); }} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-colors">
+                Back
               </button>
             </>
           )}
@@ -337,6 +358,8 @@ function SailrModal({
 
   async function handlePurchase() {
     if (!quote || !account) { setError('Wallet not connected'); return; }
+    const escrowOk = quote.escrowWallet && quote.escrowWallet !== 'false' && quote.escrowWallet.startsWith('0x') && quote.escrowWallet.length === 42;
+    if (!escrowOk) { setError('Deposits are temporarily disabled. Please check back soon.'); return; }
     setLoading(true);
     setError('');
     try {
@@ -608,15 +631,22 @@ function PerkCard({
             </div>
           ) : (
             <button
-              disabled
-              className="w-full py-3 rounded-xl text-sm font-semibold cursor-not-allowed opacity-40"
+              onClick={onUnlock}
+              className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200"
               style={{
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',
                 color: '#aaaaaa',
               }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.1)';
+                (e.currentTarget as HTMLButtonElement).style.color = '#ffffff';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)';
+                (e.currentTarget as HTMLButtonElement).style.color = '#aaaaaa';
+              }}
             >
-              {/* ESCROW_DISABLED — restore disabled={false}, onClick={onUnlock}, and hover handlers once escrow wallet is set */}
               Deposit
             </button>
           )}

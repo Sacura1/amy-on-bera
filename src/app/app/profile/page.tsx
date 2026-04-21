@@ -1192,15 +1192,21 @@ function ProfilePageContent() {
           />
         )}
 
-        {/* Referral Section */}
-        {isEligible && (
+        {/* Referral Section — visible to all connected wallets */}
+        {walletAddress && (
           <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden">
             {/* Enter Referral Code */}
             {!usedReferralCode && (
               <div className="p-4 md:p-6 border-b border-gray-700/50">
-                <h3 className="text-lg md:text-xl font-bold text-yellow-400 mb-4">
-                  Enter a referral code here (cannot be changed):
+                <h3 className="text-lg md:text-xl font-bold text-yellow-400 mb-1">
+                  Got a referral code?
                 </h3>
+                <p className="text-gray-400 text-sm mb-1">
+                  Earn up to <span className="text-yellow-400 font-semibold">1,000 pts</span> by entering a referral code.
+                </p>
+                <p className="text-gray-400 text-xs mb-4">
+                  Unlock the full reward by holding 300+ $AMY for 7 days. Can only be entered once and cannot be changed.
+                </p>
                 <div className="flex gap-3 flex-col sm:flex-row">
                   <input
                     type="text"
@@ -1241,8 +1247,9 @@ function ProfilePageContent() {
             <div className="p-4 md:p-6 border-b border-gray-700/50">
               {!userReferralCode ? (
                 <div className="text-center">
-                  <p className="text-gray-300 mb-4">
-                    Generate your unique referral code to share with friends
+                  <p className="text-gray-300 mb-1 font-semibold">Share your referral code</p>
+                  <p className="text-gray-500 text-sm mb-4">
+                    Every verified user who signs up with your code counts as a referral and boosts your points multiplier.
                   </p>
                   <button
                     onClick={generateReferralCode}
@@ -1254,7 +1261,8 @@ function ProfilePageContent() {
                 </div>
               ) : (
                 <div>
-                  <h3 className="text-lg font-bold text-yellow-400 mb-3">Your Referral Code</h3>
+                  <h3 className="text-lg font-bold text-yellow-400 mb-1">Your Referral Code</h3>
+                  <p className="text-gray-500 text-sm mb-3">Share this code or link — every person who signs up with it boosts your points multiplier.</p>
                   <div className="flex items-center gap-3 flex-wrap">
                     <div className="bg-black/50 px-6 py-3 rounded-xl border-2 border-yellow-400/50 font-mono text-2xl text-yellow-300 font-bold tracking-wider">
                       {userReferralCode}
@@ -1279,11 +1287,10 @@ function ProfilePageContent() {
             {/* Completed Referrals */}
             <div className="p-4 md:p-6">
               <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 p-4 rounded-xl border-2 border-purple-500/30">
-                <h3 className="text-purple-400 font-bold text-sm mb-2">Completed referrals:</h3>
+                <h3 className="text-purple-400 font-bold text-sm mb-2">Your referrals</h3>
                 <p className="text-4xl md:text-5xl font-black text-white">{referralCount}</p>
                 <p className="text-gray-400 text-xs mt-2">
-                  To count as a referral, the new user must hold 300+ $AMY and have connected their
-                  wallet and X to the Amy website.
+                  Each invite earns you <span className="text-yellow-400 font-semibold">+50 pts</span>. An additional <span className="text-yellow-400 font-semibold">+450 pts</span> if they hold 300+ $AMY for 7 continuous days — and they also get <span className="text-yellow-400 font-semibold">+900 pts</span>.
                 </p>
               </div>
             </div>

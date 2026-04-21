@@ -24,7 +24,7 @@ const amyTheme = darkTheme({
   },
 });
 
-const PANEL_W = 280;
+const PANEL_W = 350;
 
 const HOLDER_RING: Record<string, string> = {
   platinum: 'border-cyan-400',
@@ -335,7 +335,7 @@ export default function AppHeader() {
 
       {/* ── Side panel ── */}
       <div
-        className={`fixed right-0 top-0 h-full z-50 flex flex-col w-full md:w-[280px] ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed right-0 top-0 h-full z-50 flex flex-col w-full md:w-[350px] ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         style={{
           backgroundColor: '#1c2028',
           backgroundImage: 'radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px)',

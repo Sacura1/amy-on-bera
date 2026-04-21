@@ -237,12 +237,12 @@ export default function ProfileCard({
   return (
     <div ref={cardRef} className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-5 relative">
 
-      <div className="flex gap-5 items-stretch">
+      <div className="flex flex-col sm:flex-row gap-5 items-stretch">
 
         {/* ── Left + Middle ── */}
         <div className="flex-1 min-w-0 flex flex-col gap-3">
 
-          {/* Top row: avatar + name/bio */}
+          {/* Top row: avatar + name/bio + edit button (mobile only) */}
           <div className="flex gap-4 items-center">
             <div className="flex-shrink-0">
               <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 ${HOLDER_RING[tier] ?? 'border-gray-600'} overflow-hidden`}>
@@ -255,18 +255,28 @@ export default function ProfileCard({
                 )}
               </div>
             </div>
-            <div className="min-w-0">
-              <h2 className="text-xl sm:text-2xl font-bold text-white truncate">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-white sm:truncate break-words">
                 {profile?.displayName || xUsername}
               </h2>
               {profile?.bio && (
                 <p className="text-gray-400 text-sm mt-1 line-clamp-2">{profile.bio}</p>
               )}
             </div>
+            {/* Edit button — mobile only */}
+            <button
+              onClick={onEditProfile}
+              className="sm:hidden flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 bg-black/50 text-gray-400"
+              title="Edit Profile"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            </button>
           </div>
 
-          {/* Badge slots — horizontal row below avatar */}
-          <div className="flex items-center gap-3 mt-2">
+          {/* Badge slots */}
+          <div className="flex items-center gap-1.5 sm:gap-2 py-1 mt-1 flex-wrap">
             {[1, 2, 3, 4, 5].map((slotNumber) => {
               const badge = getBadgeForSlot(slotNumber);
               return (
@@ -374,21 +384,24 @@ export default function ProfileCard({
           </div>
         </div>
 
+        {/* Mobile divider */}
+        <div className="block sm:hidden h-px bg-gray-700/40 -mx-5" />
+
         {/* ── Right panel ── */}
-        <div className="flex-shrink-0 flex items-stretch gap-2">
+        <div className="flex-shrink-0 flex sm:items-stretch gap-2 items-start justify-center sm:justify-start">
 
           {/* Amy Score + QR stacked */}
-          <div className="flex flex-col gap-0" style={{ minWidth: 130 }}>
+          <div className="flex flex-col gap-0 sm:flex-none" style={{ minWidth: 130, maxWidth: 160 }}>
 
             {/* Amy Score — no card, no edit button */}
-            <div className="px-4 pt-0 pb-1 text-center">
+            <div className="px-4 pt-0 pb-0 text-center">
               <p className="text-sm font-bold text-yellow-400 mb-1">Amy Score</p>
               <p className="text-5xl font-black text-yellow-400 leading-none">{amyScore}</p>
-              <p className="text-[11px] text-yellow-400 text-center mt-2 tracking-wider">— Monthly score —</p>
+              <p className="text-[11px] text-yellow-400 text-center mt-1 tracking-wider">—Monthly score—</p>
             </div>
 
-            {/* QR box — pulled up so Monthly score sits on top of it */}
-            <div data-qr-box className="relative rounded-xl px-2 py-2 flex flex-col items-center gap-1 -mt-3" style={{ border: '1px solid rgba(250,204,21,0.15)' }}>
+            {/* QR box */}
+            <div data-qr-box className="relative rounded-xl px-2 py-2 flex flex-col items-center gap-1 mt-2" style={{ border: '1px solid rgba(250,204,21,0.15)' }}>
               {/* Top center */}
               <span className="absolute top-0 left-1/2 -translate-x-1/2" style={{ width: '50%', height: '1px', background: 'linear-gradient(to right, transparent, rgba(250,204,21,0.95), transparent)', boxShadow: '0 0 8px rgba(250,204,21,0.6)' }} />
               {/* Bottom center */}
@@ -415,10 +428,21 @@ export default function ProfileCard({
               <p className="text-yellow-400 font-mono font-black text-lg tracking-[0.2em] text-center -mt-2">{userReferralCode}</p>
             )}
 
+            {/* Download button — mobile only, sits below QR */}
+            <button
+              onClick={handleDownload}
+              className="sm:hidden mt-2 mx-auto w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 bg-black/50 transition-colors"
+              title="Download card"
+              data-ignore-capture="true"
+            >
+              <svg className="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </button>
           </div>
 
-          {/* Button column: edit at top, download at bottom */}
-          <div className="flex flex-col justify-between" data-ignore-capture="true">
+          {/* Button column: desktop only */}
+          <div className="hidden sm:flex flex-col justify-between" data-ignore-capture="true">
             <button
               onClick={onEditProfile}
               className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 bg-black/50 hover:bg-white/10 transition-colors text-gray-400 hover:text-gray-200"
