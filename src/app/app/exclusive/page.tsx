@@ -618,7 +618,7 @@ function PerkCard({
                 (e.currentTarget as HTMLButtonElement).style.color = '#aaaaaa';
               }}
             >
-              Unlock
+              Deposit
             </button>
           )}
         </div>
