@@ -601,7 +601,6 @@ function PerkCard({
               <span>Requires <strong className="capitalize">{minTier}</strong> ({minTier === 'gold' ? '10,000' : '300'} AMY)</span>
             </div>
           ) : (
-            {/* ESCROW_DISABLED — re-enable onClick + hover handlers once escrow wallet is set */}
             <button
               disabled
               className="w-full py-3 rounded-xl text-sm font-semibold cursor-not-allowed opacity-40"
@@ -611,6 +610,7 @@ function PerkCard({
                 color: '#aaaaaa',
               }}
             >
+              {/* ESCROW_DISABLED — restore disabled={false}, onClick={onUnlock}, and hover handlers once escrow wallet is set */}
               Deposit
             </button>
           )}
