@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1",
+    "html-to-image": "^1.11.13",
+    "html2canvas": "^1.4.1",
     "next": "15.4.8",
+    "qrcode.react": "^4.2.0",
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "thirdweb": "^5"
