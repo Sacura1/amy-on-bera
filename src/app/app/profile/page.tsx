@@ -40,6 +40,7 @@ function ProfilePageContent() {
   const [totalMultiplier, setTotalMultiplier] = useState(1);
   const [pointsPerHour, setPointsPerHour] = useState(0);
   const [userPoints, setUserPoints] = useState(0);
+  const [amyScore, setAmyScore] = useState(0);
 
   // Social connection states
   const [discordConnected, setDiscordConnected] = useState(false);
@@ -184,6 +185,10 @@ function ProfilePageContent() {
           setTelegramUsername(telegram || null);
           setEmailConnected(!!socialData.data.email);
         }
+      });
+
+      safeFetchJson(`${API_BASE_URL}/api/amy-score/${walletAddress}`).then((scoreData) => {
+        if (scoreData?.success) setAmyScore(scoreData.score ?? 0);
       });
 
       safeFetchJson(profileUrl).then((profileData) => {
@@ -1119,6 +1124,8 @@ function ProfilePageContent() {
             balance={balance}
             totalMultiplier={totalMultiplier}
             pointsPerHour={pointsPerHour}
+            amyScore={amyScore}
+            userReferralCode={userReferralCode}
             onEditProfile={() => setShowProfileEditor(true)}
             onEditBadges={() => setShowBadgeSelector(true)}
             onConnectX={connectX}

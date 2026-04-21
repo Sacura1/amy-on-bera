@@ -75,7 +75,7 @@ interface TokenHoldingsData {
 }
 
 const TIERS: Record<string, TierInfo> = {
-  platinum: { minBalance: 100000, pointsPerHour: 10, name: 'Platinum', emoji: '💎' },
+  platinum: { minBalance: 50000, pointsPerHour: 10, name: 'Platinum', emoji: '💎' },
   gold: { minBalance: 10000, pointsPerHour: 5, name: 'Gold', emoji: '🥇' },
   silver: { minBalance: 1000, pointsPerHour: 3, name: 'Silver', emoji: '🥈' },
   bronze: { minBalance: 300, pointsPerHour: 1, name: 'Bronze', emoji: '🥉' },
@@ -877,7 +877,7 @@ export default function PointsPage() {
 
   // Get current tier based on balance
   const getCurrentTier = () => {
-    if (balance >= 100000) return TIERS.platinum;
+    if (balance >= 50000) return TIERS.platinum;
     if (balance >= 10000) return TIERS.gold;
     if (balance >= 1000) return TIERS.silver;
     if (balance >= 300) return TIERS.bronze;
@@ -1112,7 +1112,7 @@ export default function PointsPage() {
                 <span className={pointsData?.currentTier === 'platinum' ? 'text-3xl' : 'text-2xl'}>💎</span>
                 <div>
                   <span className={`font-bold text-cyan-300 ${pointsData?.currentTier === 'platinum' ? 'text-lg' : ''}`}>Platinum</span>
-                  <span className="text-gray-300 text-sm ml-2">– 100,000+ AMY</span>
+                  <span className="text-gray-300 text-sm ml-2">– 50,000+ AMY</span>
                 </div>
               </div>
               <p className="text-gray-400 text-sm mt-1">→ 10 Amy Points per hour</p>

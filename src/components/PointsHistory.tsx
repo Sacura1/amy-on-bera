@@ -25,14 +25,16 @@ interface HistoryEntry {
 
 // Category display names
 const CATEGORY_DISPLAY: Record<string, string> = {
-  DAILY_EARN: 'Daily Points Earned',
+  DAILY_EARN: 'Points Earned (This Hour)',
   GIVEAWAY: 'Amy Point Giveaway',
   COSMETIC_BACKGROUND_BUY: 'Background Purchase',
   COSMETIC_FILTER_BUY: 'Filter Purchase',
   RAFFLE_ENTRY: 'Raffle Entry',
   PREDICTION_WAGER: 'Prediction Market Wager',
   PREDICTION_PAYOUT: 'Prediction Market Payout',
-  PREDICTION_REFUND: 'Prediction Market Refund'
+  PREDICTION_REFUND: 'Prediction Market Refund',
+  REFERRAL_INITIAL: 'Referral Bonus',
+  REFERRAL_FULL: 'Referral Full Unlock'
 };
 
 // Category icons
@@ -44,7 +46,9 @@ const CATEGORY_ICONS: Record<string, string> = {
   RAFFLE_ENTRY: '-',
   PREDICTION_WAGER: '-',
   PREDICTION_PAYOUT: '+',
-  PREDICTION_REFUND: '+'
+  PREDICTION_REFUND: '+',
+  REFERRAL_INITIAL: '+',
+  REFERRAL_FULL: '+'
 };
 
 const HISTORY_PAGE_SIZE = 20;
@@ -136,7 +140,7 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
       return 'Purchase';
     }
     if (entry.reason === 'admin_bonus') return 'Amy Point Giveaway';
-    if (entry.reason === 'hourly_earning') return 'Daily Points Earned';
+    if (entry.reason === 'hourly_earning') return 'Points Earned (This Hour)';
     return entry.reason || 'Points Update';
   };
 

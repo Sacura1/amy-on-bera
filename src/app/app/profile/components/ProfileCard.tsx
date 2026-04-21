@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { API_BASE_URL } from '@/lib/constants';
 
 interface BadgeData {
@@ -46,6 +47,8 @@ interface ProfileCardProps {
   tier: string;
   totalMultiplier: number;
   pointsPerHour: number;
+  amyScore?: number;
+  userReferralCode?: string;
   onEditProfile: () => void;
   onEditBadges: () => void;
   onConnectX: () => void;
@@ -77,6 +80,8 @@ export default function ProfileCard({
   tier,
   totalMultiplier,
   pointsPerHour,
+  amyScore = 0,
+  userReferralCode,
   onEditProfile,
   onEditBadges,
   onConnectX,
@@ -85,11 +90,71 @@ export default function ProfileCard({
   onConnectEmail,
   socialConnections
 }: ProfileCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [equippedBadges, setEquippedBadges] = useState<EquippedBadge[]>([]);
   const [activeBadges, setActiveBadges] = useState<BadgeData[]>([]);
   const [socialData, setSocialData] = useState<SocialData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const referralUrl = userReferralCode
+    ? `${typeof window !== 'undefined' ? window.location.origin : 'https://amybera.com'}/app/profile?ref=${userReferralCode}`
+    : '';
+
+  const handleDownload = async () => {
+    if (!cardRef.current) return;
+    const { toPng } = await import('html-to-image');
+
+    // Temporarily hide capture-ignored elements
+    const ignored = cardRef.current.querySelectorAll('[data-ignore-capture]');
+    ignored.forEach(n => ((n as HTMLElement).style.display = 'none'));
+
+    // Temporarily unclip truncated/clamped text
+    const truncated = cardRef.current.querySelectorAll('.truncate');
+    const clamped = cardRef.current.querySelectorAll('.line-clamp-2');
+    truncated.forEach(n => {
+      const el = n as HTMLElement;
+      el.dataset.origOverflow = el.style.overflow;
+      el.style.overflow = 'visible';
+      el.style.textOverflow = 'unset';
+      el.style.whiteSpace = 'normal';
+    });
+    clamped.forEach(n => {
+      const el = n as HTMLElement;
+      el.dataset.origDisplay = el.style.display;
+      el.style.display = 'block';
+      el.style.overflow = 'visible';
+      (el.style as CSSStyleDeclaration & { webkitLineClamp: string }).webkitLineClamp = 'unset';
+    });
+
+    try {
+      const dataUrl = await toPng(cardRef.current, {
+        pixelRatio: 2,
+        backgroundColor: '#111827',
+        style: { backdropFilter: 'none' },
+      });
+
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `amy-profile-${xUsername}.png`;
+      a.click();
+    } finally {
+      // Restore everything
+      ignored.forEach(n => ((n as HTMLElement).style.display = ''));
+      truncated.forEach(n => {
+        const el = n as HTMLElement;
+        el.style.overflow = el.dataset.origOverflow || '';
+        el.style.textOverflow = '';
+        el.style.whiteSpace = '';
+      });
+      clamped.forEach(n => {
+        const el = n as HTMLElement;
+        el.style.display = el.dataset.origDisplay || '';
+        el.style.overflow = '';
+        (el.style as CSSStyleDeclaration & { webkitLineClamp: string }).webkitLineClamp = '';
+      });
+    }
+  };
 
   const { discordConnected, telegramConnected, emailConnected } = socialConnections || {};
 
@@ -170,56 +235,45 @@ export default function ProfileCard({
   }
 
   return (
-    <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6 relative">
-      {/* Edit Profile Button */}
-      <button
-        onClick={onEditProfile}
-        className="absolute top-4 right-4 p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 transition-colors"
-        title="Edit Profile"
-      >
-        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-        </svg>
-      </button>
+    <div ref={cardRef} className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-5 relative">
 
-      <div className="flex flex-col sm:flex-row gap-6">
-        {/* Avatar */}
-        <div className="flex-shrink-0">
-          <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 ${HOLDER_RING[tier] ?? 'border-gray-600'} overflow-hidden`}>
-            {getAvatarUrl() ? (
-              <img
-                src={getAvatarUrl()!}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                <span className="text-4xl">🐻</span>
+      <div className="flex gap-5 items-stretch">
+
+        {/* ── Left + Middle ── */}
+        <div className="flex-1 min-w-0 flex flex-col gap-3">
+
+          {/* Top row: avatar + name/bio */}
+          <div className="flex gap-4 items-center">
+            <div className="flex-shrink-0">
+              <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 ${HOLDER_RING[tier] ?? 'border-gray-600'} overflow-hidden`}>
+                {getAvatarUrl() ? (
+                  <img src={getAvatarUrl()!} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                    <span className="text-4xl">🐻</span>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-xl sm:text-2xl font-bold text-white truncate">
+                {profile?.displayName || xUsername}
+              </h2>
+              {profile?.bio && (
+                <p className="text-gray-400 text-sm mt-1 line-clamp-2">{profile.bio}</p>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Profile Info */}
-        <div className="flex-1 min-w-0">
-          <h2 className="text-xl sm:text-2xl font-bold text-white truncate">
-            {profile?.displayName || xUsername}
-          </h2>
-          {profile?.bio && (
-            <p className="text-gray-400 text-sm mt-1 line-clamp-2">{profile.bio}</p>
-          )}
-
-          {/* Multiplier Badge Slots */}
-          <div className="flex gap-3 my-3">
+          {/* Badge slots — horizontal row below avatar */}
+          <div className="flex items-center gap-3 mt-2">
             {[1, 2, 3, 4, 5].map((slotNumber) => {
               const badge = getBadgeForSlot(slotNumber);
               return (
                 <div
                   key={slotNumber}
-                  className={`relative w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${
-                    badge
-                      ? `bg-white ${badgeRing(badge)}`
-                      : 'border-2 border-gray-600/50 bg-gray-800/50 border-dashed'
+                  className={`w-9 h-9 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden ${
+                    badge ? `bg-white ${badgeRing(badge)}` : 'border-2 border-gray-600/50 bg-gray-800/50 border-dashed'
                   }`}
                 >
                   {badge ? (
@@ -232,16 +286,16 @@ export default function ProfileCard({
             })}
             <button
               onClick={onEditBadges}
-              className="w-10 h-10 rounded-full border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors"
+              className="w-9 h-9 flex-shrink-0 rounded-full border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors"
               title="Edit Badges"
             >
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
             </button>
           </div>
 
-          {/* Stats Row */}
+          {/* Stats */}
           <div className="flex flex-wrap gap-4 text-sm">
             <div>
               <span className="text-gray-400">AMY:</span>{' '}
@@ -257,87 +311,136 @@ export default function ProfileCard({
             </div>
           </div>
 
-          {/* Social Connections */}
-          <div className="flex flex-wrap gap-2 mt-3">
+          {/* Social connections — pushed to bottom */}
+          <div className="flex flex-wrap gap-2 mt-auto" data-socials>
+
             {/* X/Twitter */}
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-700/50 text-sm">
-              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <div className="px-2 py-1 rounded-lg bg-gray-700/50 text-sm whitespace-nowrap">
+              <svg className="w-4 h-4 text-white inline-block align-middle" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
               </svg>
-              <span className="text-white">@{xUsername}</span>
+              <span className="inline-block align-middle ml-1.5 text-white">@{xUsername}</span>
             </div>
 
             {/* Discord */}
             {discordConnected ? (
-              <div
-                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#5865F2]/20 text-sm cursor-default"
-                title={socialData?.discordUsername && socialData.discordUsername !== 'connected' ? `@${socialData.discordUsername}` : 'Discord connected'}
-              >
-                <svg className="w-4 h-4 text-[#5865F2]" viewBox="0 0 24 24" fill="currentColor">
+              <div className="px-2 py-1 rounded-lg bg-[#5865F2]/20 text-sm whitespace-nowrap cursor-default"
+                title={socialData?.discordUsername && socialData.discordUsername !== 'connected' ? `@${socialData.discordUsername}` : 'Discord connected'}>
+                <svg className="w-4 h-4 text-[#5865F2] inline-block align-middle" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
                 </svg>
-                <span className="text-white">{socialData?.discordUsername && socialData.discordUsername !== 'connected' ? socialData.discordUsername : 'Connected'}</span>
+                <span className="inline-block align-middle ml-1.5 text-white">{socialData?.discordUsername && socialData.discordUsername !== 'connected' ? socialData.discordUsername : 'Connected'}</span>
               </div>
             ) : (
-              <button
-                onClick={onConnectDiscord}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#5865F2]/20 hover:bg-[#5865F2]/30 text-sm transition-colors"
-              >
-                <svg className="w-4 h-4 text-[#5865F2]" viewBox="0 0 24 24" fill="currentColor">
+              <button onClick={onConnectDiscord} className="px-2 py-1 rounded-lg bg-[#5865F2]/20 hover:bg-[#5865F2]/30 text-sm whitespace-nowrap transition-colors">
+                <svg className="w-4 h-4 text-[#5865F2] inline-block align-middle" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
                 </svg>
-                <span className="text-gray-400">Connect</span>
+                <span className="inline-block align-middle ml-1.5 text-gray-400">Connect</span>
               </button>
             )}
 
             {/* Telegram */}
             {telegramConnected ? (
-              <div
-                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#0088cc]/20 text-sm cursor-default"
-                title={socialData?.telegramUsername && socialData.telegramUsername !== 'connected' ? `@${socialData.telegramUsername}` : 'Telegram connected'}
-              >
-                <svg className="w-4 h-4 text-[#0088cc]" viewBox="0 0 24 24" fill="currentColor">
+              <div className="px-2 py-1 rounded-lg bg-[#0088cc]/20 text-sm whitespace-nowrap cursor-default"
+                title={socialData?.telegramUsername && socialData.telegramUsername !== 'connected' ? `@${socialData.telegramUsername}` : 'Telegram connected'}>
+                <svg className="w-4 h-4 text-[#0088cc] inline-block align-middle" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                 </svg>
-                <span className="text-white">{socialData?.telegramUsername && socialData.telegramUsername !== 'connected' ? socialData.telegramUsername : 'Connected'}</span>
+                <span className="inline-block align-middle ml-1.5 text-white">{socialData?.telegramUsername && socialData.telegramUsername !== 'connected' ? socialData.telegramUsername : 'Connected'}</span>
               </div>
             ) : (
-              <button
-                onClick={onConnectTelegram}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#0088cc]/20 hover:bg-[#0088cc]/30 text-sm transition-colors"
-              >
-                <svg className="w-4 h-4 text-[#0088cc]" viewBox="0 0 24 24" fill="currentColor">
+              <button onClick={onConnectTelegram} className="px-2 py-1 rounded-lg bg-[#0088cc]/20 hover:bg-[#0088cc]/30 text-sm whitespace-nowrap transition-colors">
+                <svg className="w-4 h-4 text-[#0088cc] inline-block align-middle" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                 </svg>
-                <span className="text-gray-400">Connect</span>
+                <span className="inline-block align-middle ml-1.5 text-gray-400">Connect</span>
               </button>
             )}
 
             {/* Email - Commented out until SendGrid implementation is ready
             {emailConnected ? (
-              <div
-                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-green-500/20 text-sm cursor-default"
-                title={socialData?.email || 'Email verified'}
-              >
-                <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-green-500/20 text-sm cursor-default" title={socialData?.email || 'Email verified'}>
+                <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                 <span className="text-green-400">Verified</span>
               </div>
             ) : (
-              <button
-                onClick={onConnectEmail}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-sm transition-colors"
-              >
-                <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+              <button onClick={onConnectEmail} className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-sm transition-colors">
+                <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                 <span className="text-gray-400">Add Email</span>
               </button>
             )}
             */}
           </div>
         </div>
+
+        {/* ── Right panel ── */}
+        <div className="flex-shrink-0 flex items-stretch gap-2">
+
+          {/* Amy Score + QR stacked */}
+          <div className="flex flex-col gap-0" style={{ minWidth: 130 }}>
+
+            {/* Amy Score — no card, no edit button */}
+            <div className="px-4 pt-0 pb-1 text-center">
+              <p className="text-sm font-bold text-yellow-400 mb-1">Amy Score</p>
+              <p className="text-5xl font-black text-yellow-400 leading-none">{amyScore}</p>
+              <p className="text-[11px] text-yellow-400 text-center mt-2 tracking-wider">— Monthly score —</p>
+            </div>
+
+            {/* QR box — pulled up so Monthly score sits on top of it */}
+            <div data-qr-box className="relative rounded-xl px-2 py-2 flex flex-col items-center gap-1 -mt-3" style={{ border: '1px solid rgba(250,204,21,0.15)' }}>
+              {/* Top center */}
+              <span className="absolute top-0 left-1/2 -translate-x-1/2" style={{ width: '50%', height: '1px', background: 'linear-gradient(to right, transparent, rgba(250,204,21,0.95), transparent)', boxShadow: '0 0 8px rgba(250,204,21,0.6)' }} />
+              {/* Bottom center */}
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2" style={{ width: '50%', height: '1px', background: 'linear-gradient(to right, transparent, rgba(250,204,21,0.95), transparent)', boxShadow: '0 0 8px rgba(250,204,21,0.6)' }} />
+              {/* Left center */}
+              <span className="absolute left-0 top-1/2 -translate-y-1/2" style={{ height: '50%', width: '1px', background: 'linear-gradient(to bottom, transparent, rgba(250,204,21,0.95), transparent)', boxShadow: '0 0 8px rgba(250,204,21,0.6)' }} />
+              {/* Right center */}
+              <span className="absolute right-0 top-1/2 -translate-y-1/2" style={{ height: '50%', width: '1px', background: 'linear-gradient(to bottom, transparent, rgba(250,204,21,0.95), transparent)', boxShadow: '0 0 8px rgba(250,204,21,0.6)' }} />
+
+              {userReferralCode && referralUrl ? (
+                <>
+                  <div className="rounded-lg overflow-hidden">
+                    <QRCodeCanvas value={referralUrl} size={140} bgColor="#ffffff" fgColor="#000000" includeMargin />
+                  </div>
+                  <p className="text-[11px] text-yellow-400 font-mono tracking-widest mt-1">Join via my code</p>
+                </>
+              ) : (
+                <p className="text-[10px] text-gray-500 py-6">No referral code yet</p>
+              )}
+            </div>
+
+            {/* Referral code — outside, flush against QR card */}
+            {userReferralCode && (
+              <p className="text-yellow-400 font-mono font-black text-lg tracking-[0.2em] text-center -mt-2">{userReferralCode}</p>
+            )}
+
+          </div>
+
+          {/* Button column: edit at top, download at bottom */}
+          <div className="flex flex-col justify-between" data-ignore-capture="true">
+            <button
+              onClick={onEditProfile}
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 bg-black/50 hover:bg-white/10 transition-colors text-gray-400 hover:text-gray-200"
+              title="Edit Profile"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            </button>
+            <button
+              onClick={handleDownload}
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 bg-black/50 hover:bg-white/10 transition-colors"
+              title="Download card"
+            >
+              <svg className="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </button>
+          </div>
+
+        </div>
+
       </div>
     </div>
   );
