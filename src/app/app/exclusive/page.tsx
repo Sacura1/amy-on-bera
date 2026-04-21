@@ -56,13 +56,20 @@ interface JnrusdPosition {
 
 interface SailrPurchase {
   purchase_id: string;
+  quote_id?: string;
+  wallet?: string;
+  qualification_tier?: string;
   honey_amount_input: number;
   sail_amount_output: number;
+  sail_margin_to_amy?: number;
+  payment_tx_hash?: string;
   payment_confirmed_at_utc: string;
   earning_start_date_utc: string;
   lock_end_date_utc: string;
   purchase_status: string;
   live_sail_price: number;
+  discount_percent?: number;
+  discounted_sail_price?: number;
 }
 
 type ModalType = 'jnrusd' | 'sailr' | null;
@@ -908,7 +915,7 @@ export default function ExclusivePage() {
             assetSubtitle="Priority Access"
             description={
               <>
-                <p>Skip the queue. Get priority access to Amy's partner network.</p>
+                <p>Skip the queue. Get priority access to Amy&apos;s partner network.</p>
                 <p className="mt-2">Faster answers. Better outcomes. Routed through Amy directly.</p>
               </>
             }
