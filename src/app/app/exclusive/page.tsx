@@ -601,21 +601,14 @@ function PerkCard({
               <span>Requires <strong className="capitalize">{minTier}</strong> ({minTier === 'gold' ? '10,000' : '300'} AMY)</span>
             </div>
           ) : (
+            {/* ESCROW_DISABLED — re-enable onClick + hover handlers once escrow wallet is set */}
             <button
-              onClick={onUnlock}
-              className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200"
+              disabled
+              className="w-full py-3 rounded-xl text-sm font-semibold cursor-not-allowed opacity-40"
               style={{
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',
                 color: '#aaaaaa',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.1)';
-                (e.currentTarget as HTMLButtonElement).style.color = '#ffffff';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)';
-                (e.currentTarget as HTMLButtonElement).style.color = '#aaaaaa';
               }}
             >
               Deposit
