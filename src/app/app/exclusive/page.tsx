@@ -873,6 +873,221 @@ function JnrusdInfoModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── VIP Partner Info Modal ──────────────────────────────────────────────────
+function VipPartnerInfoModal({ onClose }: { onClose: () => void }) {
+  const goldBg = 'rgba(212,175,55,0.12)';
+  const goldBorder = '1px solid rgba(212,175,55,0.3)';
+  const iconBox = { background: goldBg, border: goldBorder, borderRadius: '10px', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 as const };
+
+  const features = [
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round"/></svg>, title: 'Direct Access', desc: 'Get routed into real partner teams, not public channels.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: 'Priority Handling', desc: 'Your requests are surfaced and handled faster.' },
+    { icon: <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>, title: 'Early Opportunities', desc: 'Access new products, launches, and whitelists first.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5" strokeLinecap="round"/><line x1="12" y1="19" x2="12" y2="22" strokeLinecap="round"/><line x1="2" y1="12" x2="5" y2="12" strokeLinecap="round"/><line x1="19" y1="12" x2="22" y2="12" strokeLinecap="round"/></svg>, title: 'Expert Guidance', desc: 'Get help on how to allocate and position capital.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/></svg>, title: 'For Gold+ Holders', desc: 'Exclusive to AMY Gold and Platinum holders.' },
+  ];
+
+  const accessItems = [
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round"/></svg>, title: 'Partner Introductions', desc: 'Direct introductions to protocol teams, allocators and operators.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><rect x="5" y="11" width="14" height="11" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" strokeLinecap="round"/></svg>, title: 'Private Opportunities', desc: 'Access to capacity-limited deals, rounds, and allocations.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinejoin="round"/></svg>, title: 'Faster Support', desc: 'Get faster responses and resolution through direct channels.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>, title: 'Early Access', desc: 'Be first in line for new products, launches and whitelists.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5" strokeLinecap="round"/><line x1="12" y1="19" x2="12" y2="22" strokeLinecap="round"/><line x1="2" y1="12" x2="5" y2="12" strokeLinecap="round"/><line x1="19" y1="12" x2="22" y2="12" strokeLinecap="round"/></svg>, title: 'Strategic Guidance', desc: 'Advice on how to structure and position your capital effectively.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>, title: 'Ongoing Relationship', desc: 'Build real relationships that open doors over the long term.' },
+  ];
+
+  const exampleSteps = [
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>, label: '1. You Request', desc: 'You tell Amy what you\'re looking for or where you want to deploy capital.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" strokeLinecap="round"/></svg>, label: '2. Amy Reviews', desc: 'Amy reviews your request based on your tier, intent and relevance.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round"/></svg>, label: '3. Routed to Partner', desc: 'Amy routes your request to the most relevant partner team.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinejoin="round"/></svg>, label: '4. Partner Connects', desc: 'The partner reaches out directly or provides access and information.' },
+    { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, label: '5. You Take Action', desc: 'You get the opportunity or guidance you need to deploy capital with confidence.' },
+  ];
+
+  const keyDetails = [
+    { label: 'Access Type', val: 'Request-based and curated' },
+    { label: 'Not Guaranteed', val: 'Not all requests are approved' },
+    { label: 'No Custody', val: 'Amy does not custody or manage your funds' },
+    { label: 'Capital Focused', val: 'Designed for users deploying meaningful capital' },
+    { label: 'Tier Based', val: 'Priority depends on your AMY holding tier and context' },
+    { label: 'No Obligation', val: 'Access does not require you to take any action' },
+    { label: 'Availability', val: 'Subject to partner capacity and opportunity availability' },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start md:items-center justify-center p-4 md:p-6 overflow-y-auto bg-black/75 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="relative w-full max-w-6xl max-h-[92vh] overflow-y-auto rounded-2xl shadow-2xl"
+        style={{ background: '#13151a', border: '1px solid rgba(255,255,255,0.08)' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Close */}
+        <button onClick={onClose} className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-lg font-bold">✕</button>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 px-4 sm:px-6 py-4 pr-12" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ ...iconBox, padding: '10px' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.8" className="w-6 h-6">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round"/>
+            </svg>
+          </div>
+          <div className="min-w-0">
+            <h2 className="font-black text-lg sm:text-2xl leading-tight" style={{ color: gold }}>About VIP Partner Access</h2>
+            <p className="text-gray-400 text-xs sm:text-sm mt-0.5 leading-snug">Everything you need to know about how VIP Partner Access works through Amy.</p>
+          </div>
+        </div>
+
+        {/* Feature bar */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 px-4 sm:px-6 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.3)' }}>
+          {features.map(f => (
+            <div key={f.title} className="flex flex-col gap-1">
+              <span className="mb-0.5" style={{ color: gold }}>{f.icon}</span>
+              <p className="font-bold text-xs" style={{ color: gold }}>{f.title}</p>
+              <p className="text-gray-400 text-xs leading-snug">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Main grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+
+          {/* Left col */}
+          <div className="flex flex-col gap-4">
+
+            {/* How It Works */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="font-bold text-base mb-3" style={{ color: gold }}>How It Works</h4>
+              <ol className="space-y-2">
+                {[
+                  'You qualify through your AMY holding tier (Gold or Platinum).',
+                  'You submit a request through Amy with details of your needs.',
+                  'Amy reviews and routes your request to the right partner team.',
+                  'The partner connects with you directly or provides access.',
+                  'Amy may support with guidance on positioning and next steps.',
+                ].map((step, i) => (
+                  <li key={i} className="flex gap-3 items-start text-sm text-gray-300">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: goldBg, color: gold, border: goldBorder }}>{i + 1}</span>
+                    <span className="leading-snug pt-0.5">{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            {/* Example flow */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="font-bold text-base mb-4" style={{ color: gold }}>Example: How It Works in Practice</h4>
+              {/* Mobile: vertical list */}
+              <div className="flex flex-col gap-3 md:hidden">
+                {exampleSteps.map((step, i) => (
+                  <div key={i} className="flex gap-3 items-start">
+                    <div style={{ ...iconBox, width: 34, height: 34, borderRadius: '50%', flexShrink: 0, color: gold }}>{step.icon}</div>
+                    <div>
+                      <p className="font-bold text-xs leading-tight mb-0.5" style={{ color: gold }}>{step.label}</p>
+                      <p className="text-gray-400 text-xs leading-snug">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Desktop: horizontal flow — each step gets equal 1/5 width */}
+              <div className="hidden md:grid grid-cols-5 gap-1">
+                {exampleSteps.map((step, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1.5 relative">
+                    {i < exampleSteps.length - 1 && (
+                      <div className="absolute top-[17px] left-[calc(50%+17px)] right-[-50%] pointer-events-none" style={{ borderTop: '2px dashed rgba(212,175,55,0.35)', zIndex: 0 }} />
+                    )}
+                    <div style={{ ...iconBox, width: 34, height: 34, borderRadius: '50%', color: gold, zIndex: 1, flexShrink: 0 }}>{step.icon}</div>
+                    <p className="font-bold text-[9px] text-center leading-tight" style={{ color: gold }}>{step.label}</p>
+                    <p className="text-gray-400 text-[9px] text-center leading-snug">{step.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Who Manages What */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="font-bold text-base mb-3" style={{ color: gold }}>Who Manages What</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex gap-3">
+                  <div style={iconBox}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.8" className="w-5 h-5"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/></svg>
+                  </div>
+                  <div>
+                    <p className="font-bold text-xs mb-1" style={{ color: gold }}>Amy&apos;s Responsibilities</p>
+                    <p className="text-gray-400 text-[11px] leading-snug">Eligibility gating, request intake, partner routing, context sharing, prioritisation, and follow-up.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div style={iconBox}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.8" className="w-5 h-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round"/></svg>
+                  </div>
+                  <div>
+                    <p className="font-bold text-xs mb-1" style={{ color: gold }}>Partners&apos; Responsibilities</p>
+                    <p className="text-gray-400 text-[11px] leading-snug">Provide access, information, opportunities, and ongoing communication.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right col */}
+          <div className="flex flex-col gap-4">
+
+            {/* What You Get Access To */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="font-bold text-base mb-3" style={{ color: gold }}>What You Get Access To</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {accessItems.map(item => (
+                  <div key={item.title} className="flex gap-2.5">
+                    <div style={{ ...iconBox, flexShrink: 0, alignSelf: 'flex-start', color: gold }}>{item.icon}</div>
+                    <div>
+                      <p className="font-semibold text-white text-xs mb-0.5">{item.title}</p>
+                      <p className="text-gray-400 text-[11px] leading-snug">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Key Details */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="font-bold text-base mb-3" style={{ color: gold }}>Key Details</h4>
+              <ul className="space-y-2">
+                {keyDetails.map(item => (
+                  <li key={item.label} className="flex items-start gap-2 text-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: gold }}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" strokeLinecap="round"/><polyline points="22 4 12 14.01 9 11.01" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <span className="text-gray-300 text-xs"><span className="font-semibold text-white">{item.label}:</span> {item.val}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Important */}
+            <div className="rounded-xl p-4 flex gap-3" style={{ background: goldBg, border: goldBorder }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.8" className="w-5 h-5 flex-shrink-0 mt-0.5"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/></svg>
+              <div>
+                <p className="font-bold text-xs mb-1" style={{ color: gold }}>Important</p>
+                <p className="text-gray-300 text-xs leading-snug">Access is provided at Amy&apos;s discretion based on partner capacity, relevance, and user profile. This is not financial advice. Always do your own research.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 gap-2 sm:gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(212,175,55,0.04)' }}>
+          <div className="flex items-start gap-2 text-xs text-gray-400">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: gold }}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" strokeLinecap="round"/></svg>
+            <span>VIP Partner Access connects you to opportunities and people that are not available through standard channels.</span>
+          </div>
+          <a href="https://amyonbera.com" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold whitespace-nowrap transition-colors pl-6 sm:pl-0" style={{ color: gold }}>
+            Learn more about risks →
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PerkCard({
   minTier,
   title,
@@ -1033,11 +1248,27 @@ function PerkCard({
 
 // ─── Positions Dashboard ──────────────────────────────────────────────────────
 
-function PositionsDashboard({ wallet, refreshTrigger }: { wallet: string; refreshTrigger?: number }) {
+const gold = '#d4af37';
+const goldBgSm = 'rgba(212,175,55,0.12)';
+const goldBorderSm = '1px solid rgba(212,175,55,0.3)';
+
+function TierPill({ tier }: { tier: string }) {
+  const upper = (tier || '').toUpperCase();
+  const isBronze = upper === 'BRONZE';
+  return (
+    <span className="text-[10px] font-black tracking-widest px-2 py-0.5 rounded-full"
+      style={{ background: isBronze ? 'rgba(180,120,60,0.25)' : 'rgba(212,175,55,0.2)', color: isBronze ? '#cd7f32' : gold, border: isBronze ? '1px solid rgba(180,120,60,0.4)' : `1px solid rgba(212,175,55,0.4)` }}>
+      {upper}
+    </span>
+  );
+}
+
+function PositionsDashboard({ wallet, refreshTrigger, sharePrice }: { wallet: string; refreshTrigger?: number; sharePrice: number }) {
   const [positions, setPositions] = useState<JnrusdPosition[]>([]);
   const [purchases, setPurchases] = useState<SailrPurchase[]>([]);
   const [loading, setLoading] = useState(true);
   const [exitingId, setExitingId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'sailr' | 'jnrusd'>('all');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -1070,107 +1301,244 @@ function PositionsDashboard({ wallet, refreshTrigger }: { wallet: string; refres
     }
   }
 
+  if (loading) return null;
+
   const activePositions = positions.filter(p => p.status !== 'withdrawn');
   const activePurchases = purchases.filter(p => p.purchase_status !== 'cancelled');
+  const hasPositions = activePositions.length > 0 || activePurchases.length > 0;
+  const totalCount = activePositions.length + activePurchases.length;
+  const totalValue =
+    activePurchases.reduce((s, p) => s + parseFloat(String(p.honey_amount_input)), 0) +
+    activePositions.reduce((s, p) => s + parseFloat(String(p.deposit_usde)), 0);
 
-  if (loading) return null;
-  if (activePositions.length === 0 && activePurchases.length === 0) return null;
+  const visiblePurchases = filter === 'jnrusd' ? [] : activePurchases;
+  const visiblePositions = filter === 'sailr' ? [] : activePositions;
+
+  const fmtDate = (d: string) => new Date(d).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <div className="mt-12 space-y-8">
-      {/* Section header — same style as Available Perks */}
-      <div className="flex justify-center items-center gap-1">
-        <div style={{ width: '126px', height: '2px', background: 'linear-gradient(to left, rgba(212,175,55,0.7), rgba(212,175,55,0))', borderRadius: '2px' }} />
-        <div style={{ background: 'rgba(10,25,22,0.85)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '10px 28px', whiteSpace: 'nowrap', boxShadow: '0 10px 40px rgba(0,0,0,0.4)' }}>
-          <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '16px' }}>Your Positions</span>
-        </div>
-        <div style={{ width: '126px', height: '2px', background: 'linear-gradient(to right, rgba(212,175,55,0.7), rgba(212,175,55,0))', borderRadius: '2px' }} />
-      </div>
+    <div className="mt-10 max-w-6xl mx-auto px-4 pb-20">
+      <div style={{ background: 'rgba(13,18,26,0.97)', border: '1px solid rgba(212,175,55,0.22)', borderRadius: '20px', boxShadow: '0 0 60px rgba(212,175,55,0.05), 0 24px 64px rgba(0,0,0,0.6)' }} className="p-4 sm:p-6">
 
-      {activePurchases.length > 0 && (
-        <div>
-          <p className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-3 px-1">SAIL.r Allocations</p>
-          <div className="space-y-3">
-            {activePurchases.map(p => (
-              <div key={p.purchase_id} style={{ background: 'rgba(10,25,22,0.85)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.35)' }}
-                className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div style={{ background: 'rgba(0,0,0,0.35)', borderRadius: '12px', padding: '8px' }}>
-                    <Image src="/sail.png" alt="SAIL.r" width={36} height={36} className="rounded-full" />
-                  </div>
-                  <div>
-                    <p className="text-white font-bold text-lg">{parseFloat(String(p.sail_amount_output)).toFixed(4)} <span className="text-yellow-400">SAIL.r</span></p>
-                    <p className="text-xs text-gray-400 mt-0.5">Bought at ${parseFloat(String(p.discounted_sail_price)).toFixed(4)} · 18% discount</p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-gray-500 uppercase tracking-wider">Earning from</span>
-                    <span className="text-white font-medium">{new Date(p.earning_start_date_utc).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-gray-500 uppercase tracking-wider">Lock ends</span>
-                    <span className="text-white font-medium">{new Date(p.lock_end_date_utc).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-gray-500 uppercase tracking-wider">Status</span>
-                    <span className="text-green-400 font-semibold capitalize">{p.purchase_status}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <div style={{ background: goldBgSm, border: goldBorderSm, borderRadius: '12px', padding: '10px', flexShrink: 0 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.8" className="w-6 h-6">
+              <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+              <line x1="6" y1="15" x2="10" y2="15" strokeLinecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h2 className="font-black text-xl sm:text-2xl" style={{ color: gold }}>Your Exclusive Access</h2>
+            <p className="text-gray-400 text-xs sm:text-sm mt-0.5">Track and manage your active positions across Exclusive Access products.</p>
           </div>
         </div>
-      )}
 
-      {activePositions.length > 0 && (
-        <div>
-          <p className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-3 px-1">jnrUSD Positions</p>
-          <div className="space-y-3">
-            {activePositions.map(p => (
-              <div key={p.position_id} style={{ background: 'rgba(10,25,22,0.85)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: `1px solid ${p.status === 'cooling' ? 'rgba(251,146,60,0.2)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.35)' }}
-                className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div style={{ background: 'rgba(0,0,0,0.35)', borderRadius: '12px', padding: '8px' }}>
-                    <Image src="/jnr.png" alt="jnrUSD" width={36} height={36} className="rounded-full" />
+        {/* Stats row */}
+        <div className="flex items-center mb-6">
+          {/* Stat 1 */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 pr-4 sm:pr-10 flex-1 sm:flex-none">
+            <div style={{ background: goldBgSm, border: goldBorderSm, borderRadius: '10px', padding: '8px', flexShrink: 0 }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.8" className="w-5 h-5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div className="text-center sm:text-left">
+              <p className="text-gray-400 text-[10px] sm:text-[11px]">Total Position Value</p>
+              <p className="font-black text-lg sm:text-2xl" style={{ color: gold }}>${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            </div>
+          </div>
+          <div style={{ width: 1, height: 44, background: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
+          {/* Stat 2 */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 pl-4 sm:pl-10 flex-1 sm:flex-none">
+            <div style={{ background: goldBgSm, border: goldBorderSm, borderRadius: '10px', padding: '8px', flexShrink: 0 }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.8" className="w-5 h-5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v5c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 10v5c0 1.66 4.03 3 9 3s9-1.34 9-3v-5"/></svg>
+            </div>
+            <div className="text-center sm:text-left">
+              <p className="text-gray-400 text-[10px] sm:text-[11px]">Active Positions</p>
+              <p className="text-white font-black text-lg sm:text-2xl">{totalCount}</p>
+            </div>
+          </div>
+        </div>
+
+        {hasPositions ? (
+          <>
+            {/* Positions header + filter */}
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <h3 className="font-bold text-base sm:text-lg" style={{ color: gold }}>Active Positions</h3>
+                <p className="text-gray-400 text-xs mt-0.5">Your current positions across Exclusive Access products.</p>
+              </div>
+              <select
+                value={filter}
+                onChange={e => setFilter(e.target.value as 'all' | 'sailr' | 'jnrusd')}
+                className="flex-shrink-0 text-xs font-semibold outline-none cursor-pointer"
+                style={{ background: 'rgba(25,32,44,0.9)', border: goldBorderSm, borderRadius: '10px', color: gold, padding: '6px 10px' }}
+              >
+                <option value="all">All Products</option>
+                <option value="sailr">SAIL.r</option>
+                <option value="jnrusd">jnrUSD</option>
+              </select>
+            </div>
+
+            {/* Cards — horizontal scroll */}
+            <div className="flex gap-4 overflow-x-auto pb-2" style={{ scrollbarWidth: 'thin' }}>
+              {visiblePurchases.map((p, i) => (
+                <div key={p.purchase_id} className="flex-shrink-0 flex flex-col" style={{ width: 220, background: 'rgba(20,26,36,0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '14px', gap: 0 }}>
+                  {/* Product + tier */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-gray-400 text-[11px] font-semibold">SAIL.r</span>
+                    <TierPill tier={p.qualification_tier || 'gold'} />
                   </div>
-                  <div>
-                    <p className="text-white font-bold text-lg">{parseFloat(String(p.deposit_usde)).toLocaleString()} <span className="text-yellow-400">USDE</span></p>
-                    <p className="text-xs text-gray-400 mt-0.5">{parseFloat(String(p.unit_quantity)).toFixed(4)} units · entry ${parseFloat(String(p.entry_share_price)).toFixed(4)}</p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs items-end">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-gray-500 uppercase tracking-wider">Earning from</span>
-                    <span className="text-white font-medium">{new Date(p.earning_start_date_utc).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                  </div>
-                  {p.status === 'cooling' && p.exit_available_at_utc && (
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-orange-400 uppercase tracking-wider">Withdrawable</span>
-                      <span className="text-white font-medium">{new Date(p.exit_available_at_utc).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  {/* Logo + title */}
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '50%', padding: '5px', flexShrink: 0 }}>
+                      <Image src="/sail.png" alt="SAIL.r" width={30} height={30} className="rounded-full" />
                     </div>
-                  )}
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-gray-500 uppercase tracking-wider">Status</span>
-                    <span className={`font-semibold capitalize ${p.status === 'cooling' ? 'text-orange-400' : 'text-green-400'}`}>{p.status}</span>
+                    <p className="text-white font-bold text-sm leading-snug">SAIL.r Position #{i + 1}</p>
                   </div>
-                  {p.status === 'active' && (
-                    <button
-                      onClick={() => requestExit(p.position_id)}
-                      disabled={exitingId === p.position_id}
-                      style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '10px', padding: '6px 14px', color: '#f87171', fontSize: '12px', fontWeight: 600, transition: 'all 0.2s' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.2)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.1)')}
-                    >
-                      {exitingId === p.position_id ? 'Requesting...' : 'Request Exit'}
-                    </button>
-                  )}
+                  {/* Fields */}
+                  <div className="flex flex-col gap-2 flex-1">
+                    <div>
+                      <p className="text-gray-500 text-[10px] mb-0.5">Deposit Amount</p>
+                      <p className="text-white font-semibold text-sm">{parseFloat(String(p.honey_amount_input)).toFixed(2)} HONEY</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-[10px] mb-0.5">SAIL.r Allocation</p>
+                      <p className="text-white font-semibold text-sm">~{parseFloat(String(p.sail_amount_output)).toFixed(2)} SAIL.r</p>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-3.5 h-3.5 text-gray-500 flex-shrink-0"><rect x="5" y="11" width="14" height="11" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" strokeLinecap="round"/></svg>
+                      <div>
+                        <p className="text-gray-500 text-[10px]">Lock Ends</p>
+                        <p className="text-white font-semibold text-sm">{fmtDate(p.lock_end_date_utc)}</p>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Status row */}
+                  <div className="flex items-center justify-between mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div>
+                      <p className="text-gray-500 text-[10px]">Status</p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
+                        <span className="text-green-400 font-semibold text-xs capitalize">{p.purchase_status}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-gray-500 text-[10px]">Rewards</p>
+                      <p className="text-white font-semibold text-xs mt-0.5">Earning</p>
+                    </div>
+                  </div>
+                  {/* Button */}
+                  <button className="mt-3 w-full py-2 rounded-xl text-xs font-bold transition-all duration-200"
+                    style={{ background: 'transparent', border: `1px solid rgba(212,175,55,0.4)`, color: gold }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = goldBgSm; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}>
+                    View Details
+                  </button>
                 </div>
-              </div>
-            ))}
+              ))}
+
+              {visiblePositions.map((p, i) => {
+                const currentValue = parseFloat(String(p.unit_quantity)) * sharePrice;
+                const isCooling = p.status === 'cooling';
+                return (
+                  <div key={p.position_id} className="flex-shrink-0 flex flex-col" style={{ width: 220, background: 'rgba(20,26,36,0.95)', border: `1px solid ${isCooling ? 'rgba(251,146,60,0.2)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '14px', padding: '14px' }}>
+                    {/* Product + tier */}
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-gray-400 text-[11px] font-semibold">jnrUSD</span>
+                      <TierPill tier={p.qualification_tier || 'bronze'} />
+                    </div>
+                    {/* Logo + title */}
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '50%', padding: '5px', flexShrink: 0 }}>
+                        <Image src="/jnr.png" alt="jnrUSD" width={30} height={30} className="rounded-full" />
+                      </div>
+                      <p className="text-white font-bold text-sm leading-snug">jnrUSD Position #{i + 1}</p>
+                    </div>
+                    {/* Fields */}
+                    <div className="flex flex-col gap-2 flex-1">
+                      <div>
+                        <p className="text-gray-500 text-[10px] mb-0.5">Deposit Amount</p>
+                        <p className="text-white font-semibold text-sm">{parseFloat(String(p.deposit_usde)).toFixed(2)} USDe</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-[10px] mb-0.5">Current Value</p>
+                        <p className="text-white font-semibold text-sm">~${currentValue.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-[10px] mb-0.5">Share Price</p>
+                        <p className="text-white font-semibold text-sm">${sharePrice.toFixed(4)}</p>
+                      </div>
+                    </div>
+                    {/* Status row */}
+                    <div className="flex items-center justify-between mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div>
+                        <p className="text-gray-500 text-[10px]">Status</p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isCooling ? 'bg-orange-400' : 'bg-green-400'}`} />
+                          <span className={`font-semibold text-xs ${isCooling ? 'text-orange-400' : 'text-green-400'}`}>{isCooling ? 'Cooling Down' : 'Earning'}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-gray-500 text-[10px]">Exit Available</p>
+                        {isCooling && p.exit_available_at_utc
+                          ? <p className="text-orange-400 font-semibold text-[10px] mt-0.5">{fmtDate(p.exit_available_at_utc)}</p>
+                          : <p className="text-green-400 font-semibold text-xs mt-0.5">Yes</p>
+                        }
+                      </div>
+                    </div>
+                    {/* Button */}
+                    {!isCooling ? (
+                      <button
+                        onClick={() => requestExit(p.position_id)}
+                        disabled={exitingId === p.position_id}
+                        className="mt-3 w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all duration-200"
+                        style={{ background: exitingId === p.position_id ? 'rgba(212,175,55,0.4)' : gold, color: '#0a0e14', border: 'none' }}
+                        onMouseEnter={e => { if (!exitingId) (e.currentTarget as HTMLButtonElement).style.opacity = '0.88'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; }}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        {exitingId === p.position_id ? 'Requesting...' : 'Start 7-Day Cooldown'}
+                      </button>
+                    ) : (
+                      <div className="mt-3 w-full py-2 rounded-xl text-xs font-semibold text-center text-orange-400"
+                        style={{ background: 'rgba(251,146,60,0.08)', border: '1px solid rgba(251,146,60,0.2)' }}>
+                        Cooling Down
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Info strip */}
+            <div className="mt-4 flex items-start gap-2 text-[11px] text-gray-500 px-1 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-600"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" strokeLinecap="round"/></svg>
+              <span><strong className="text-gray-400">SAIL.r positions</strong> are locked for 6 months. Your SAIL.r will be delivered to your wallet when the lock period ends. <strong className="text-gray-400">jnrUSD positions</strong> can be unlocked at any time. A 7-day cooldown applies before withdrawal.</span>
+            </div>
+          </>
+        ) : (
+          /* Empty state */
+          <div className="flex flex-col items-center text-center py-10 px-4" style={{ border: '2px dashed rgba(212,175,55,0.18)', borderRadius: '16px' }}>
+            <div style={{ background: goldBgSm, border: goldBorderSm, borderRadius: '50%', padding: '18px', marginBottom: '16px' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.6" className="w-8 h-8">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <h3 className="text-white font-black text-lg mb-2">No active positions yet</h3>
+            <p className="text-gray-400 text-sm max-w-sm leading-snug mb-6">You don&apos;t have any active positions at the moment.<br/>Once you deposit, your positions will appear here.</p>
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-200"
+              style={{ background: goldBgSm, border: `1px solid rgba(212,175,55,0.45)`, color: gold }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(212,175,55,0.2)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = goldBgSm; }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5" strokeLinecap="round"/><line x1="12" y1="19" x2="12" y2="22" strokeLinecap="round"/><line x1="2" y1="12" x2="5" y2="12" strokeLinecap="round"/><line x1="19" y1="12" x2="22" y2="12" strokeLinecap="round"/></svg>
+              Explore Exclusive Access
+            </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
@@ -1186,6 +1554,7 @@ export default function ExclusivePage() {
   const [openModal, setOpenModal] = useState<ModalType>(null);
   const [showSailrInfo, setShowSailrInfo] = useState(false);
   const [showJnrusdInfo, setShowJnrusdInfo] = useState(false);
+  const [showVipInfo, setShowVipInfo] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -1254,7 +1623,7 @@ export default function ExclusivePage() {
           {/* jnrUSD */}
           <PerkCard
             minTier="bronze"
-            title="Access jnrUSD"
+            title="jnrUSD — Pooled Access"
             onInfo={() => setShowJnrusdInfo(true)}
             infoAccent="#22c55e"
             userTier={userTier}
@@ -1265,9 +1634,8 @@ export default function ExclusivePage() {
             assetSubtitle="Liquid Royalty Vault"
             description={
               <>
-                <p>Skip the usual barriers and access jnrUSD directly through Amy.</p>
-                <p className="mt-2">No 10k minimum. No whitelist friction.</p>
-                <p className="mt-1">Start earning from day one with a strategy normally reserved for larger players.</p>
+                <p>Access jnrUSD through Amy — a yield strategy typically restricted by high minimums and limited access.</p>
+                <p className="mt-2">Gain exposure to a compounding asset where value increases over time through share price growth, without needing direct protocol access or whitelist approval.</p>
                 {capacity?.jnrusd && !capacity.jnrusd.unlimited && (
                   <p className="mt-2 text-xs text-gray-500">
                     Allocation: {capacity.jnrusd.used.toFixed(0)} / {capacity.jnrusd.cap.toFixed(0)} USDE used
@@ -1276,9 +1644,10 @@ export default function ExclusivePage() {
               </>
             }
             footer={
-              <div className="flex items-center gap-2 text-green-400 text-sm font-semibold">
-                <span>✓</span>
-                <span>Available to all AMY holders (300+)</span>
+              <div className="space-y-1 text-xs">
+                <div className="flex items-center gap-2 text-gray-400"><span>•</span><span>Access without high minimums or manual onboarding</span></div>
+                <div className="flex items-center gap-2 text-gray-400"><span>•</span><span>No long-term lock (7-day exit cooldown)</span></div>
+                <div className="flex items-center gap-2 text-gray-400"><span>•</span><span>Value grows through share price appreciation</span></div>
               </div>
             }
           />
@@ -1318,6 +1687,7 @@ export default function ExclusivePage() {
           <PerkCard
             minTier="gold"
             title="VIP Partner Access"
+            onInfo={() => setShowVipInfo(true)}
             userTier={userTier}
             isDisplayOnly
             displayOnlyLabel="Request Access"
@@ -1357,7 +1727,7 @@ export default function ExclusivePage() {
         )}
 
         {/* Positions dashboard */}
-        {wallet && <PositionsDashboard wallet={wallet} refreshTrigger={refreshKey} />}
+        {wallet && <PositionsDashboard wallet={wallet} refreshTrigger={refreshKey} sharePrice={sharePrice} />}
       </div>
 
       {/* Modals */}
@@ -1371,6 +1741,7 @@ export default function ExclusivePage() {
       )}
       {showSailrInfo && <SailrInfoModal onClose={() => setShowSailrInfo(false)} />}
       {showJnrusdInfo && <JnrusdInfoModal onClose={() => setShowJnrusdInfo(false)} />}
+      {showVipInfo && <VipPartnerInfoModal onClose={() => setShowVipInfo(false)} />}
 
       {openModal === 'sailr' && wallet && (
         <SailrModal
