@@ -1513,7 +1513,7 @@ function PositionsDashboard({ wallet, refreshTrigger, sharePrice }: { wallet: st
             {/* Info strip */}
             <div className="mt-4 flex items-start gap-2 text-[11px] text-gray-500 px-1 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-600"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" strokeLinecap="round"/></svg>
-              <span><strong className="text-gray-400">SAIL.r positions</strong> are locked for 6 months. Your SAIL.r will be delivered to your wallet when the lock period ends. <strong className="text-gray-400">jnrUSD positions</strong> can be unlocked at any time. A 7-day cooldown applies before withdrawal.</span>
+              <span><strong className="text-gray-400">SAIL.r positions</strong> are locked for 6 months. Your SAIL.r will be delivered to your wallet when the lock period ends.<br /><strong className="text-gray-400">jnrUSD positions</strong> can be unlocked at any time. A 7-day cooldown applies before withdrawal.</span>
             </div>
           </>
         ) : (
