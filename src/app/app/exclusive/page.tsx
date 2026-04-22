@@ -157,48 +157,69 @@ function useCountdown(expiresAt: string | null) {
 
 // ─── jnrUSDE Modal ────────────────────────────────────────────────────────────
 
+interface JnrusdQuote {
+  quoteId: string;
+  expiresAt: string;
+  sharePrice: number;
+  depositUsde: number;
+  unitsReceived: number;
+  escrowWallet: string;
+}
+
 function JnrusdModal({
   wallet,
   tier,
-  sharePrice,
-  escrowWallet,
   onClose,
   onSuccess,
 }: {
   wallet: string;
   tier: string;
-  sharePrice: number;
-  escrowWallet: string;
   onClose: () => void;
   onSuccess: () => void;
 }) {
   const [step, setStep] = useState<'amount' | 'quote' | 'done'>('amount');
   const [usdeAmount, setUsdeAmount] = useState('');
+  const [quote, setQuote] = useState<JnrusdQuote | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ unitQuantity: number; earningStartDate: string } | null>(null);
 
   const account = useActiveAccount();
+  const countdown = useCountdown(quote?.expiresAt || null);
+  const quoteExpired = countdown === 0 && !!quote;
 
-  const parsedAmount = parseFloat(usdeAmount);
-  const units = parsedAmount > 0 ? (parsedAmount / sharePrice).toFixed(6) : '—';
+  async function fetchQuote() {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/exclusive/jnrusd/quote?wallet=${wallet}&deposit_usde=${usdeAmount}`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to get quote');
+      setQuote(data.data);
+      setStep('quote');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleDeposit() {
-    if (!account) { setError('Wallet not connected'); return; }
-    const escrowOk = escrowWallet && escrowWallet !== 'false' && escrowWallet.startsWith('0x') && escrowWallet.length === 42;
+    if (!quote || !account) { setError('Wallet not connected'); return; }
+    const escrowOk = quote.escrowWallet && quote.escrowWallet !== 'false' && quote.escrowWallet.startsWith('0x') && quote.escrowWallet.length === 42;
     if (!escrowOk) { setError('Deposits are temporarily disabled. Please check back soon.'); return; }
     setLoading(true);
     setError('');
     try {
       const usdeContract = getContract({ client, chain: berachain, address: USDE_ADDRESS as `0x${string}` });
-      const tx = transfer({ contract: usdeContract, to: escrowWallet as `0x${string}`, amount: usdeAmount });
+      const tx = transfer({ contract: usdeContract, to: quote.escrowWallet as `0x${string}`, amount: String(quote.depositUsde) });
       const receipt = await sendTransaction({ transaction: tx, account });
       const txHash = receipt.transactionHash;
 
       const res = await fetch(`${API_BASE_URL}/api/exclusive/jnrusd/confirm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet, depositUsde: parsedAmount, depositTxHash: txHash }),
+        body: JSON.stringify({ wallet, quoteId: quote.quoteId, depositTxHash: txHash }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to confirm');
@@ -252,43 +273,56 @@ function JnrusdModal({
               </div>
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button
-                onClick={() => setStep('quote')}
-                disabled={!usdeAmount || parsedAmount < 10}
+                onClick={fetchQuote}
+                disabled={loading || !usdeAmount || parseFloat(usdeAmount) < 10}
                 className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
               >
-                Review Deposit
+                {loading ? 'Fetching quote...' : 'Get Quote'}
               </button>
             </>
           )}
 
-          {step === 'quote' && (
+          {step === 'quote' && quote && (
             <>
+              <div className={`flex items-center justify-between text-sm rounded-xl px-4 py-2 ${quoteExpired ? 'bg-red-900/40 text-red-400' : 'bg-gray-800/60 text-gray-300'}`}>
+                <span>Quote valid for</span>
+                <span className={`font-mono font-bold ${quoteExpired ? 'text-red-400' : countdown <= 30 ? 'text-orange-400' : 'text-green-400'}`}>
+                  {quoteExpired ? 'Expired' : `${countdown}s`}
+                </span>
+              </div>
+
               <div className="bg-gray-800/60 rounded-xl p-4 space-y-2 text-sm">
                 <div className="flex justify-between text-gray-400">
                   <span>Current share price</span>
-                  <span className="text-white">${sharePrice.toFixed(6)}</span>
+                  <span className="text-white">${quote.sharePrice.toFixed(6)}</span>
                 </div>
                 <div className="flex justify-between text-gray-400">
                   <span>USDE you deposit</span>
-                  <span className="text-white">{parsedAmount.toLocaleString()} USDE</span>
+                  <span className="text-white">{quote.depositUsde.toLocaleString()} USDE</span>
                 </div>
                 <div className="flex justify-between font-semibold border-t border-gray-700 pt-2 mt-2">
-                  <span className="text-gray-300">jnrUSD units you receive</span>
-                  <span className="text-yellow-400">{units} jnrUSD</span>
+                  <span className="text-gray-300">jnrUSD shares you receive</span>
+                  <span className="text-yellow-400">{quote.unitsReceived.toFixed(6)} jnrUSD</span>
                 </div>
-                <p className="text-gray-500 text-xs mt-1">Units appreciate over time as the vault grows.</p>
+                <p className="text-gray-500 text-xs mt-1">Shares appreciate over time as the vault grows.</p>
               </div>
 
               {error && <p className="text-red-400 text-sm">{error}</p>}
 
-              <button
-                onClick={handleDeposit}
-                disabled={loading}
-                className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
-              >
-                {loading ? 'Waiting for wallet...' : 'Confirm & Send USDE'}
-              </button>
-              <button onClick={() => { setStep('amount'); setError(''); }} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-colors">
+              {quoteExpired ? (
+                <button onClick={() => { setQuote(null); setStep('amount'); }} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-colors">
+                  Get New Quote
+                </button>
+              ) : (
+                <button
+                  onClick={handleDeposit}
+                  disabled={loading}
+                  className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
+                >
+                  {loading ? 'Waiting for wallet...' : 'Confirm & Send USDE'}
+                </button>
+              )}
+              <button onClick={() => { setQuote(null); setStep('amount'); setError(''); }} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-colors">
                 Back
               </button>
             </>
@@ -300,7 +334,7 @@ function JnrusdModal({
               <p className="text-white font-bold text-lg">Position Created!</p>
               <div className="bg-gray-800/60 rounded-xl p-4 space-y-2 text-sm text-left">
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Units</span>
+                  <span className="text-gray-400">jnrUSD shares</span>
                   <span className="text-yellow-400 font-semibold">{result.unitQuantity.toFixed(6)}</span>
                 </div>
                 <div className="flex justify-between">
@@ -526,11 +560,325 @@ const CARD_HOVER: React.CSSProperties = {
   borderColor: 'rgba(255,255,255,0.15)',
 };
 
+// ─── SAIL.r Info Modal ────────────────────────────────────────────────────────
+function SailrInfoModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-start md:items-center justify-center p-4 md:p-6 overflow-y-auto bg-black/75 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="relative w-full max-w-6xl max-h-[92vh] overflow-y-auto rounded-2xl shadow-2xl"
+        style={{ background: '#13151a', border: '1px solid rgba(255,255,255,0.08)' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Close */}
+        <button onClick={onClose} className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-lg font-bold">✕</button>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 px-4 sm:px-6 py-4 pr-12" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <Image src="/sail.png" alt="SAIL.r" width={36} height={36} className="rounded-full flex-shrink-0 sm:w-11 sm:h-11" />
+          <div className="min-w-0">
+            <h2 className="text-white font-black text-lg sm:text-2xl leading-tight">About SAIL.r Access</h2>
+            <p className="text-gray-400 text-xs sm:text-sm mt-0.5 leading-snug">Everything you need to know about how SAIL.r access works through Amy.</p>
+          </div>
+        </div>
+
+        {/* Feature row */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 px-6 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.3)' }}>
+          {[
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/></svg>, title: 'Discounted Access', desc: 'Get SAIL.r at 18% off the live market price.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><rect x="5" y="11" width="14" height="11" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" strokeLinecap="round"/></svg>, title: 'Fixed 6-Month Lock', desc: 'Your principal is locked for 6 months from purchase.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>, title: 'Earn Weekly', desc: 'Rewards are distributed weekly during the lock.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73L11 21.73a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.73z" strokeLinejoin="round"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" strokeLinecap="round"/></svg>, title: 'Inventory Backed', desc: 'All allocations are fully backed by SAIL.r inventory.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>, title: 'For Gold+ Holders', desc: 'Exclusive to AMY Gold and Platinum holders.' },
+          ].map(f => (
+            <div key={f.title} className="flex flex-col gap-1">
+              <span className="mb-0.5 text-yellow-400">{f.icon}</span>
+              <p className="text-yellow-400 font-bold text-xs">{f.title}</p>
+              <p className="text-gray-400 text-xs leading-snug">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Main grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+          {/* Left col */}
+          <div className="flex flex-col gap-4">
+            {/* How It Works */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="text-yellow-400 font-bold text-base mb-3">How It Works</h4>
+              <ol className="space-y-2">
+                {[
+                  'You choose an amount of HONEY to invest.',
+                  'We fetch the live SAIL.r price and apply your 18% discount.',
+                  'You send HONEY to the escrow wallet.',
+                  'Your SAIL.r allocation is recorded in Amy and your 6-month lock begins.',
+                  'You earn rewards weekly while your position is locked.',
+                  'At the end of the lock, your SAIL.r principal is delivered to your wallet.',
+                ].map((step, i) => (
+                  <li key={i} className="flex gap-3 items-start text-sm text-gray-300">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(250,204,21,0.15)', color: '#facc15', border: '1px solid rgba(250,204,21,0.25)' }}>{i + 1}</span>
+                    <span className="leading-snug pt-0.5">{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            {/* Where Funds Are Held */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="text-yellow-400 font-bold text-base mb-3">Where Your Funds &amp; SAIL.r Are Held</h4>
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                {[
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinejoin="round"/><path d="M9 22V12h6v10" strokeLinecap="round"/></svg>, title: 'HONEY Escrow', desc: 'Your HONEY is held in a secure multisig escrow wallet.' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 17l3-8 3 4 3-7 3 5 3-3" strokeLinecap="round" strokeLinejoin="round"/><path d="M2 20h20" strokeLinecap="round"/></svg>, title: 'SAIL.r Inventory', desc: 'SAIL.r inventory is held in escrow, provided by Liquid Royalty.' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/><path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: 'Three-Party Security', desc: 'Escrow is controlled by Amy, Liquid Royalty, and a trusted third party.' },
+                ].map(item => (
+                  <div key={item.title} className="flex flex-col gap-1.5">
+                    <span className="text-yellow-400">{item.icon}</span>
+                    <p className="text-white font-semibold text-xs">{item.title}</p>
+                    <p className="text-gray-400 text-[11px] leading-snug">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="rounded-lg px-4 py-3 text-xs text-gray-400 flex items-start gap-2" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-500"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" strokeLinecap="round"/></svg>
+                <span>Your allocation is recorded in Amy and represents your full beneficial ownership of the SAIL.r position. This structure ensures all allocations are backed, secured, and fully tracked throughout the lock period.</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right col */}
+          <div className="flex flex-col gap-4">
+            {/* Example Box */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="text-yellow-400 font-bold text-base mb-3">Example: Your 100 HONEY Investment</h4>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr>
+                    <th className="text-left text-gray-500 font-normal pb-2 text-xs"></th>
+                    <th className="text-center text-gray-400 font-medium pb-2 text-xs">On Exchange<br/>(Market Price)</th>
+                    <th className="text-center font-bold pb-2 text-xs rounded-t-lg" style={{ color: '#facc15', background: 'rgba(250,204,21,0.08)', padding: '4px 8px' }}>With Amy<br/>(18% Discount)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { label: 'SAIL.r Price', market: '$15.80', amy: '$12.96', highlight: true },
+                    { label: 'Your HONEY', market: '100 HONEY', amy: '100 HONEY', highlight: false },
+                    { label: 'SAIL.r You Receive', market: '~6.32 SAIL.r', amy: '~7.74 SAIL.r', highlight: true },
+                    { label: 'You Earn', market: '—', amy: '~1.42 SAIL.r extra', highlight: true },
+                  ].map((row, i) => (
+                    <tr key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <td className="py-2.5 text-gray-300 font-medium text-xs">{row.label}</td>
+                      <td className="py-2.5 text-center text-gray-400 text-xs">{row.market}</td>
+                      <td className="py-2.5 text-center text-xs font-bold" style={{ color: row.highlight ? '#4ade80' : '#facc15', background: 'rgba(250,204,21,0.05)' }}>{row.amy}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="mt-4 rounded-xl px-4 py-3 flex items-center gap-2 text-sm font-bold" style={{ background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.25)', color: '#facc15' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span>That&apos;s ~22.5% more SAIL.r for the same 100 HONEY.</span>
+              </div>
+            </div>
+
+            {/* Key Details */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="text-yellow-400 font-bold text-base mb-3">Key Details</h4>
+              <ul className="space-y-2.5">
+                {[
+                  { label: 'Lock Duration', val: '6 months from payment confirmation' },
+                  { label: 'Rewards', val: 'Paid weekly based on your allocation and time held' },
+                  { label: 'Delivery', val: 'Your SAIL.r principal is sent to your wallet at lock end' },
+                  { label: 'No Auto-Sell', val: 'You keep your SAIL.r. Amy does not manage exits' },
+                  { label: 'Inventory Limited', val: 'Purchases are limited to available inventory' },
+                ].map(item => (
+                  <li key={item.label} className="flex items-start gap-2 text-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 flex-shrink-0 mt-0.5 text-yellow-400"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <span className="text-gray-300"><span className="font-semibold text-white">{item.label}:</span> {item.val}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 gap-2 sm:gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(250,204,21,0.04)' }}>
+          <div className="flex items-start gap-2 text-xs text-gray-400">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 flex-shrink-0 mt-0.5 text-yellow-400"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/></svg>
+            <span><strong className="text-yellow-400">Important:</strong> This is not financial advice. SAIL.r is a yield-generating asset with risks. Always do your own research.</span>
+          </div>
+          <a href="https://liquidroyalty.io" target="_blank" rel="noopener noreferrer" className="text-xs text-yellow-400 hover:text-yellow-300 font-semibold whitespace-nowrap transition-colors pl-6 sm:pl-0">
+            Learn more about risks →
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── jnrUSD Info Modal ───────────────────────────────────────────────────────
+function JnrusdInfoModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-start md:items-center justify-center p-4 md:p-6 overflow-y-auto bg-black/75 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="relative w-full max-w-6xl max-h-[92vh] overflow-y-auto rounded-2xl shadow-2xl"
+        style={{ background: '#13151a', border: '1px solid rgba(255,255,255,0.08)' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Close */}
+        <button onClick={onClose} className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-lg font-bold">✕</button>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 px-4 sm:px-6 py-4 pr-12" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <Image src="/jnr.png" alt="jnrUSD" width={36} height={36} className="rounded-full flex-shrink-0 sm:w-11 sm:h-11" />
+          <div className="min-w-0">
+            <h2 className="text-white font-black text-lg sm:text-2xl leading-tight">About jnrUSD Access</h2>
+            <p className="text-gray-400 text-xs sm:text-sm mt-0.5 leading-snug">Everything you need to know about how jnrUSD access works through Amy.</p>
+          </div>
+        </div>
+
+        {/* Feature row */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 px-6 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.3)' }}>
+          {[
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, title: 'Earn Yield', desc: 'Your jnrUSD shares increase in value as the share price rises.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>, title: 'No Long-Term Lock', desc: 'Exit any time. 7-day cooldown applies.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: 'Additional Rewards', desc: 'BGT rewards are distributed separately.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: 'Professionally Managed', desc: 'Amy manages the pooled position and liquidity.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>, title: 'For Bronze+ Holders', desc: 'Available to users holding 300+ AMY.' },
+          ].map(f => (
+            <div key={f.title} className="flex flex-col gap-1">
+              <span className="mb-0.5 text-green-400">{f.icon}</span>
+              <p className="text-green-400 font-bold text-xs">{f.title}</p>
+              <p className="text-gray-400 text-xs leading-snug">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Main grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+          {/* Left col */}
+          <div className="flex flex-col gap-4">
+            {/* How It Works */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="text-green-400 font-bold text-base mb-3">How It Works</h4>
+              <ol className="space-y-2">
+                {[
+                  'You deposit USDe to access the jnrUSD pool.',
+                  'You receive jnrUSD shares based on the current share price.',
+                  'Your shares represent your portion of the pooled position.',
+                  'The share price increases over time as the strategy earns yield.',
+                  'Your share count stays the same, but its value grows.',
+                  'When you exit, your shares are unwound and returned as USDe after cooldown.',
+                ].map((step, i) => (
+                  <li key={i} className="flex gap-3 items-start text-sm text-gray-300">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.25)' }}>{i + 1}</span>
+                    <span className="leading-snug pt-0.5">{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            {/* Where Funds Are Held */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="text-green-400 font-bold text-base mb-3">Where Your Funds &amp; jnrUSD Are Held</h4>
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                {[
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>, title: 'USDe Buffer', desc: 'Your deposit is held in a managed buffer to support liquidity and withdrawals.' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, title: 'jnrUSD Pool', desc: 'A pre-funded jnrUSD position managed by Amy to generate yield.' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/><path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: 'Secure & Controlled', desc: 'Assets are managed in controlled wallets with operational safeguards.' },
+                ].map(item => (
+                  <div key={item.title} className="flex flex-col gap-1.5">
+                    <span className="text-green-400">{item.icon}</span>
+                    <p className="text-white font-semibold text-xs">{item.title}</p>
+                    <p className="text-gray-400 text-[11px] leading-snug">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="rounded-lg px-4 py-3 text-xs text-gray-400 flex items-start gap-2" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-500"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" strokeLinecap="round"/></svg>
+                <span>Amy tracks your position in jnrUSD shares. You own your portion of the pool.</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right col */}
+          <div className="flex flex-col gap-4">
+            {/* Example Box */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="text-green-400 font-bold text-base mb-3">Example: Your $100 USDe Deposit</h4>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr>
+                    <th className="text-left text-gray-500 font-normal pb-2 text-xs"></th>
+                    <th className="text-right text-gray-400 font-medium pb-2 text-xs">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { label: 'Current Share Price (1 jnrUSD)', val: '$1.25 USDe' },
+                    { label: 'Your Deposit', val: '100 USDe' },
+                    { label: 'jnrUSD Shares You Receive', val: '~80.00 jnrUSD shares' },
+                    { label: 'Share Price After Growth', val: '$1.40 USDe' },
+                    { label: 'Your Position Value', val: '~$112.00 USDe', highlight: true },
+                    { label: 'Gain (Before Fees)', val: '~$12.00 USDe', highlight: true },
+                  ].map((row, i) => (
+                    <tr key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <td className="py-2.5 text-gray-300 font-medium text-xs">{row.label}</td>
+                      <td className="py-2.5 text-right text-xs font-bold" style={{ color: row.highlight ? '#4ade80' : '#d1d5db' }}>{row.val}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="mt-4 rounded-xl px-4 py-3 flex items-center gap-2 text-sm font-bold" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', color: '#22c55e' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span>Your shares increase in value as the share price rises.</span>
+              </div>
+            </div>
+
+            {/* Key Details */}
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 className="text-green-400 font-bold text-base mb-3">Key Details</h4>
+              <ul className="space-y-2.5">
+                {[
+                  { label: 'Minimum Deposit', val: '$10 USDe' },
+                  { label: 'Exit Anytime', val: 'Request withdrawal at any time' },
+                  { label: 'Cooldown', val: '7 days from exit request (no earnings from 00:00 UTC next day)' },
+                  { label: 'Payout', val: 'Shares are unwound and returned as USDe after cooldown' },
+                  { label: 'Fees', val: '~8% performance fee on realized yield (only on gains)' },
+                  { label: 'Rewards', val: 'BGT rewards distributed separately' },
+                  { label: 'Quote Validity', val: '120 seconds (based on live share price)' },
+                  { label: 'No Maximum', val: 'No upper deposit limit' },
+                ].map(item => (
+                  <li key={item.label} className="flex items-start gap-2 text-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 flex-shrink-0 mt-0.5 text-green-400"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <span className="text-gray-300"><span className="font-semibold text-white">{item.label}:</span> {item.val}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 gap-2 sm:gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(34,197,94,0.04)' }}>
+          <div className="flex items-start gap-2 text-xs text-gray-400">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 flex-shrink-0 mt-0.5 text-green-400"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/></svg>
+            <span><strong className="text-green-400">Important:</strong> This is not financial advice. jnrUSD is a yield-generating asset with risks. Always do your own research.</span>
+          </div>
+          <a href="https://liquidroyalty.io" target="_blank" rel="noopener noreferrer" className="text-xs text-green-400 hover:text-green-300 font-semibold whitespace-nowrap transition-colors pl-6 sm:pl-0">
+            Learn more about risks →
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PerkCard({
   minTier,
   title,
   description,
   assetImage,
+  assetIcon,
   assetName,
   assetSubtitle,
   footer,
@@ -538,11 +886,15 @@ function PerkCard({
   isFull,
   onUnlock,
   isDisplayOnly,
+  displayOnlyLabel,
+  onInfo,
+  infoAccent,
 }: {
   minTier: string;
   title: string;
   description: React.ReactNode;
-  assetImage: string;
+  assetImage?: string;
+  assetIcon?: React.ReactNode;
   assetName: string;
   assetSubtitle: string;
   footer: React.ReactNode;
@@ -550,6 +902,9 @@ function PerkCard({
   isFull?: boolean;
   onUnlock?: () => void;
   isDisplayOnly?: boolean;
+  displayOnlyLabel?: string;
+  onInfo?: () => void;
+  infoAccent?: string;
 }) {
   const [hovered, setHovered] = useState(false);
   const eligible = tierMeetsMin(userTier, minTier);
@@ -580,7 +935,25 @@ function PerkCard({
 
       {/* Body */}
       <div className="flex flex-col flex-1 px-6 pt-4 pb-6 gap-4">
-        <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#ffffff', lineHeight: 1.3 }}>{title}</h3>
+        <div className="flex items-center gap-2">
+          <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#ffffff', lineHeight: 1.3 }}>{title}</h3>
+          {onInfo && (() => {
+            const ac = infoAccent || '#facc15';
+            const bgBase = infoAccent ? 'rgba(34,197,94,0.15)' : 'rgba(250,204,21,0.15)';
+            const bgHover = infoAccent ? 'rgba(34,197,94,0.3)' : 'rgba(250,204,21,0.3)';
+            const border = infoAccent ? '1px solid rgba(34,197,94,0.35)' : '1px solid rgba(250,204,21,0.35)';
+            return (
+              <button
+                onClick={e => { e.stopPropagation(); onInfo(); }}
+                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black transition-all duration-200"
+                style={{ background: bgBase, color: ac, border }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = bgHover; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = bgBase; }}
+                title="Learn more"
+              >i</button>
+            );
+          })()}
+        </div>
         <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }} className="space-y-2">
           {description}
         </div>
@@ -594,8 +967,8 @@ function PerkCard({
           alignItems: 'center',
           gap: '12px',
         }}>
-          <div className="relative w-10 h-10 flex-shrink-0">
-            <Image src={assetImage} alt={assetName} fill className="rounded-full object-cover" />
+          <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
+            {assetIcon ? assetIcon : assetImage ? <Image src={assetImage} alt={assetName} fill className="rounded-full object-cover" /> : null}
           </div>
           <div>
             <p style={{ color: '#ffffff', fontWeight: 700, fontSize: '14px' }}>{assetName}</p>
@@ -623,7 +996,7 @@ function PerkCard({
                 color: '#aaaaaa',
               }}
             >
-              Deposit
+              {displayOnlyLabel || 'Deposit'}
             </button>
           ) : locked ? (
             <div className="w-full py-3 rounded-xl text-center text-sm font-semibold flex items-center justify-center gap-2"
@@ -811,6 +1184,8 @@ export default function ExclusivePage() {
   const [userTier, setUserTier] = useState<string | null>(null);
   const [capacity, setCapacity] = useState<CapacityData | null>(null);
   const [openModal, setOpenModal] = useState<ModalType>(null);
+  const [showSailrInfo, setShowSailrInfo] = useState(false);
+  const [showJnrusdInfo, setShowJnrusdInfo] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -880,6 +1255,8 @@ export default function ExclusivePage() {
           <PerkCard
             minTier="bronze"
             title="Access jnrUSD"
+            onInfo={() => setShowJnrusdInfo(true)}
+            infoAccent="#22c55e"
             userTier={userTier}
             isFull={jnrusdFull}
             onUnlock={() => setOpenModal('jnrusd')}
@@ -910,6 +1287,7 @@ export default function ExclusivePage() {
           <PerkCard
             minTier="gold"
             title="SAIL — 18% Discount Access"
+            onInfo={() => setShowSailrInfo(true)}
             userTier={userTier}
             isFull={sailrFull}
             onUnlock={() => setOpenModal('sailr')}
@@ -918,8 +1296,8 @@ export default function ExclusivePage() {
             assetSubtitle="Liquid Royalty Token"
             description={
               <>
-                <p>Buy SAIL at a fixed 18% discount — a rare entry into a high-performing, yield-generating asset.</p>
-                <p className="mt-2">Earn daily rewards, distributed weekly. Positions are locked for 6 months.</p>
+                <p>Access SAIL.r at a fixed 18% discount — a controlled entry not available on the open market.</p>
+                <p className="mt-2">Secure an allocation into a high-yield asset with weekly rewards, backed by real inventory.</p>
                 {capacity?.sailr && !capacity.sailr.unlimited && (
                   <p className="mt-2 text-xs text-gray-500">
                     Allocation: {capacity.sailr.used.toFixed(2)} / {capacity.sailr.cap.toFixed(2)} SAIL.r used
@@ -929,8 +1307,9 @@ export default function ExclusivePage() {
             }
             footer={
               <div className="space-y-1 text-xs">
-                <div className="flex items-center gap-2 text-gray-400"><span>⏳</span><span>Limited allocation</span></div>
-                <div className="flex items-center gap-2 text-gray-400"><span>🔒</span><span>6 month lock applies</span></div>
+                <div className="flex items-center gap-2 text-gray-400"><span>⏳</span><span>Limited allocation per round</span></div>
+                <div className="flex items-center gap-2 text-gray-400"><span>📦</span><span>Inventory-backed access</span></div>
+                <div className="flex items-center gap-2 text-gray-400"><span>🔒</span><span>6 month lock with weekly rewards</span></div>
               </div>
             }
           />
@@ -938,21 +1317,35 @@ export default function ExclusivePage() {
           {/* Partner Access — display only */}
           <PerkCard
             minTier="gold"
-            title="Direct Partner Access"
+            title="VIP Partner Access"
             userTier={userTier}
             isDisplayOnly
-            assetImage="/sail.png"
+            displayOnlyLabel="Request Access"
+            assetIcon={
+              <svg viewBox="0 0 24 24" className="w-9 h-9" style={{ color: '#d4af37' }}>
+                <path d="M12 12L12 5M12 12L20 9M12 12L19 18.5M12 12L4 17M12 5L20 9M4 17L19 18.5"
+                      stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                <circle cx="12" cy="12" r="2.8" fill="currentColor"/>
+                <circle cx="12" cy="5" r="1.9" fill="currentColor"/>
+                <circle cx="20" cy="9" r="2.1" fill="currentColor"/>
+                <circle cx="19" cy="18.5" r="1.5" fill="currentColor"/>
+                <circle cx="4" cy="17" r="1.7" fill="currentColor"/>
+              </svg>
+            }
             assetName="Partner Network"
-            assetSubtitle="Priority Access"
+            assetSubtitle="Curated Access"
             description={
               <>
-                <p>Skip the queue. Get priority access to Amy&apos;s partner network.</p>
-                <p className="mt-2">Faster answers. Better outcomes. Routed through Amy directly.</p>
+                <p>Work directly through Amy.</p>
+                <p className="mt-2">Instead of navigating protocols alone, you get routed into the right people, earlier access to opportunities, and guidance on how to position capital effectively.</p>
+                <p className="mt-2">From priority introductions to new products, to support when it actually matters — this is curated access built around real relationships.</p>
               </>
             }
             footer={
-              <div className="flex items-center gap-2 text-gray-400 text-xs">
-                <span>⭐</span><span>Priority support for Gold+ holders</span>
+              <div className="space-y-1 text-xs">
+                <div className="flex items-center gap-2 text-gray-400"><span>⭐️</span><span>Direct routing into partner teams</span></div>
+                <div className="flex items-center gap-2 text-gray-400"><span>⚡️</span><span>Early access to new opportunities &amp; whitelists</span></div>
+                <div className="flex items-center gap-2 text-gray-400"><span>🧠</span><span>Guidance on capital allocation &amp; positioning</span></div>
               </div>
             }
           />
@@ -972,12 +1365,13 @@ export default function ExclusivePage() {
         <JnrusdModal
           wallet={wallet}
           tier={userTier || 'bronze'}
-          sharePrice={sharePrice}
-          escrowWallet={process.env.NEXT_PUBLIC_JNRUSD_ESCROW_WALLET || ''}
           onClose={() => setOpenModal(null)}
           onSuccess={handleSuccess}
         />
       )}
+      {showSailrInfo && <SailrInfoModal onClose={() => setShowSailrInfo(false)} />}
+      {showJnrusdInfo && <JnrusdInfoModal onClose={() => setShowJnrusdInfo(false)} />}
+
       {openModal === 'sailr' && wallet && (
         <SailrModal
           wallet={wallet}
