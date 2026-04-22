@@ -335,7 +335,7 @@ export default function AppHeader() {
 
       {/* ── Side panel ── */}
       <div
-        className={`fixed right-0 top-0 h-full z-50 flex flex-col w-full md:w-[350px] ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed right-0 top-0 h-full z-50 flex flex-col w-full landscape:w-[350px] md:w-[350px] ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         style={{
           backgroundColor: '#1c2028',
           backgroundImage: 'radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px)',
@@ -372,8 +372,8 @@ export default function AppHeader() {
           </div>
         </div>
 
-        {/* Grid — horizontal tiles, no scroll */}
-        <div className="grid grid-cols-2 gap-[10px] p-3">
+        {/* Grid — scrollable */}
+        <div className="grid grid-cols-2 gap-[10px] p-3 overflow-y-auto flex-1">
           {TILES.map((tile, i) => {
             if (tile.disabled) {
               return (

@@ -206,13 +206,14 @@ function JnrusdModal({
       setStep('done');
       onSuccess();
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      if (msg.includes('0xec442f05') || msg.toLowerCase().includes('insufficient')) {
+      const raw = e as Record<string, unknown>;
+      const msg = raw?.shortMessage as string || raw?.message as string || (e instanceof Error ? e.message : '') || String(e);
+      if (msg.includes('0xe450d38c') || msg.includes('0xec442f05') || msg.toLowerCase().includes('insufficient')) {
         setError('Insufficient USDE balance in your wallet.');
-      } else if (msg.toLowerCase().includes('user rejected') || msg.toLowerCase().includes('denied')) {
-        setError('Transaction rejected.');
+      } else if (msg.toLowerCase().includes('user rejected') || msg.toLowerCase().includes('denied') || msg.toLowerCase().includes('cancelled') || (raw?.code === 4001)) {
+        setError('Transaction cancelled.');
       } else {
-        setError(msg);
+        setError(msg || 'Transaction failed. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -234,13 +235,13 @@ function JnrusdModal({
           {step === 'amount' && (
             <>
               <div>
-                <label className="text-sm text-gray-400 mb-1.5 block">USDE amount to deposit</label>
+                <label className="text-sm text-gray-400 mb-1.5 block">USDE amount to deposit <span className="text-gray-500">(min $10)</span></label>
                 <input
                   type="number"
                   value={usdeAmount}
                   onChange={e => setUsdeAmount(e.target.value)}
                   placeholder="e.g. 100"
-                  min="0"
+                  min="10"
                   className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500"
                 />
               </div>
@@ -252,7 +253,7 @@ function JnrusdModal({
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button
                 onClick={() => setStep('quote')}
-                disabled={!usdeAmount || parsedAmount <= 0}
+                disabled={!usdeAmount || parsedAmount < 10}
                 className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
               >
                 Review Deposit
@@ -379,13 +380,14 @@ function SailrModal({
       setStep('done');
       onSuccess();
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      if (msg.includes('0xec442f05') || msg.toLowerCase().includes('insufficient')) {
+      const raw = e as Record<string, unknown>;
+      const msg = raw?.shortMessage as string || raw?.message as string || (e instanceof Error ? e.message : '') || String(e);
+      if (msg.includes('0xf4d678b8') || msg.includes('0xec442f05') || msg.toLowerCase().includes('insufficient')) {
         setError('Insufficient HONEY balance in your wallet.');
-      } else if (msg.toLowerCase().includes('user rejected') || msg.toLowerCase().includes('denied')) {
-        setError('Transaction rejected.');
+      } else if (msg.toLowerCase().includes('user rejected') || msg.toLowerCase().includes('denied') || msg.toLowerCase().includes('cancelled') || (raw?.code === 4001)) {
+        setError('Transaction cancelled.');
       } else {
-        setError(msg);
+        setError(msg || 'Transaction failed. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -407,13 +409,13 @@ function SailrModal({
           {step === 'amount' && (
             <>
               <div>
-                <label className="text-sm text-gray-400 mb-1.5 block">HONEY amount to spend</label>
+                <label className="text-sm text-gray-400 mb-1.5 block">HONEY amount to spend <span className="text-gray-500">(min $10)</span></label>
                 <input
                   type="number"
                   value={honeyAmount}
                   onChange={e => setHoneyAmount(e.target.value)}
                   placeholder="e.g. 100"
-                  min="0"
+                  min="10"
                   className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500"
                 />
               </div>
@@ -425,7 +427,7 @@ function SailrModal({
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button
                 onClick={fetchQuote}
-                disabled={loading || !honeyAmount || parseFloat(honeyAmount) <= 0}
+                disabled={loading || !honeyAmount || parseFloat(honeyAmount) < 10}
                 className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
               >
                 {loading ? 'Fetching quote...' : 'Get Quote'}

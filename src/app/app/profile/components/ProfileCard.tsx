@@ -390,10 +390,10 @@ export default function ProfileCard({
         {/* ── Right panel ── */}
         <div className="flex-shrink-0 flex sm:items-stretch gap-2 items-start justify-center sm:justify-start">
 
-          {/* Amy Score + QR stacked */}
-          <div className="flex flex-col gap-0 sm:flex-none" style={{ minWidth: 130, maxWidth: 160 }}>
+          {/* Score + QR column */}
+          <div className="flex flex-col items-center gap-0 sm:flex-none" style={{ minWidth: 130, maxWidth: 160 }}>
 
-            {/* Amy Score — no card, no edit button */}
+            {/* Amy Score */}
             <div className="px-4 pt-0 pb-0 text-center">
               <p className="text-sm font-bold text-yellow-400 mb-1">Amy Score</p>
               <p className="text-5xl font-black text-yellow-400 leading-none">{amyScore}</p>
@@ -402,13 +402,9 @@ export default function ProfileCard({
 
             {/* QR box */}
             <div data-qr-box className="relative rounded-xl px-2 py-2 flex flex-col items-center gap-1 mt-2" style={{ border: '1px solid rgba(250,204,21,0.15)' }}>
-              {/* Top center */}
               <span className="absolute top-0 left-1/2 -translate-x-1/2" style={{ width: '50%', height: '1px', background: 'linear-gradient(to right, transparent, rgba(250,204,21,0.95), transparent)', boxShadow: '0 0 8px rgba(250,204,21,0.6)' }} />
-              {/* Bottom center */}
               <span className="absolute bottom-0 left-1/2 -translate-x-1/2" style={{ width: '50%', height: '1px', background: 'linear-gradient(to right, transparent, rgba(250,204,21,0.95), transparent)', boxShadow: '0 0 8px rgba(250,204,21,0.6)' }} />
-              {/* Left center */}
               <span className="absolute left-0 top-1/2 -translate-y-1/2" style={{ height: '50%', width: '1px', background: 'linear-gradient(to bottom, transparent, rgba(250,204,21,0.95), transparent)', boxShadow: '0 0 8px rgba(250,204,21,0.6)' }} />
-              {/* Right center */}
               <span className="absolute right-0 top-1/2 -translate-y-1/2" style={{ height: '50%', width: '1px', background: 'linear-gradient(to bottom, transparent, rgba(250,204,21,0.95), transparent)', boxShadow: '0 0 8px rgba(250,204,21,0.6)' }} />
 
               {userReferralCode && referralUrl ? (
@@ -423,12 +419,12 @@ export default function ProfileCard({
               )}
             </div>
 
-            {/* Referral code — outside, flush against QR card */}
+            {/* Referral code — sits below QR box */}
             {userReferralCode && (
-              <p className="text-yellow-400 font-mono font-black text-lg tracking-[0.2em] text-center -mt-2">{userReferralCode}</p>
+              <p className="text-yellow-400 font-mono font-black text-lg tracking-[0.2em] text-center mt-2">{userReferralCode}</p>
             )}
 
-            {/* Download button — mobile only, sits below QR */}
+            {/* Download button — mobile only */}
             <button
               onClick={handleDownload}
               className="sm:hidden mt-2 mx-auto w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 bg-black/50 transition-colors"
