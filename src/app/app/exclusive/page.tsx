@@ -243,14 +243,14 @@ function JnrusdModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-gray-900 border border-gray-700/60 rounded-2xl w-full max-w-md shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-gray-900 border border-gray-700/60 rounded-2xl w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700/50">
           <div className="flex items-center gap-3">
             <Image src="/jnr.png" alt="jnrUSD" width={28} height={28} className="rounded-full" />
             <span className="font-bold text-white">Access jnrUSD</span>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl leading-none">×</button>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-xl font-bold leading-none">×</button>
         </div>
 
         <div className="p-6 space-y-5">
@@ -431,14 +431,14 @@ function SailrModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-gray-900 border border-gray-700/60 rounded-2xl w-full max-w-md shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-gray-900 border border-gray-700/60 rounded-2xl w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700/50">
           <div className="flex items-center gap-3">
             <Image src="/sail.png" alt="SAIL.r" width={28} height={28} className="rounded-full" />
             <span className="font-bold text-white">SAIL.r — 18% Discount Access</span>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl leading-none">×</button>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-xl font-bold leading-none">×</button>
         </div>
 
         <div className="p-6 space-y-5">
@@ -691,7 +691,7 @@ function SailrInfoModal({ onClose }: { onClose: () => void }) {
               <h4 className="text-yellow-400 font-bold text-base mb-3">Key Details</h4>
               <ul className="space-y-2.5">
                 {[
-                  { label: 'Lock Duration', val: 'Paid weekly in USDe based on your allocation and time held' },
+                  { label: 'Lock Duration', val: '6 months from payment confirmation' },
                   { label: 'Rewards', val: 'Paid weekly based on your allocation and time held' },
                   { label: 'Delivery', val: 'Your SAIL.r principal is sent to your wallet at lock end' },
                   { label: 'No Auto-Sell', val: 'You keep your SAIL.r. Amy does not manage exits' },
