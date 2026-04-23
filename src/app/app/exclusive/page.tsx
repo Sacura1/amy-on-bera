@@ -1698,19 +1698,30 @@ export default function ExclusivePage() {
               </>
             }
             footer={
-              <div className="space-y-1 text-xs">
-                <div className="flex items-center gap-2 text-gray-400"><span>⏳</span><span>Deposit USDe to receive discounted SAIL.r allocation</span></div>
-                <div className="flex items-center gap-2 text-gray-400"><span>📦</span><span>6 month lock with weekly rewards in USDe</span></div>
-                <div className="flex items-center gap-2 text-gray-400"><span>🔒</span><span>Inventory-backed access via multisig custody</span></div>
-                 <div className="flex items-center gap-2 pt-10">
-  <h2 className="font-black text-yellow-400 text-lg sm:text-xl">
-    Status:
-  </h2>
-  <h2 className="font-black text-gray-400 text-lg sm:text-xl">
-    Launching May
-  </h2>
-</div>           </div>
-              
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="w-3.5 h-3.5 flex-shrink-0">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>Deposit USDe to receive discounted SAIL.r allocation</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                  </svg>
+                  <span>6 month lock with weekly rewards in USDe</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <span>Inventory-backed access via multisig custody</span>
+                </div>
+                <div className="flex items-center gap-1.5 pt-2 mt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span className="text-gray-500">Status:</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black" style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.30)', color: '#d4af37' }}>Launching May</span>
+                </div>
+              </div>
             }
             
             
@@ -1745,10 +1756,25 @@ export default function ExclusivePage() {
               </>
             }
             footer={
-              <div className="space-y-1 text-xs">
-                <div className="flex items-center gap-2 text-gray-400"><span>⭐️</span><span>Direct routing into partner teams</span></div>
-                <div className="flex items-center gap-2 text-gray-400"><span>⚡️</span><span>Early access to new opportunities &amp; whitelists</span></div>
-                <div className="flex items-center gap-2 text-gray-400"><span>🧠</span><span>Guidance on capital allocation &amp; positioning</span></div>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                  <span>Direct routing into partner teams</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                  <span>Early access to new opportunities &amp; whitelists</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                  </svg>
+                  <span>Guidance on capital allocation &amp; positioning</span>
+                </div>
               </div>
             }
           />
