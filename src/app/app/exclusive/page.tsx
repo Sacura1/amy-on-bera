@@ -436,7 +436,7 @@ function SailrModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700/50">
           <div className="flex items-center gap-3">
             <Image src="/sail.png" alt="SAIL.r" width={28} height={28} className="rounded-full" />
-            <span className="font-bold text-white">SAIL — 18% Discount Access</span>
+            <span className="font-bold text-white">SAIL.r — 18% Discount Access</span>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-white text-xl leading-none">×</button>
         </div>
@@ -1165,31 +1165,26 @@ function PerkCard({
             <button
               type="button"
               onClick={e => { e.stopPropagation(); onInfo(); }}
-              className="text-left hover:opacity-90 transition-opacity"
-              style={{ fontSize: '20px', fontWeight: 600, color: '#ffffff', lineHeight: 1.3 }}
+              className="text-left flex items-center gap-1.5 group"
               title="Learn more"
+              style={{ background: 'none', border: 'none', padding: 0 }}
             >
-              {title}
+              <span
+                className="transition-all duration-200 group-hover:text-white"
+                style={{ fontSize: '20px', fontWeight: 600, color: 'rgba(255,255,255,0.82)', lineHeight: 1.3, display: 'inline-block', transition: 'color 200ms, transform 200ms', transformOrigin: 'left center' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLSpanElement).style.transform = 'scale(1.03)'; (e.currentTarget as HTMLSpanElement).style.color = '#ffffff'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLSpanElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLSpanElement).style.color = 'rgba(255,255,255,0.82)'; }}
+              >
+                {title}
+              </span>
+              <span
+                className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black transition-all duration-200"
+                style={{ background: 'rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.50)', border: '1px solid rgba(255,255,255,0.15)', marginTop: '1px' }}
+              >i</span>
             </button>
           ) : (
             <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#ffffff', lineHeight: 1.3 }}>{title}</h3>
           )}
-          {onInfo && (() => {
-            const ac = infoAccent || '#facc15';
-            const bgBase = infoAccent ? 'rgba(34,197,94,0.15)' : 'rgba(250,204,21,0.15)';
-            const bgHover = infoAccent ? 'rgba(34,197,94,0.3)' : 'rgba(250,204,21,0.3)';
-            const border = infoAccent ? '1px solid rgba(34,197,94,0.35)' : '1px solid rgba(250,204,21,0.35)';
-            return (
-              <button
-                onClick={e => { e.stopPropagation(); onInfo(); }}
-                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black transition-all duration-200"
-                style={{ background: bgBase, color: ac, border }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = bgHover; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = bgBase; }}
-                title="Learn more"
-              >i</button>
-            );
-          })()}
         </div>
         <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }} className="space-y-2">
           {description}
@@ -1677,13 +1672,13 @@ export default function ExclusivePage() {
           {/* SAIL.r */}
           <PerkCard
             minTier="gold"
-            title="SAIL — 18% Discount Access"
+            title="SAIL.r — 18% Discount Access"
             onInfo={() => setShowSailrInfo(true)}
             userTier={userTier}
             isFull={sailrFull}
             onUnlock={() => setOpenModal('sailr')}
             assetImage="/sail.png"
-            assetName="SAIL"
+            assetName="SAIL.r"
             assetSubtitle="Liquid Royalty Token"
             description={
               <>
