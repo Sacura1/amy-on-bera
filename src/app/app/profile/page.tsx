@@ -35,6 +35,7 @@ function ProfilePageContent() {
   const [usedReferralCode, setUsedReferralCode] = useState('');
   const [referralCount, setReferralCount] = useState(0);
   const [referralInputStatus, setReferralInputStatus] = useState('');
+  const [refInputFocused, setRefInputFocused] = useState(false);
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
   const [currentTier, setCurrentTier] = useState('none');
   const [totalMultiplier, setTotalMultiplier] = useState(1);
@@ -1193,109 +1194,330 @@ function ProfilePageContent() {
         )}
 
         {/* Referral Section — visible to all connected wallets */}
-        {walletAddress && (
-          <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 overflow-hidden">
-            {/* Enter Referral Code */}
-            {!usedReferralCode && (
-              <div className="p-4 md:p-6 border-b border-gray-700/50">
-                <h3 className="text-lg md:text-xl font-bold text-yellow-400 mb-1">
-                  Got a referral code?
-                </h3>
-                <p className="text-gray-400 text-sm mb-1">
-                  Earn up to <span className="text-yellow-400 font-semibold">1,000 pts</span> by entering a referral code.
-                </p>
-                <p className="text-gray-400 text-xs mb-4">
-                  Unlock the full reward by holding 300+ $AMY for 7 days. Can only be entered once and cannot be changed.
-                </p>
-                <div className="flex gap-3 flex-col sm:flex-row">
-                  <input
-                    type="text"
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                    maxLength={8}
-                    placeholder="XXXXXXXX"
-                    className="flex-1 px-4 py-3 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-lg font-mono uppercase tracking-wider focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500"
-                  />
-                  <button
-                    onClick={useReferralCode}
-                    className="btn-samy btn-samy-enhanced text-white px-6 py-3 rounded-full text-base font-bold uppercase whitespace-nowrap"
-                  >
-                    SUBMIT
-                  </button>
-                </div>
-                {referralInputStatus && (
-                  <p className="text-xs text-gray-400 mt-2">{referralInputStatus}</p>
-                )}
-              </div>
-            )}
+        {walletAddress && (() => {
+          const isActive = isEligible;
+          const hasEnteredCode = !!usedReferralCode;
+          const hasOwnCode = !!userReferralCode;
+          const g = '#d4af37';
+          const gBg = 'rgba(212,175,55,0.10)';
+          const gBorder = '1px solid rgba(212,175,55,0.30)';
 
-            {/* Already Used Code */}
-            {usedReferralCode && (
-              <div className="p-4 md:p-6 border-b border-gray-700/50">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-green-400 text-lg">✓</span>
-                  <h3 className="text-lg md:text-xl font-bold text-green-400">Referral Code Used</h3>
-                </div>
-                <p className="text-gray-300 text-sm">
-                  You used referral code:{' '}
-                  <span className="text-yellow-400 font-mono font-bold">{usedReferralCode}</span>
-                </p>
-              </div>
-            )}
+          // Header config per state
+          const header = isActive
+            ? hasEnteredCode
+              ? { eyebrow: 'Your referral system is active!', title: 'Keep inviting and keep earning.', sub: 'Your code is active. Invite others to earn more points with no limits.' }
+              : { eyebrow: "You're ready to earn more!", title: 'Enter a referral code to earn up to 1,000 points', sub: 'Enter a referral code to activate your rewards and start earning points from your invites.' }
+            : hasEnteredCode
+              ? { eyebrow: "You've earned your referral reward!", title: 'You earned 1,000 points', sub: 'Thanks! Your referral code has been accepted and your reward has been added to your account.' }
+              : { eyebrow: 'Got a referral code?', title: 'Earn up to 1,000 points', sub: 'Enter a referral code to earn your first 1,000 points' };
 
-            {/* Your Referral Code */}
-            <div className="p-4 md:p-6 border-b border-gray-700/50">
-              {!userReferralCode ? (
-                <div className="text-center">
-                  <p className="text-gray-300 mb-1 font-semibold">Share your referral code</p>
-                  <p className="text-gray-500 text-sm mb-4">
-                    Every verified user who signs up with your code counts as a referral and boosts your points multiplier.
-                  </p>
-                  <button
-                    onClick={generateReferralCode}
-                    disabled={isGeneratingCode}
-                    className="btn-samy btn-samy-enhanced text-white px-6 py-3 rounded-full text-base font-bold uppercase disabled:opacity-50"
-                  >
-                    {isGeneratingCode ? 'GENERATING...' : 'GENERATE CODE'}
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <h3 className="text-lg font-bold text-yellow-400 mb-1">Your Referral Code</h3>
-                  <p className="text-gray-500 text-sm mb-3">Share this code or link — every person who signs up with it boosts your points multiplier.</p>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <div className="bg-black/50 px-6 py-3 rounded-xl border-2 border-yellow-400/50 font-mono text-2xl text-yellow-300 font-bold tracking-wider">
-                      {userReferralCode}
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(userReferralCode)}
-                      className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm text-white font-semibold transition-colors"
-                    >
-                      Copy Code
-                    </button>
-                    <button
-                      onClick={() => copyToClipboard(`${window.location.origin}/app/profile?ref=${userReferralCode}`)}
-                      className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm text-white font-semibold transition-colors"
-                    >
-                      Copy Link
-                    </button>
+          return (
+            <div style={{
+              background: 'linear-gradient(145deg, rgba(18,22,32,0.45), rgba(10,14,20,0.55))',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(212,175,55,0.22)',
+              borderRadius: '20px',
+              overflow: 'hidden',
+              boxShadow: '0 0 0 1px rgba(212,175,55,0.06) inset, 0 2px 0 rgba(255,255,255,0.04) inset, 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(212,175,55,0.06)',
+            }}>
+
+              {/* ── Header ── */}
+              <div className="relative p-5 sm:p-7" style={{ background: 'linear-gradient(135deg, rgba(18,22,32,0.35) 55%, rgba(28,20,6,0.40))', borderBottom: '1px solid rgba(212,175,55,0.10)' }}>
+                <div className="flex items-start gap-3">
+                  <div style={{ background: gBg, border: gBorder, borderRadius: '12px', padding: '10px', flexShrink: 0, marginTop: 2 }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke={g} strokeWidth="1.7" className="w-6 h-6">
+                      <path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/>
+                      <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold mb-0.5" style={{ color: g }}>{header.eyebrow}</p>
+                    <h2 className="text-white font-black text-xl sm:text-2xl leading-tight mb-1">{header.title}</h2>
+                    <p className="text-gray-400 text-sm">{header.sub}</p>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Completed Referrals */}
-            <div className="p-4 md:p-6">
-              <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 p-4 rounded-xl border-2 border-purple-500/30">
-                <h3 className="text-purple-400 font-bold text-sm mb-2">Your referrals</h3>
-                <p className="text-4xl md:text-5xl font-black text-white">{referralCount}</p>
-                <p className="text-gray-400 text-xs mt-2">
-                  Each invite earns you <span className="text-yellow-400 font-semibold">+50 pts</span>. An additional <span className="text-yellow-400 font-semibold">+450 pts</span> if they hold 300+ $AMY for 7 continuous days — and they also get <span className="text-yellow-400 font-semibold">+900 pts</span>.
-                </p>
+              <div className="p-4 sm:p-6 flex flex-col gap-4">
+
+                {/* ── State 4 top: side-by-side referral code box + entered confirmation ── */}
+                {isActive && hasEnteredCode && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Your code */}
+                    <div className="rounded-xl p-4" style={{ background: 'linear-gradient(145deg, rgba(36,28,8,0.92), rgba(20,16,4,0.97))', border: gBorder, boxShadow: '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,215,80,0.08)' }}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg viewBox="0 0 24 24" fill="none" stroke={g} strokeWidth="1.7" className="w-4 h-4 flex-shrink-0"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>
+                        <p className="font-bold text-sm" style={{ color: g }}>Your Referral Code</p>
+                      </div>
+                      <p className="text-gray-400 text-xs mb-3">Share this code or link – every person who signs up with it boosts your points.</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="font-mono font-black text-xl tracking-widest text-white px-4 py-2 rounded-lg" style={{ background: 'rgba(0,0,0,0.4)', border: gBorder }}>{userReferralCode || '—'}</div>
+                        <button onClick={() => copyToClipboard(userReferralCode)} className="px-3 py-2 text-xs font-semibold rounded-lg text-white transition-colors" style={{ background: 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: '1px solid rgba(255,255,255,0.10)', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>Copy Code</button>
+                        <button onClick={() => copyToClipboard(`${window.location.origin}/app/profile?ref=${userReferralCode}`)} className="px-3 py-2 text-xs font-semibold rounded-lg text-white transition-colors" style={{ background: 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: '1px solid rgba(255,255,255,0.10)', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>Copy Link</button>
+                      </div>
+                    </div>
+                    {/* Code entered confirmation */}
+                    <div className="rounded-xl p-4 flex flex-col justify-center" style={{ background: 'linear-gradient(145deg, rgba(10,32,18,0.92), rgba(6,22,12,0.96))', border: '1px solid rgba(34,197,94,0.28)', boxShadow: '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(34,197,94,0.08)' }}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" className="w-5 h-5 flex-shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" strokeLinecap="round"/><polyline points="22 4 12 14.01 9 11.01" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <p className="font-bold text-sm text-green-400">Referral code entered</p>
+                      </div>
+                      <p className="text-gray-300 text-xs">Your reward has been applied and you&apos;re now earning points.</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── State 3: referral code box only (active, no code entered) ── */}
+                {isActive && !hasEnteredCode && (
+                  <>
+                    {/* Input */}
+                    <div className="flex gap-2">
+                      <div className="flex-1 flex items-center gap-3 px-4 rounded-xl transition-all duration-200"
+                        style={{ background: 'linear-gradient(145deg, rgba(22,28,40,0.95), rgba(10,14,22,0.98))', border: `1px solid ${refInputFocused || referralCode ? 'rgba(212,175,55,0.45)' : 'rgba(255,255,255,0.10)'}`, boxShadow: refInputFocused || referralCode ? 'inset 0 2px 6px rgba(0,0,0,0.4), 0 0 0 3px rgba(212,175,55,0.08)' : 'inset 0 2px 6px rgba(0,0,0,0.4)' }}>
+                        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.6" className="w-4 h-4 flex-shrink-0 transition-colors duration-200" style={{ stroke: refInputFocused || referralCode ? g : '#4b5563' }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input
+                          type="text"
+                          value={referralCode}
+                          onChange={e => setReferralCode(e.target.value.toUpperCase())}
+                          onFocus={() => setRefInputFocused(true)}
+                          onBlur={() => setRefInputFocused(false)}
+                          maxLength={8}
+                          placeholder="e.g. BPZMXT6H"
+                          className="flex-1 bg-transparent py-3.5 focus:outline-none"
+                          style={{ color: '#fff', fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '15px', fontWeight: 700, letterSpacing: referralCode ? '0.22em' : '0.05em', textTransform: 'uppercase' }}
+                        />
+                      </div>
+                      <button onClick={useReferralCode} disabled={!referralCode.trim()} className="px-6 py-3.5 rounded-xl text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-40" style={{ background: referralCode.trim() ? g : 'rgba(212,175,55,0.3)', color: '#0a0e14', boxShadow: referralCode.trim() ? '0 4px 14px rgba(212,175,55,0.3)' : 'none' }}>SUBMIT</button>
+                    </div>
+                    {referralInputStatus && <p className="text-xs text-gray-400 -mt-2">{referralInputStatus}</p>}
+                    {/* Your code box */}
+                    <div className="rounded-xl p-4" style={{ background: 'linear-gradient(145deg, rgba(36,28,8,0.92), rgba(20,16,4,0.97))', border: gBorder, boxShadow: '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,215,80,0.08)' }}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg viewBox="0 0 24 24" fill="none" stroke={g} strokeWidth="1.7" className="w-4 h-4 flex-shrink-0"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>
+                        <p className="font-bold text-sm" style={{ color: g }}>Your Referral Code</p>
+                      </div>
+                      <p className="text-gray-400 text-xs mb-3">Share this code or link – every person who signs up with it boosts your points.</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="font-mono font-black text-xl tracking-widest text-white px-4 py-2 rounded-lg" style={{ background: 'rgba(0,0,0,0.4)', border: gBorder }}>{userReferralCode || '—'}</div>
+                        <button onClick={() => copyToClipboard(userReferralCode)} className="px-3 py-2 text-xs font-semibold rounded-lg text-white transition-colors" style={{ background: 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: '1px solid rgba(255,255,255,0.10)', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>Copy Code</button>
+                        <button onClick={() => copyToClipboard(`${window.location.origin}/app/profile?ref=${userReferralCode}`)} className="px-3 py-2 text-xs font-semibold rounded-lg text-white transition-colors" style={{ background: 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: '1px solid rgba(255,255,255,0.10)', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>Copy Link</button>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* ── State 2: code entered confirmation (started user) ── */}
+                {!isActive && hasEnteredCode && (
+                  <div className="rounded-xl p-4" style={{ background: 'linear-gradient(145deg, rgba(10,32,18,0.92), rgba(6,22,12,0.96))', border: '1px solid rgba(34,197,94,0.28)', boxShadow: '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(34,197,94,0.08)' }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" className="w-5 h-5 flex-shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" strokeLinecap="round"/><polyline points="22 4 12 14.01 9 11.01" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <p className="font-bold text-sm text-green-400">Referral code entered</p>
+                    </div>
+                    <p className="text-gray-300 text-xs">Referral active — you&apos;re now earning points</p>
+                  </div>
+                )}
+
+                {/* ── State 1: input only (started, no code) ── */}
+                {!isActive && !hasEnteredCode && (
+                  <>
+                    <div className="flex gap-2">
+                      <div className="flex-1 flex items-center gap-3 px-4 rounded-xl transition-all duration-200"
+                        style={{ background: 'linear-gradient(145deg, rgba(22,28,40,0.95), rgba(10,14,22,0.98))', border: `1px solid ${refInputFocused || referralCode ? 'rgba(212,175,55,0.45)' : 'rgba(255,255,255,0.10)'}`, boxShadow: refInputFocused || referralCode ? 'inset 0 2px 6px rgba(0,0,0,0.4), 0 0 0 3px rgba(212,175,55,0.08)' : 'inset 0 2px 6px rgba(0,0,0,0.4)' }}>
+                        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.6" className="w-4 h-4 flex-shrink-0 transition-colors duration-200" style={{ stroke: refInputFocused || referralCode ? g : '#4b5563' }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input
+                          type="text"
+                          value={referralCode}
+                          onChange={e => setReferralCode(e.target.value.toUpperCase())}
+                          onFocus={() => setRefInputFocused(true)}
+                          onBlur={() => setRefInputFocused(false)}
+                          maxLength={8}
+                          placeholder="e.g. BPZMXT6H"
+                          className="flex-1 bg-transparent py-3.5 focus:outline-none"
+                          style={{ color: '#fff', fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '15px', fontWeight: 700, letterSpacing: referralCode ? '0.22em' : '0.05em', textTransform: 'uppercase' }}
+                        />
+                      </div>
+                      <button onClick={useReferralCode} disabled={!referralCode.trim()} className="px-6 py-3.5 rounded-xl text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-40" style={{ background: referralCode.trim() ? g : 'rgba(212,175,55,0.3)', color: '#0a0e14', boxShadow: referralCode.trim() ? '0 4px 14px rgba(212,175,55,0.3)' : 'none' }}>SUBMIT</button>
+                    </div>
+                    {referralInputStatus && <p className="text-xs text-gray-400 -mt-2">{referralInputStatus}</p>}
+                  </>
+                )}
+
+                {/* ── How you can earn ── */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div style={{ width: 16, height: 2, background: g, borderRadius: 2 }} />
+                    <p className="font-bold text-sm" style={{ color: g }}>How you can earn</p>
+                    <div style={{ width: 16, height: 2, background: g, borderRadius: 2 }} />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {/* Tile 1: Enter a code */}
+                    <div className="rounded-xl p-3 flex items-start gap-3" style={{ background: 'linear-gradient(145deg, rgba(38,44,58,0.85), rgba(18,22,32,0.92))', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 4px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)' }}>
+                      <div style={{ background: gBg, border: gBorder, borderRadius: '8px', padding: '7px', flexShrink: 0 }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke={g} strokeWidth="1.8" className="w-4 h-4"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-white text-sm">Enter a code</p>
+                        {hasEnteredCode ? (
+                          <>
+                            <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-green-500 text-white">Completed</span>
+                            <p className="text-gray-400 text-xs mt-1">You&apos;ve received 1,000 points.</p>
+                          </>
+                        ) : (
+                          <p className="text-gray-400 text-xs mt-0.5">Start earning points right away.</p>
+                        )}
+                      </div>
+                    </div>
+                    {/* Tile 2: Invite started users */}
+                    <div className="rounded-xl p-3 flex items-start gap-3" style={{ background: 'linear-gradient(145deg, rgba(40,34,14,0.88), rgba(22,18,6,0.94))', border: gBorder, boxShadow: '0 4px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,215,80,0.07)' }}>
+                      <div style={{ background: gBg, border: gBorder, borderRadius: '8px', padding: '7px', flexShrink: 0 }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke={g} strokeWidth="1.8" className="w-4 h-4"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round"/></svg>
+                      </div>
+                      <div>
+                        <p className="font-bold text-white text-sm">Invite started users</p>
+                        <p className="text-gray-400 text-xs">(wallet + social)</p>
+                        <p className="font-bold text-xs mt-1" style={{ color: g }}>Earn +50 points each</p>
+                      </div>
+                    </div>
+                    {/* Tile 3: Invite active users */}
+                    <div className="rounded-xl p-3 flex items-start gap-3" style={{ background: 'linear-gradient(145deg, rgba(40,34,14,0.88), rgba(22,18,6,0.94))', border: gBorder, boxShadow: '0 4px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,215,80,0.07)' }}>
+                      <div style={{ background: gBg, border: gBorder, borderRadius: '8px', padding: '7px', flexShrink: 0 }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke={g} strokeWidth="1.8" className="w-4 h-4"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+                      </div>
+                      <div>
+                        <p className="font-bold text-white text-sm">Invite active users</p>
+                        <p className="text-gray-400 text-xs">(holding 300+ AMY)</p>
+                        <p className="font-bold text-xs mt-1" style={{ color: g }}>Earn +450 points each</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── AMY banner ── */}
+                <div className="rounded-xl p-4 flex items-center justify-between gap-4" style={{ background: 'linear-gradient(135deg, rgba(36,28,8,0.92) 0%, rgba(24,20,6,0.96) 60%, rgba(18,14,4,0.98) 100%)', border: '1px solid rgba(212,175,55,0.28)', boxShadow: '0 6px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,215,80,0.08), 0 0 20px rgba(212,175,55,0.06)' }}>
+                  <div className="flex items-start gap-3">
+                    <div style={{ background: gBg, border: gBorder, borderRadius: '10px', padding: '9px', flexShrink: 0 }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke={g} strokeWidth="1.7" className="w-5 h-5"><rect x="5" y="11" width="14" height="11" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" strokeLinecap="round"/></svg>
+                    </div>
+                    <div>
+                      <p className="font-black text-base sm:text-lg" style={{ color: g }}>
+                        {isActive ? 'Keep your balance above 300 AMY' : 'Unlock your own referral code'}
+                      </p>
+                      <p className="text-gray-300 text-sm mt-0.5">
+                        {isActive
+                          ? 'to keep your referral code active and continue earning rewards.'
+                          : 'Hold 300 AMY to unlock your own referral code and start earning rewards from others.'}
+                      </p>
+                    </div>
+                  </div>
+                  {/* AMY coins illustration */}
+                  <div className="hidden sm:block flex-shrink-0">
+                    <svg viewBox="0 0 140 118" className="w-28 h-24" style={{ filter: 'drop-shadow(0 0 14px rgba(212,175,55,0.45))' }}>
+                      <defs>
+                        <radialGradient id="cg1" cx="36%" cy="28%" r="68%">
+                          <stop offset="0%" stopColor="#fff0a0"/>
+                          <stop offset="30%" stopColor="#f0c830"/>
+                          <stop offset="70%" stopColor="#c49a10"/>
+                          <stop offset="100%" stopColor="#7a5c00"/>
+                        </radialGradient>
+                        <radialGradient id="cg2" cx="36%" cy="28%" r="68%">
+                          <stop offset="0%" stopColor="#ffe070"/>
+                          <stop offset="30%" stopColor="#d4a820"/>
+                          <stop offset="70%" stopColor="#a87c08"/>
+                          <stop offset="100%" stopColor="#5e4200"/>
+                        </radialGradient>
+                        <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+                          <stop offset="0%" stopColor="#d4af37" stopOpacity="0.55"/>
+                          <stop offset="60%" stopColor="#d4af37" stopOpacity="0.18"/>
+                          <stop offset="100%" stopColor="#d4af37" stopOpacity="0"/>
+                        </radialGradient>
+                      </defs>
+                      {/* Halo glow ring */}
+                      <ellipse cx="78" cy="104" rx="54" ry="12" fill="url(#halo)"/>
+                      <ellipse cx="78" cy="103" rx="42" ry="7" fill="none" stroke="#d4af37" strokeWidth="1.2" opacity="0.45"/>
+                      {/* Back coin */}
+                      <circle cx="88" cy="64" r="36" fill="url(#cg2)"/>
+                      <circle cx="88" cy="64" r="36" fill="none" stroke="#a07808" strokeWidth="1.5"/>
+                      <circle cx="88" cy="64" r="30" fill="none" stroke="rgba(255,230,80,0.22)" strokeWidth="2"/>
+                      {/* Shine on back coin */}
+                      <ellipse cx="79" cy="50" rx="10" ry="5" fill="rgba(255,255,200,0.18)" transform="rotate(-20,79,50)"/>
+                      {/* A — 3D emboss: shadow layer + face layer */}
+                      <text x="89.5" y="74.5" textAnchor="middle" fontSize="24" fontWeight="900" fontFamily="Arial Black,Arial,sans-serif" fill="rgba(80,50,0,0.55)" letterSpacing="-0.5">A</text>
+                      <text x="88" y="73" textAnchor="middle" fontSize="24" fontWeight="900" fontFamily="Arial Black,Arial,sans-serif" fill="rgba(160,110,20,0.92)" letterSpacing="-0.5">A</text>
+                      <text x="87" y="72" textAnchor="middle" fontSize="24" fontWeight="900" fontFamily="Arial Black,Arial,sans-serif" fill="rgba(210,170,60,0.5)" letterSpacing="-0.5">A</text>
+                      {/* Front coin */}
+                      <circle cx="55" cy="56" r="36" fill="url(#cg1)"/>
+                      <circle cx="55" cy="56" r="36" fill="none" stroke="#b89010" strokeWidth="1.5"/>
+                      <circle cx="55" cy="56" r="30" fill="none" stroke="rgba(255,240,100,0.25)" strokeWidth="2"/>
+                      {/* Shine on front coin */}
+                      <ellipse cx="46" cy="42" rx="11" ry="5.5" fill="rgba(255,255,200,0.22)" transform="rotate(-20,46,42)"/>
+                      {/* A — 3D emboss: shadow layer + face layer */}
+                      <text x="56.5" y="66.5" textAnchor="middle" fontSize="24" fontWeight="900" fontFamily="Arial Black,Arial,sans-serif" fill="rgba(80,50,0,0.55)" letterSpacing="-0.5">A</text>
+                      <text x="55" y="65" textAnchor="middle" fontSize="24" fontWeight="900" fontFamily="Arial Black,Arial,sans-serif" fill="rgba(160,110,20,0.92)" letterSpacing="-0.5">A</text>
+                      <text x="54" y="64" textAnchor="middle" fontSize="24" fontWeight="900" fontFamily="Arial Black,Arial,sans-serif" fill="rgba(220,180,70,0.48)" letterSpacing="-0.5">A</text>
+                      {/* Sparkles */}
+                      <circle cx="22" cy="22" r="2" fill="#ffe060" opacity="0.75"/>
+                      <circle cx="16" cy="38" r="1.2" fill="#ffd040" opacity="0.55"/>
+                      <circle cx="126" cy="28" r="2.2" fill="#ffe060" opacity="0.70"/>
+                      <circle cx="133" cy="50" r="1.3" fill="#ffd040" opacity="0.50"/>
+                      <circle cx="110" cy="14" r="1.5" fill="#fff080" opacity="0.60"/>
+                      {/* Star sparkle top-left */}
+                      <g transform="translate(30,10) scale(0.55)" fill="#ffe060" opacity="0.7">
+                        <polygon points="8,0 9.8,5.8 16,5.8 11,9.2 13,15 8,11.5 3,15 5,9.2 0,5.8 6.2,5.8"/>
+                      </g>
+                      {/* Star sparkle top-right */}
+                      <g transform="translate(112,8) scale(0.45)" fill="#ffe060" opacity="0.65">
+                        <polygon points="8,0 9.8,5.8 16,5.8 11,9.2 13,15 8,11.5 3,15 5,9.2 0,5.8 6.2,5.8"/>
+                      </g>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* ── Referral system locked strip (started users only) ── */}
+                {!isActive && (
+                  <div className="rounded-xl p-4 flex items-center justify-between gap-3" style={{ background: 'linear-gradient(145deg, rgba(44,14,68,0.88), rgba(22,8,38,0.95))', border: '1px solid rgba(139,92,246,0.28)', boxShadow: '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(167,139,250,0.07)' }}>
+                    <div className="flex items-center gap-3">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.7" className="w-5 h-5 flex-shrink-0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round"/></svg>
+                      <div>
+                        <p className="font-bold text-sm text-purple-400">Referral system locked</p>
+                        <p className="text-gray-400 text-xs">Hold 300 AMY to activate your own referral code and start inviting others.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Your referrals (active users only) ── */}
+                {isActive && (
+                  <div className="rounded-xl p-4" style={{ background: 'linear-gradient(145deg, rgba(44,14,68,0.88), rgba(22,8,38,0.95))', border: '1px solid rgba(139,92,246,0.28)', boxShadow: '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(167,139,250,0.07)' }}>
+                    <p className="text-purple-400 font-bold text-sm mb-2">Your referrals</p>
+                    <div className="flex items-start gap-4">
+                      <p className="text-white font-black text-4xl">{referralCount}</p>
+                      <div className="flex-1">
+                        <p className="text-gray-300 text-xs">Each started user (wallet + social) earns you <span style={{ color: g }} className="font-bold">+50 pts</span>.</p>
+                        <p className="text-gray-300 text-xs mt-1">Each active user (holding 300+ AMY) earns you <span style={{ color: g }} className="font-bold">+450 pts</span>.</p>
+                      </div>
+                      {referralCount === 0 && (
+                        <div className="flex flex-col items-center gap-1 text-center flex-shrink-0">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5" className="w-8 h-8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round"/></svg>
+                          <p className="text-gray-500 text-[10px] leading-tight">No referrals yet<br/>Start inviting!</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Info footer ── */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.7" className="w-4 h-4 flex-shrink-0 mt-0.5 sm:mt-0 mr-2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" strokeLinecap="round"/></svg>
+                  <p className="text-gray-500 text-xs">Each <strong className="text-gray-300">started user</strong> (wallet + social) earns you <span style={{ color: g }} className="font-semibold">+50 pts</span>.</p>
+                  <div className="hidden sm:block mx-4 h-3 w-px bg-gray-700" />
+                  <p className="text-gray-500 text-xs">Each <strong className="text-gray-300">active user</strong> (holding 300+ AMY) earns you <span style={{ color: g }} className="font-semibold">+450 pts</span>.</p>
+                </div>
+
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Admin Section */}
         {isAdmin && (
