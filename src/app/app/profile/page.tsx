@@ -408,7 +408,7 @@ function ProfilePageContent() {
     }
   };
 
-  const useReferralCode = async () => {
+  const applyReferralCode = async () => {
     if (!walletAddress || !referralCode.trim()) return;
     setReferralInputStatus('Submitting...');
     try {
@@ -1290,7 +1290,7 @@ function ProfilePageContent() {
                           style={{ color: '#fff', fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '15px', fontWeight: 700, letterSpacing: referralCode ? '0.22em' : '0.05em', textTransform: 'uppercase' }}
                         />
                       </div>
-                      <button onClick={() => { if (!xConnected && !discordConnected && !telegramConnected) { setShowNoSocialModal(true); } else { useReferralCode(); } }} disabled={!referralCode.trim()} className="px-6 py-3.5 rounded-xl text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-40" style={{ background: referralCode.trim() ? g : 'rgba(212,175,55,0.3)', color: '#0a0e14', boxShadow: referralCode.trim() ? '0 4px 14px rgba(212,175,55,0.3)' : 'none' }}>SUBMIT</button>
+                      <button onClick={() => { if (!xConnected && !discordConnected && !telegramConnected) { setShowNoSocialModal(true); } else { applyReferralCode(); } }} disabled={!referralCode.trim()} className="px-6 py-3.5 rounded-xl text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-40" style={{ background: referralCode.trim() ? g : 'rgba(212,175,55,0.3)', color: '#0a0e14', boxShadow: referralCode.trim() ? '0 4px 14px rgba(212,175,55,0.3)' : 'none' }}>SUBMIT</button>
                     </div>
                     {referralInputStatus && <p className="text-xs text-gray-400 -mt-2">{referralInputStatus}</p>}
                     {/* Your code box */}
@@ -1339,7 +1339,7 @@ function ProfilePageContent() {
                           style={{ color: '#fff', fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '15px', fontWeight: 700, letterSpacing: referralCode ? '0.22em' : '0.05em', textTransform: 'uppercase' }}
                         />
                       </div>
-                      <button onClick={() => { if (!xConnected && !discordConnected && !telegramConnected) { setShowNoSocialModal(true); } else { useReferralCode(); } }} disabled={!referralCode.trim()} className="px-6 py-3.5 rounded-xl text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-40" style={{ background: referralCode.trim() ? g : 'rgba(212,175,55,0.3)', color: '#0a0e14', boxShadow: referralCode.trim() ? '0 4px 14px rgba(212,175,55,0.3)' : 'none' }}>SUBMIT</button>
+                      <button onClick={() => { if (!xConnected && !discordConnected && !telegramConnected) { setShowNoSocialModal(true); } else { applyReferralCode(); } }} disabled={!referralCode.trim()} className="px-6 py-3.5 rounded-xl text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-40" style={{ background: referralCode.trim() ? g : 'rgba(212,175,55,0.3)', color: '#0a0e14', boxShadow: referralCode.trim() ? '0 4px 14px rgba(212,175,55,0.3)' : 'none' }}>SUBMIT</button>
                     </div>
                     {referralInputStatus && <p className="text-xs text-gray-400 -mt-2">{referralInputStatus}</p>}
                   </>
