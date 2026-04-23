@@ -9,7 +9,6 @@ import { client } from '@/app/client';
 import { berachain } from '@/lib/chain';
 import { API_BASE_URL } from '@/lib/constants';
 
-const HONEY_ADDRESS = '0xfcbd14dc51f0a4d49d5e53c2e0950e0bc26d0dce';
 const USDE_ADDRESS  = '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -33,7 +32,8 @@ interface SailrQuote {
   liveSailPrice: number;
   discountPercent: number;
   discountedSailPrice: number;
-  honeyAmountInput: number;
+  usdeAmountInput: number;
+  honeyAmountInput?: number;
   sailAmountOutput: number;
   escrowWallet: string;
 }
@@ -59,7 +59,8 @@ interface SailrPurchase {
   quote_id?: string;
   wallet?: string;
   qualification_tier?: string;
-  honey_amount_input: number;
+  deposit_usde: number;
+  honey_amount_input?: number;
   sail_amount_output: number;
   sail_margin_to_amy?: number;
   payment_tx_hash?: string;
@@ -365,7 +366,7 @@ function SailrModal({
   onSuccess: () => void;
 }) {
   const [step, setStep] = useState<'amount' | 'quote' | 'done'>('amount');
-  const [honeyAmount, setHoneyAmount] = useState('');
+  const [usdeAmount, setUsdeAmount] = useState('');
   const [quote, setQuote] = useState<SailrQuote | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -379,7 +380,7 @@ function SailrModal({
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${API_BASE_URL}/api/exclusive/sailr/quote?wallet=${wallet}&honey_amount=${honeyAmount}`);
+      const res = await fetch(`${API_BASE_URL}/api/exclusive/sailr/quote?wallet=${wallet}&deposit_usde=${usdeAmount}`);
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to get quote');
       setQuote(data.data);
@@ -398,8 +399,9 @@ function SailrModal({
     setLoading(true);
     setError('');
     try {
-      const honeyContract = getContract({ client, chain: berachain, address: HONEY_ADDRESS as `0x${string}` });
-      const tx = transfer({ contract: honeyContract, to: quote.escrowWallet as `0x${string}`, amount: String(quote.honeyAmountInput) });
+      const usdeContract = getContract({ client, chain: berachain, address: USDE_ADDRESS as `0x${string}` });
+      const quoteAmount = quote.usdeAmountInput ?? quote.honeyAmountInput ?? 0;
+      const tx = transfer({ contract: usdeContract, to: quote.escrowWallet as `0x${string}`, amount: String(quoteAmount) });
       const receipt = await sendTransaction({ transaction: tx, account });
       const txHash = receipt.transactionHash;
 
@@ -417,7 +419,7 @@ function SailrModal({
       const raw = e as Record<string, unknown>;
       const msg = raw?.shortMessage as string || raw?.message as string || (e instanceof Error ? e.message : '') || String(e);
       if (msg.includes('0xf4d678b8') || msg.includes('0xec442f05') || msg.toLowerCase().includes('insufficient')) {
-        setError('Insufficient HONEY balance in your wallet.');
+        setError('Insufficient USDe balance in your wallet.');
       } else if (msg.toLowerCase().includes('user rejected') || msg.toLowerCase().includes('denied') || msg.toLowerCase().includes('cancelled') || (raw?.code === 4001)) {
         setError('Transaction cancelled.');
       } else {
@@ -443,11 +445,11 @@ function SailrModal({
           {step === 'amount' && (
             <>
               <div>
-                <label className="text-sm text-gray-400 mb-1.5 block">HONEY amount to spend <span className="text-gray-500">(min $10)</span></label>
+                <label className="text-sm text-gray-400 mb-1.5 block">USDe amount to spend <span className="text-gray-500">(min $10)</span></label>
                 <input
                   type="number"
-                  value={honeyAmount}
-                  onChange={e => setHoneyAmount(e.target.value)}
+                  value={usdeAmount}
+                  onChange={e => setUsdeAmount(e.target.value)}
                   placeholder="e.g. 100"
                   min="10"
                   className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500"
@@ -461,7 +463,7 @@ function SailrModal({
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button
                 onClick={fetchQuote}
-                disabled={loading || !honeyAmount || parseFloat(honeyAmount) < 10}
+                disabled={loading || !usdeAmount || parseFloat(usdeAmount) < 10}
                 className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
               >
                 {loading ? 'Fetching quote...' : 'Get Quote'}
@@ -488,8 +490,8 @@ function SailrModal({
                   <span className="text-green-400">${quote.discountedSailPrice.toFixed(4)}</span>
                 </div>
                 <div className="flex justify-between text-gray-400">
-                  <span>HONEY you pay</span>
-                  <span className="text-white">{quote.honeyAmountInput.toLocaleString()} HONEY</span>
+                  <span>USDe you pay</span>
+                  <span className="text-white">{(quote.usdeAmountInput ?? quote.honeyAmountInput ?? 0).toLocaleString()} USDe</span>
                 </div>
                 <div className="flex justify-between font-semibold border-t border-gray-700 pt-2 mt-2">
                   <span className="text-gray-300">SAIL.r you receive</span>
@@ -509,7 +511,7 @@ function SailrModal({
                   disabled={loading}
                   className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
                 >
-                  {loading ? 'Waiting for wallet...' : 'Accept & Send HONEY'}
+                  {loading ? 'Waiting for wallet...' : 'Accept & Send USDe'}
                 </button>
               )}
             </>
@@ -1316,7 +1318,7 @@ function PositionsDashboard({ wallet, refreshTrigger, sharePrice }: { wallet: st
   const hasPositions = activePositions.length > 0 || activePurchases.length > 0;
   const totalCount = activePositions.length + activePurchases.length;
   const totalValue =
-    activePurchases.reduce((s, p) => s + parseFloat(String(p.honey_amount_input)), 0) +
+    activePurchases.reduce((s, p) => s + parseFloat(String(p.deposit_usde ?? p.honey_amount_input ?? 0)), 0) +
     activePositions.reduce((s, p) => s + parseFloat(String(p.deposit_usde)), 0);
 
   const visiblePurchases = filter === 'jnrusd' ? [] : activePurchases;
@@ -1407,7 +1409,7 @@ function PositionsDashboard({ wallet, refreshTrigger, sharePrice }: { wallet: st
                   <div className="flex flex-col gap-2 flex-1">
                     <div>
                       <p className="text-gray-500 text-[10px] mb-0.5">Deposit Amount</p>
-                      <p className="text-white font-semibold text-sm">{parseFloat(String(p.honey_amount_input)).toFixed(2)} HONEY</p>
+                      <p className="text-white font-semibold text-sm">{parseFloat(String(p.deposit_usde ?? p.honey_amount_input ?? 0)).toFixed(2)} USDe</p>
                     </div>
                     <div>
                       <p className="text-gray-500 text-[10px] mb-0.5">SAIL.r Allocation</p>
@@ -1673,22 +1675,33 @@ export default function ExclusivePage() {
             assetSubtitle="Liquid Royalty Token"
             description={
               <>
-                <p>Access SAIL.r at a fixed 18% discount — a controlled entry not available on the open market.</p>
-                <p className="mt-2">Secure an allocation into a high-yield asset with weekly rewards, backed by real inventory.</p>
+                <p>Access SAIL.r at a fixed 18% discount via Amy.</p>
+                <p className="mt-2"> Secure an inventory-backed allocation held via multisig custody, with weekly rewards during the lock.</p>
                 {capacity?.sailr && !capacity.sailr.unlimited && (
                   <p className="mt-2 text-xs text-gray-500">
                     Allocation: {capacity.sailr.used.toFixed(2)} / {capacity.sailr.cap.toFixed(2)} SAIL.r used
                   </p>
                 )}
+                
               </>
             }
             footer={
               <div className="space-y-1 text-xs">
-                <div className="flex items-center gap-2 text-gray-400"><span>⏳</span><span>Limited allocation per round</span></div>
-                <div className="flex items-center gap-2 text-gray-400"><span>📦</span><span>Inventory-backed access</span></div>
-                <div className="flex items-center gap-2 text-gray-400"><span>🔒</span><span>6 month lock with weekly rewards</span></div>
-              </div>
+                <div className="flex items-center gap-2 text-gray-400"><span>⏳</span><span>Deposit USDe to receive discounted SAIL.r allocation</span></div>
+                <div className="flex items-center gap-2 text-gray-400"><span>📦</span><span>6 month lock with weekly rewards in USDe</span></div>
+                <div className="flex items-center gap-2 text-gray-400"><span>🔒</span><span>Inventory-backed access via multisig custody</span></div>
+                 <div className="flex items-center gap-2 pt-10">
+  <h2 className="font-black text-yellow-400 text-lg sm:text-xl">
+    Status:
+  </h2>
+  <h2 className="font-black text-gray-400 text-lg sm:text-xl">
+    Launching May
+  </h2>
+</div>           </div>
+              
             }
+            
+            
           />
 
           {/* Partner Access — display only */}
