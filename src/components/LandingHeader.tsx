@@ -130,7 +130,7 @@ export default function LandingHeader() {
 
   return (
     <>
-      <header className="container mx-auto px-4 py-4 md:py-6">
+      <header className="container mx-auto px-4 py-4 md:py-3">
         <nav className="flex justify-between items-center">
           <Link href="/" className="text-3xl md:text-4xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
             AMY
@@ -170,7 +170,7 @@ export default function LandingHeader() {
           <button onClick={close} className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-base font-bold">✕</button>
         </div>
 
-        <div className="grid grid-cols-2 gap-[10px] p-3 overflow-y-auto flex-1">
+        <div className="grid grid-cols-2 gap-[10px] md:gap-1 lg:gap-0.5 p-3 md:px-3 md:py-2 overflow-y-auto flex-1">
           {TILES.map((tile, i) => {
             if (tile.disabled) {
               return (
