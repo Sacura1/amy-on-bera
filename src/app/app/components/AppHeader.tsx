@@ -373,7 +373,7 @@ export default function AppHeader() {
         </div>
 
         {/* Grid — scrollable */}
-        <div className="grid grid-cols-2 gap-[10px] md:gap-1 lg:gap-0.5 p-3 md:px-3 md:py-2 overflow-y-auto flex-1">
+        <div className="grid grid-cols-2 content-start gap-[10px] md:gap-[6px] lg:gap-1 p-3 md:px-3 md:py-2 overflow-y-auto flex-1">
           {TILES.map((tile, i) => {
             if (tile.disabled) {
               return (

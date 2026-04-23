@@ -170,7 +170,7 @@ export default function LandingHeader() {
           <button onClick={close} className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-base font-bold">✕</button>
         </div>
 
-        <div className="grid grid-cols-2 gap-[10px] md:gap-1 lg:gap-0.5 p-3 md:px-3 md:py-2 overflow-y-auto flex-1">
+        <div className="grid grid-cols-2 content-start gap-[10px] md:gap-[6px] lg:gap-1 p-3 md:px-3 md:py-2 overflow-y-auto flex-1">
           {TILES.map((tile, i) => {
             if (tile.disabled) {
               return (
