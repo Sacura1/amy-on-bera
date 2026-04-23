@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { useActiveAccount } from 'thirdweb/react';
-import { getContract, sendTransaction } from 'thirdweb';
+import { getContract, sendTransaction, readContract } from 'thirdweb';
 import { transfer } from 'thirdweb/extensions/erc20';
 import { client } from '@/app/client';
 import { berachain } from '@/lib/chain';
@@ -184,10 +184,19 @@ function JnrusdModal({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ unitQuantity: number; earningStartDate: string } | null>(null);
+  const [usdeBalance, setUsdeBalance] = useState<number | null>(null);
 
   const account = useActiveAccount();
   const countdown = useCountdown(quote?.expiresAt || null);
   const quoteExpired = countdown === 0 && !!quote;
+
+  useEffect(() => {
+    if (!wallet) return;
+    const usdeContract = getContract({ client, chain: berachain, address: USDE_ADDRESS as `0x${string}` });
+    readContract({ contract: usdeContract, method: 'function balanceOf(address) view returns (uint256)', params: [wallet as `0x${string}`] })
+      .then(bal => setUsdeBalance(Number(bal) / 1e18))
+      .catch(() => {});
+  }, [wallet]);
 
   async function fetchQuote() {
     setLoading(true);
@@ -293,6 +302,12 @@ function JnrusdModal({
               </div>
 
               <div className="bg-gray-800/60 rounded-xl p-4 space-y-2 text-sm">
+                {usdeBalance !== null && (
+                  <div className="flex justify-between text-gray-400 pb-2 mb-1 border-b border-gray-700">
+                    <span>Your USDe balance</span>
+                    <span className={usdeBalance < quote.depositUsde ? 'text-red-400 font-semibold' : 'text-green-400 font-semibold'}>{usdeBalance.toFixed(2)} USDe</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-400">
                   <span>Current share price</span>
                   <span className="text-white">${quote.sharePrice.toFixed(6)}</span>
@@ -315,13 +330,18 @@ function JnrusdModal({
                   Get New Quote
                 </button>
               ) : (
-                <button
-                  onClick={handleDeposit}
-                  disabled={loading}
-                  className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
-                >
-                  {loading ? 'Waiting for wallet...' : 'Confirm & Send USDE'}
-                </button>
+                <>
+                  {usdeBalance !== null && usdeBalance < quote.depositUsde && (
+                    <p className="text-red-400 text-sm font-semibold text-center">Insufficient USDe balance to complete this deposit.</p>
+                  )}
+                  <button
+                    onClick={handleDeposit}
+                    disabled={loading || (usdeBalance !== null && usdeBalance < quote.depositUsde)}
+                    className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
+                  >
+                    {loading ? 'Waiting for wallet...' : 'Confirm Deposit'}
+                  </button>
+                </>
               )}
               <button onClick={() => { setQuote(null); setStep('amount'); setError(''); }} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-colors">
                 Back
@@ -371,10 +391,19 @@ function SailrModal({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ sailAmount: number; earningStartDate: string; lockEndDate: string } | null>(null);
+  const [usdeBalance, setUsdeBalance] = useState<number | null>(null);
 
   const account = useActiveAccount();
   const countdown = useCountdown(quote?.expiresAt || null);
   const quoteExpired = countdown === 0 && !!quote;
+
+  useEffect(() => {
+    if (!wallet) return;
+    const usdeContract = getContract({ client, chain: berachain, address: USDE_ADDRESS as `0x${string}` });
+    readContract({ contract: usdeContract, method: 'function balanceOf(address) view returns (uint256)', params: [wallet as `0x${string}`] })
+      .then(bal => setUsdeBalance(Number(bal) / 1e18))
+      .catch(() => {});
+  }, [wallet]);
 
   async function fetchQuote() {
     setLoading(true);
@@ -481,6 +510,12 @@ function SailrModal({
               </div>
 
               <div className="bg-gray-800/60 rounded-xl p-4 space-y-2 text-sm">
+                {usdeBalance !== null && (
+                  <div className="flex justify-between text-gray-400 pb-2 mb-1 border-b border-gray-700">
+                    <span>Your USDe balance</span>
+                    <span className={usdeBalance < (quote.usdeAmountInput ?? quote.honeyAmountInput ?? 0) ? 'text-red-400 font-semibold' : 'text-green-400 font-semibold'}>{usdeBalance.toFixed(2)} USDe</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-400">
                   <span>Live SAIL.r price</span>
                   <span className="text-white">${quote.liveSailPrice.toFixed(4)}</span>
@@ -506,13 +541,18 @@ function SailrModal({
                   Get New Quote
                 </button>
               ) : (
-                <button
-                  onClick={handlePurchase}
-                  disabled={loading}
-                  className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
-                >
-                  {loading ? 'Waiting for wallet...' : 'Accept & Send USDe'}
-                </button>
+                <>
+                  {usdeBalance !== null && usdeBalance < (quote.usdeAmountInput ?? quote.honeyAmountInput ?? 0) && (
+                    <p className="text-red-400 text-sm font-semibold text-center">Insufficient USDe balance to complete this deposit.</p>
+                  )}
+                  <button
+                    onClick={handlePurchase}
+                    disabled={loading || (usdeBalance !== null && usdeBalance < (quote.usdeAmountInput ?? quote.honeyAmountInput ?? 0))}
+                    className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors"
+                  >
+                    {loading ? 'Waiting for wallet...' : 'Confirm Deposit'}
+                  </button>
+                </>
               )}
             </>
           )}
