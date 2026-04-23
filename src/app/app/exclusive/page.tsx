@@ -1161,7 +1161,19 @@ function PerkCard({
       {/* Body */}
       <div className="flex flex-col flex-1 px-6 pt-4 pb-6 gap-4">
         <div className="flex items-center gap-2">
-          <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#ffffff', lineHeight: 1.3 }}>{title}</h3>
+          {onInfo ? (
+            <button
+              type="button"
+              onClick={e => { e.stopPropagation(); onInfo(); }}
+              className="text-left hover:opacity-90 transition-opacity"
+              style={{ fontSize: '20px', fontWeight: 600, color: '#ffffff', lineHeight: 1.3 }}
+              title="Learn more"
+            >
+              {title}
+            </button>
+          ) : (
+            <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#ffffff', lineHeight: 1.3 }}>{title}</h3>
+          )}
           {onInfo && (() => {
             const ac = infoAccent || '#facc15';
             const bgBase = infoAccent ? 'rgba(34,197,94,0.15)' : 'rgba(250,204,21,0.15)';
