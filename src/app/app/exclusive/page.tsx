@@ -586,7 +586,7 @@ function SailrInfoModal({ onClose }: { onClose: () => void }) {
           {[
             { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/></svg>, title: 'Discounted Access', desc: 'Get SAIL.r at 18% off the live market price.' },
             { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><rect x="5" y="11" width="14" height="11" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" strokeLinecap="round"/></svg>, title: 'Fixed 6-Month Lock', desc: 'Your principal is locked for 6 months from purchase.' },
-            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>, title: 'Earn Weekly', desc: 'Rewards are distributed weekly during the lock.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>, title: 'Earn Weekly', desc: 'Rewards are paid weekly in USDe during the lock.' },
             { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73L11 21.73a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.73z" strokeLinejoin="round"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" strokeLinecap="round"/></svg>, title: 'Inventory Backed', desc: 'All allocations are fully backed by SAIL.r inventory.' },
             { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>, title: 'For Gold+ Holders', desc: 'Exclusive to AMY Gold and Platinum holders.' },
           ].map(f => (
@@ -607,11 +607,11 @@ function SailrInfoModal({ onClose }: { onClose: () => void }) {
               <h4 className="text-yellow-400 font-bold text-base mb-3">How It Works</h4>
               <ol className="space-y-2">
                 {[
-                  'You choose an amount of HONEY to invest.',
-                  'We fetch the live SAIL.r price and apply your 18% discount.',
-                  'You send HONEY to the escrow wallet.',
-                  'Your SAIL.r allocation is recorded in Amy and your 6-month lock begins.',
-                  'You earn rewards weekly while your position is locked.',
+                  'You choose an amount of USDe to invest.',
+                  'We fetch the live SAIL.r price and apply your 18% discount to generate a time-limited quote.',
+                  'You confirm the deposit directly from your wallet (approve + confirm).',
+                  'Your USDe is sent to a secure multisig Safe and your SAIL.r allocation is recorded in Amy and your 6-month lock begins',
+                  ' You earn rewards weekly in USDe while your position is locked.',
                   'At the end of the lock, your SAIL.r principal is delivered to your wallet.',
                 ].map((step, i) => (
                   <li key={i} className="flex gap-3 items-start text-sm text-gray-300">
@@ -624,12 +624,17 @@ function SailrInfoModal({ onClose }: { onClose: () => void }) {
 
             {/* Where Funds Are Held */}
             <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <h4 className="text-yellow-400 font-bold text-base mb-3">Where Your Funds &amp; SAIL.r Are Held</h4>
+              <h4 className="text-yellow-400 font-bold text-base mb-3">Where Your Funds &amp; SAIL.r Are Held </h4>
+              <h4 className="text-yellow-400 font-meduim text-base mb-3">Custody & Security </h4>
+
+
               <div className="grid grid-cols-3 gap-3 mb-4">
                 {[
-                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinejoin="round"/><path d="M9 22V12h6v10" strokeLinecap="round"/></svg>, title: 'HONEY Escrow', desc: 'Your HONEY is held in a secure multisig escrow wallet.' },
-                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 17l3-8 3 4 3-7 3 5 3-3" strokeLinecap="round" strokeLinejoin="round"/><path d="M2 20h20" strokeLinecap="round"/></svg>, title: 'SAIL.r Inventory', desc: 'SAIL.r inventory is held in escrow, provided by Liquid Royalty.' },
-                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/><path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: 'Three-Party Security', desc: 'Escrow is controlled by Amy, Liquid Royalty, and a trusted third party.' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinejoin="round"/><path d="M9 22V12h6v10" strokeLinecap="round"/></svg>, title: 'Multisig Safe', desc: 'Your USDe is held in a secure Safe multisig wallet requiring 2-of-3 approvals (Amy,Liquid Royalty, and a trusted third party).' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 17l3-8 3 4 3-7 3 5 3-3" strokeLinecap="round" strokeLinejoin="round"/><path d="M2 20h20" strokeLinecap="round"/></svg>, title: 'SAIL.r Inventory', desc: 'SAIL.r inventory is held in custody, provided by Liquid Royalty.' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/><path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: 'Three-Party Security', desc: 'Multisig is controlled by Amy, Liquid Royalty, and a trusted third party.' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinejoin="round"/><path d="M9 22V12h6v10" strokeLinecap="round"/></svg>, title: 'User-Initiated Deposits', desc: 'All deposits are confirmed via your wallet and recorded onchain.' },
+
                 ].map(item => (
                   <div key={item.title} className="flex flex-col gap-1.5">
                     <span className="text-yellow-400">{item.icon}</span>
@@ -649,7 +654,7 @@ function SailrInfoModal({ onClose }: { onClose: () => void }) {
           <div className="flex flex-col gap-4">
             {/* Example Box */}
             <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <h4 className="text-yellow-400 font-bold text-base mb-3">Example: Your 100 HONEY Investment</h4>
+              <h4 className="text-yellow-400 font-bold text-base mb-3">Example: Your $100 USDe Investment</h4>
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -661,7 +666,7 @@ function SailrInfoModal({ onClose }: { onClose: () => void }) {
                 <tbody>
                   {[
                     { label: 'SAIL.r Price', market: '$15.80', amy: '$12.96', highlight: true },
-                    { label: 'Your HONEY', market: '100 HONEY', amy: '100 HONEY', highlight: false },
+                    { label: 'Your USDe', market: '100 USDe', amy: '100 USDe', highlight: false },
                     { label: 'SAIL.r You Receive', market: '~6.32 SAIL.r', amy: '~7.74 SAIL.r', highlight: true },
                     { label: 'You Earn', market: '—', amy: '~1.42 SAIL.r extra', highlight: true },
                   ].map((row, i) => (
@@ -675,7 +680,7 @@ function SailrInfoModal({ onClose }: { onClose: () => void }) {
               </table>
               <div className="mt-4 rounded-xl px-4 py-3 flex items-center gap-2 text-sm font-bold" style={{ background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.25)', color: '#facc15' }}>
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <span>That&apos;s ~22.5% more SAIL.r for the same 100 HONEY.</span>
+                <span>That&apos;s ~22.5% more SAIL.r for the same $100 USDe.</span>
               </div>
             </div>
 
@@ -684,11 +689,14 @@ function SailrInfoModal({ onClose }: { onClose: () => void }) {
               <h4 className="text-yellow-400 font-bold text-base mb-3">Key Details</h4>
               <ul className="space-y-2.5">
                 {[
-                  { label: 'Lock Duration', val: '6 months from payment confirmation' },
+                  { label: 'Lock Duration', val: 'Paid weekly in USDe based on your allocation and time held' },
                   { label: 'Rewards', val: 'Paid weekly based on your allocation and time held' },
                   { label: 'Delivery', val: 'Your SAIL.r principal is sent to your wallet at lock end' },
                   { label: 'No Auto-Sell', val: 'You keep your SAIL.r. Amy does not manage exits' },
                   { label: 'Inventory Limited', val: 'Purchases are limited to available inventory' },
+                  { label: 'Quote Validity', val: '~2 minutes (must confirm within this time)' },
+                  { label: 'Confirmation', val: 'You will be asked to approve and confirm in your wallet' },
+
                 ].map(item => (
                   <li key={item.label} className="flex items-start gap-2 text-sm">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 flex-shrink-0 mt-0.5 text-yellow-400"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>

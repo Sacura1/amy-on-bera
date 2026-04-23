@@ -36,6 +36,7 @@ function ProfilePageContent() {
   const [referralCount, setReferralCount] = useState(0);
   const [referralInputStatus, setReferralInputStatus] = useState('');
   const [refInputFocused, setRefInputFocused] = useState(false);
+  const [showNoSocialModal, setShowNoSocialModal] = useState(false);
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
   const [currentTier, setCurrentTier] = useState('none');
   const [totalMultiplier, setTotalMultiplier] = useState(1);
@@ -1212,6 +1213,7 @@ function ProfilePageContent() {
               : { eyebrow: 'Got a referral code?', title: 'Earn up to 1,000 points', sub: 'Enter a referral code to earn your first 1,000 points' };
 
           return (
+            <>
             <div style={{
               background: 'linear-gradient(145deg, rgba(18,22,32,0.45), rgba(10,14,20,0.55))',
               backdropFilter: 'blur(20px)',
@@ -1283,12 +1285,12 @@ function ProfilePageContent() {
                           onFocus={() => setRefInputFocused(true)}
                           onBlur={() => setRefInputFocused(false)}
                           maxLength={8}
-                          placeholder="e.g. BPZMXT6H"
+                          placeholder="Enter Code"
                           className="flex-1 bg-transparent py-3.5 focus:outline-none"
                           style={{ color: '#fff', fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '15px', fontWeight: 700, letterSpacing: referralCode ? '0.22em' : '0.05em', textTransform: 'uppercase' }}
                         />
                       </div>
-                      <button onClick={useReferralCode} disabled={!referralCode.trim()} className="px-6 py-3.5 rounded-xl text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-40" style={{ background: referralCode.trim() ? g : 'rgba(212,175,55,0.3)', color: '#0a0e14', boxShadow: referralCode.trim() ? '0 4px 14px rgba(212,175,55,0.3)' : 'none' }}>SUBMIT</button>
+                      <button onClick={() => { if (!xConnected && !discordConnected && !telegramConnected) { setShowNoSocialModal(true); } else { useReferralCode(); } }} disabled={!referralCode.trim()} className="px-6 py-3.5 rounded-xl text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-40" style={{ background: referralCode.trim() ? g : 'rgba(212,175,55,0.3)', color: '#0a0e14', boxShadow: referralCode.trim() ? '0 4px 14px rgba(212,175,55,0.3)' : 'none' }}>SUBMIT</button>
                     </div>
                     {referralInputStatus && <p className="text-xs text-gray-400 -mt-2">{referralInputStatus}</p>}
                     {/* Your code box */}
@@ -1332,12 +1334,12 @@ function ProfilePageContent() {
                           onFocus={() => setRefInputFocused(true)}
                           onBlur={() => setRefInputFocused(false)}
                           maxLength={8}
-                          placeholder="e.g. BPZMXT6H"
+                          placeholder="Enter code"
                           className="flex-1 bg-transparent py-3.5 focus:outline-none"
                           style={{ color: '#fff', fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '15px', fontWeight: 700, letterSpacing: referralCode ? '0.22em' : '0.05em', textTransform: 'uppercase' }}
                         />
                       </div>
-                      <button onClick={useReferralCode} disabled={!referralCode.trim()} className="px-6 py-3.5 rounded-xl text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-40" style={{ background: referralCode.trim() ? g : 'rgba(212,175,55,0.3)', color: '#0a0e14', boxShadow: referralCode.trim() ? '0 4px 14px rgba(212,175,55,0.3)' : 'none' }}>SUBMIT</button>
+                      <button onClick={() => { if (!xConnected && !discordConnected && !telegramConnected) { setShowNoSocialModal(true); } else { useReferralCode(); } }} disabled={!referralCode.trim()} className="px-6 py-3.5 rounded-xl text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-40" style={{ background: referralCode.trim() ? g : 'rgba(212,175,55,0.3)', color: '#0a0e14', boxShadow: referralCode.trim() ? '0 4px 14px rgba(212,175,55,0.3)' : 'none' }}>SUBMIT</button>
                     </div>
                     {referralInputStatus && <p className="text-xs text-gray-400 -mt-2">{referralInputStatus}</p>}
                   </>
@@ -1516,6 +1518,63 @@ function ProfilePageContent() {
 
               </div>
             </div>
+
+            {/* ── No social modal ── */}
+            {showNoSocialModal && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                style={{ backgroundColor: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
+                onClick={() => setShowNoSocialModal(false)}
+              >
+                <div
+                  onClick={e => e.stopPropagation()}
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(18,22,32,0.98), rgba(10,14,20,0.99))',
+                    border: '1px solid rgba(212,175,55,0.28)',
+                    borderRadius: '20px',
+                    padding: '28px 24px',
+                    maxWidth: 360,
+                    width: '100%',
+                    boxShadow: '0 0 0 1px rgba(212,175,55,0.06) inset, 0 24px 60px rgba(0,0,0,0.7)',
+                  }}
+                >
+                  {/* Icon */}
+                  <div className="flex justify-center mb-4">
+                    <div style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.30)', borderRadius: '14px', padding: '14px' }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="1.7" className="w-7 h-7">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                  {/* Text */}
+                  <h3 className="text-white font-black text-lg text-center mb-2">Connect a social first</h3>
+                  <p className="text-gray-400 text-sm text-center mb-5">
+                    You need to connect at least one social account (X, Discord, or Telegram) before you can enter a referral code and earn points.
+                  </p>
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2">
+                    <a
+                      href="#socials"
+                      onClick={() => setShowNoSocialModal(false)}
+                      className="block text-center py-3 rounded-xl text-sm font-black tracking-wide"
+                      style={{ background: '#d4af37', color: '#0a0e14', boxShadow: '0 4px 14px rgba(212,175,55,0.3)' }}
+                    >
+                      Connect a Social
+                    </a>
+                    <button
+                      onClick={() => setShowNoSocialModal(false)}
+                      className="py-2.5 rounded-xl text-sm font-semibold text-gray-400 hover:text-white transition-colors"
+                      style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+                    >
+                      Maybe later
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            </>
           );
         })()}
 
