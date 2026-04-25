@@ -1416,7 +1416,7 @@ Multiplier adjusts automatically as your position value changes.`}
               name="Conviction"
               title="Monthly"
               image="/image/conviction_monthly.png"
-              description="Assigned monthly based on your onchain activity across Web3. Activity this month determines your badge for next month. Once assigned, it stays active for the entire month."
+              description="Assigned monthly based on your Amy Score (holdings & onchain activity across Web3). Your activity this month determines your badge for next month. Once assigned, it stays active for the entire month."
               multipliers={[
                 { requirement: 'Level 1', multiplier: 'x3' },
                 { requirement: 'Level 2', multiplier: 'x5' },

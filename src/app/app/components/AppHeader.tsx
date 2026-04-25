@@ -34,18 +34,46 @@ const HOLDER_RING: Record<string, string> = {
   none:     'border-white/20',
 };
 
+const TIER_COLOR: Record<string, string> = {
+  platinum: '#22d3ee',
+  gold:     '#facc15',
+  silver:   '#cbd5e1',
+  bronze:   '#f97316',
+  none:     '#9ca3af',
+};
+
+const TIER_LABEL: Record<string, string> = {
+  platinum: 'Platinum Status',
+  gold:     'Gold Status',
+  silver:   'Silver Status',
+  bronze:   'Bronze Status',
+  none:     'None',
+};
+
+const CrownIcon = ({ color }: { color: string }) => (
+  <svg viewBox="0 0 24 24" fill={color} className="w-4 h-4 flex-shrink-0">
+    <path d="M5 16L2 7l5 3.5 5-6.5 5 6.5L22 7l-3 9H5zm0 2h14v2H5v-2z"/>
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="#facc15" strokeWidth="1.8" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+  </svg>
+);
+
 // ── Icons matching design reference ──────────────────────────────────────────
 
 // Earn — lightning bolt (yield / rewards energy)
 const EarnIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10">
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-[30px] h-[30px]">
     <path d="M14 1L6 13.5h5.5L10 23l8-12.5h-5.5L14 1z"/>
   </svg>
 );
 
 // Trade — two clean opposing swap arrows
 const TradeIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[30px] h-[30px]">
     <path d="M5 8h14M19 8l-4-4M19 8l-4 4"/>
     <path d="M19 16H5M5 16l4-4M5 16l4 4"/>
   </svg>
@@ -53,7 +81,7 @@ const TradeIcon = () => (
 
 // Portfolio — 3 ascending hollow candlesticks with visible wicks, faded white fill
 const PortfolioIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-10 h-10">
+  <svg viewBox="0 0 24 24" className="w-[30px] h-[30px]">
     {/* Left candle — smallest, hollow body + wicks */}
     <rect x="2.5" y="16" width="4" height="5" rx="0.5" fill="rgba(255,255,255,0.18)" stroke="currentColor" strokeWidth="1.4"/>
     <line x1="4.5" y1="12.5" x2="4.5" y2="16" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
@@ -71,7 +99,7 @@ const PortfolioIcon = () => (
 
 // Amy Points — star inside a circle
 const AmyPointsIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-10 h-10">
+  <svg viewBox="0 0 24 24" className="w-[30px] h-[30px]">
     <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5"/>
     <path d="M12 6.8l1.2 3.6h3.8l-3.1 2.2 1.2 3.6-3.1-2.3-3.1 2.3 1.2-3.6-3.1-2.2h3.8z" fill="currentColor"/>
   </svg>
@@ -80,7 +108,7 @@ const AmyPointsIcon = () => (
 // Raffles — 3D gift box with ribbon and bow (stroke style matching gift.jpg)
 const RafflesIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-       strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10">
+       strokeLinecap="round" strokeLinejoin="round" className="w-[30px] h-[30px]">
     {/* Front face (U-shape — top edge implicit) */}
     <path d="M3 12v10h14V12"/>
     {/* Top face (parallelogram) */}
@@ -104,21 +132,21 @@ const RafflesIcon = () => (
 
 // Leaderboard — trophy cup
 const LeaderboardIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10">
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-[30px] h-[30px]">
     <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z" />
   </svg>
 );
 
 // Profile — person silhouette
 const ProfileIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10">
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-[30px] h-[30px]">
     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
   </svg>
 );
 
 // Exclusive Access — TV shape: two antennas, transparent screen top, solid bottom with VIP cutout
 const ExclusiveIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-10 h-10">
+  <svg viewBox="0 0 24 24" className="w-[30px] h-[30px]">
     {/* Left antenna */}
     <path d="M9.5 5.5L7 2" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
     {/* Right antenna */}
@@ -136,7 +164,7 @@ const ExclusiveIcon = () => (
 
 // Partners — 5-node atom/molecule: large center + 4 outer nodes of varying size
 const PartnersIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-10 h-10">
+  <svg viewBox="0 0 24 24" className="w-[30px] h-[30px]">
     {/* Connection lines (draw first so nodes sit on top) */}
     <path d="M12 12L12 5M12 12L20 9M12 12L19 18.5M12 12L4 17M12 5L20 9M4 17L19 18.5"
           stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
@@ -170,8 +198,8 @@ const TILES: Tile[] = [
   { label: 'Raffles',              href: '/app/raffles',     icon: <RafflesIcon /> },
   { label: 'Leaderboard',           href: '/app/leaderboard', icon: <LeaderboardIcon /> },
   { label: 'Profile',              href: '/app/profile',     icon: <ProfileIcon /> },
-  { label: 'Exclusive\nAccess',    href: '/app/exclusive',   icon: <ExclusiveIcon /> },
-  { label: 'Partners\n& Investors', href: '/app/partners',   icon: <PartnersIcon /> },
+  { label: 'Exclusive Access',     href: '/app/exclusive',   icon: <ExclusiveIcon /> },
+  { label: 'Partners & Investors', href: '/app/partners',   icon: <PartnersIcon /> },
   { disabled: true },
   { disabled: true },
   { disabled: true },
@@ -324,49 +352,108 @@ export default function AppHeader() {
           transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
-        {/* Header: Amy Score left, close + avatar right */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div>
-            <p className="text-[11px] text-gray-400 uppercase tracking-widest">Amy Score:</p>
-            <p className="text-5xl font-black text-white leading-none">{amyScore}</p>
+        {/* Panel header */}
+        <div className="flex-shrink-0 px-4 pt-2 pb-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          {/* AMY + close row */}
+          <div className="flex items-center justify-between mb-2">
+            <Link href="/" onClick={close} className="text-xl font-black" style={{ color: '#FFD700' }}>AMY</Link>
+            <button onClick={close} className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-base font-bold" aria-label="Close menu">✕</button>
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <button
-              onClick={close}
-              className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-base font-bold"
-              aria-label="Close menu"
-            >
-              ✕
-            </button>
-            <Link href="/app/profile" onClick={close}>
-              <div className={`w-14 h-14 rounded-full overflow-hidden border-2 ${HOLDER_RING[holderTier] ?? 'border-white/20'} hover:opacity-80 transition-opacity`}>
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                    <span className="text-xl">🐻</span>
-                  </div>
-                )}
+
+          {account ? (
+            /* Connected — score | status | avatar */
+            <div className="flex items-center gap-3 pb-2">
+              {/* Score */}
+              <div className="flex-shrink-0">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <span className="text-xs text-gray-400 font-medium">Score</span>
+                  <StarIcon />
+                </div>
+                <p className="text-5xl font-black text-white leading-none">{amyScore}</p>
               </div>
-            </Link>
-          </div>
+
+              <div className="w-px self-stretch bg-white/10" />
+
+              {/* Status + perks */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <CrownIcon color={TIER_COLOR[holderTier] ?? '#9ca3af'} />
+                  <span className="text-sm font-bold" style={{ color: TIER_COLOR[holderTier] ?? '#9ca3af' }}>
+                    {TIER_LABEL[holderTier] ?? 'Status'}
+                  </span>
+                </div>
+                <p className="text-[11px] font-semibold mb-1" style={{ color: holderTier === 'none' ? '#f87171' : '#4ade80' }}>
+                  {holderTier === 'none' ? 'Inactive' : 'Active'}
+                </p>
+                <Link href="/app/exclusive" onClick={close}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold text-gray-300 transition-colors hover:bg-white/10"
+                  style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <span>🎁</span>
+                  <span>Unlocks perks &amp; rewards</span>
+                </Link>
+              </div>
+
+              {/* Avatar */}
+              <Link href="/app/profile" onClick={close} className="flex-shrink-0">
+                <div className={`w-12 h-12 rounded-full overflow-hidden border-2 ${HOLDER_RING[holderTier] ?? 'border-white/20'} hover:opacity-80 transition-opacity`}>
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                      <span className="text-xl">🐻</span>
+                    </div>
+                  )}
+                </div>
+              </Link>
+            </div>
+          ) : (
+            /* Not connected — two column info block */
+            <div className="flex gap-2 pb-2">
+              {/* Left: Amy Score */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1 mb-1">
+                  <span className="text-xs text-gray-300 font-medium">Your Amy Score</span>
+                  <StarIcon />
+                </div>
+                <div className="flex flex-col gap-1 mb-1">
+                  <div className="h-1.5 w-16 rounded-full animate-pulse" style={{ background: 'rgba(255,255,255,0.2)' }} />
+                  <div className="h-1.5 w-10 rounded-full animate-pulse" style={{ background: 'rgba(255,255,255,0.2)' }} />
+                </div>
+                <p className="text-[10px] text-gray-400 leading-snug">
+                  Connect <Link href="/app" onClick={close} className="font-semibold" style={{ color: '#facc15' }}>the app</Link> to see your score and status.
+                </p>
+              </div>
+
+              <div className="w-px self-stretch bg-white/10" />
+
+              {/* Right: Status */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <CrownIcon color="#facc15" />
+                  <span className="text-xs font-bold" style={{ color: '#facc15' }}>Status</span>
+                </div>
+                <p className="text-[10px] text-gray-400 mb-1">Connect the app to see your status.</p>
+                <div className="rounded-lg p-1.5" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <p className="text-[10px] font-semibold text-white">🎁 Unlocks perks &amp; rewards</p>
+                  <p className="text-[10px] text-gray-400">Connect the app to access them.</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Grid — scrollable */}
-        <div className="grid grid-cols-2 content-start md:content-normal gap-[10px] md:gap-[6px] lg:gap-1 p-3 md:px-3 md:py-2 overflow-y-auto flex-1">
+        <div className="grid grid-cols-2 content-start md:content-normal gap-[8px] md:gap-[4px] lg:gap-[3px] p-2 md:px-2 md:py-1 overflow-y-auto flex-1">
           {TILES.map((tile, i) => {
             if (tile.disabled) {
               return (
-                <div key={i} className="flex items-center gap-2 min-h-[62px] md:h-full w-full px-3 rounded-xl transition-all duration-200"
+                <div key={i} className="flex flex-col items-center justify-center gap-1.5 min-h-[52px] md:h-full w-full px-2 py-3 rounded-xl"
                   style={{
                     background: 'linear-gradient(145deg, rgba(40,45,58,0.92), rgba(20,24,32,0.97))',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.25)',
                     border: '1px solid rgba(255,255,255,0.08)',
                     cursor: 'not-allowed',
-                  }}>
-                  <div className="flex-shrink-0 w-8 h-8" />
-                  <span className="text-[13.5px] font-semibold leading-tight whitespace-pre-line" />
-                </div>
+                  }} />
               );
             }
             return (
@@ -374,7 +461,7 @@ export default function AppHeader() {
                 key={i}
                 href={tile.href!}
                 onClick={close}
-                className="flex items-center gap-2 min-h-[62px] md:h-full px-3 rounded-xl transition-all duration-200"
+                className="flex flex-col items-center justify-center gap-1 min-h-[52px] md:h-full px-2 py-2 rounded-xl transition-all duration-200"
                 style={{
                   background: 'linear-gradient(145deg, rgba(40,45,58,0.92), rgba(20,24,32,0.97))',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.25)',
@@ -393,8 +480,8 @@ export default function AppHeader() {
                   el.style.transform = 'translateY(0)';
                 }}
               >
-                <div className="flex-shrink-0" style={{ color: 'rgba(210,218,230,0.88)' }}>{tile.icon}</div>
-                <span className="text-[13.5px] font-semibold leading-tight whitespace-pre-line"
+                <div style={{ color: 'rgba(210,218,230,0.88)' }}>{tile.icon}</div>
+                <span className="text-[14px] font-semibold leading-tight text-center"
                   style={{ color: 'rgba(210,218,230,0.82)' }}>{tile.label}</span>
               </Link>
             );

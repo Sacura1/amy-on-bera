@@ -1276,8 +1276,8 @@ function ProfilePageContent() {
                     {/* Input */}
                     <div className="flex flex-col sm:flex-row gap-2">
                       <div className="flex-1 flex items-center gap-3 px-4 rounded-xl transition-all duration-200"
-                        style={{ background: 'linear-gradient(145deg, rgba(22,28,40,0.95), rgba(10,14,22,0.98))', border: `1px solid ${refInputFocused || referralCode ? 'rgba(212,175,55,0.45)' : 'rgba(255,255,255,0.10)'}`, boxShadow: refInputFocused || referralCode ? 'inset 0 2px 6px rgba(0,0,0,0.4), 0 0 0 3px rgba(212,175,55,0.08)' : 'inset 0 2px 6px rgba(0,0,0,0.4)' }}>
-                        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.6" className="w-4 h-4 flex-shrink-0 transition-colors duration-200" style={{ stroke: refInputFocused || referralCode ? g : '#4b5563' }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>
+                        style={{ background: 'rgb(31,41,55)', border: `1px solid ${refInputFocused ? 'rgb(236,72,153)' : 'rgb(55,65,81)'}`, transition: 'border-color 150ms' }}>
+                        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.6" className="w-4 h-4 flex-shrink-0 transition-colors duration-200" style={{ stroke: refInputFocused ? 'rgb(236,72,153)' : '#6b7280' }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>
                         <input
                           type="text"
                           value={referralCode}
@@ -1325,8 +1325,8 @@ function ProfilePageContent() {
                   <>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <div className="flex-1 flex items-center gap-3 px-4 rounded-xl transition-all duration-200"
-                        style={{ background: 'linear-gradient(145deg, rgba(22,28,40,0.95), rgba(10,14,22,0.98))', border: `1px solid ${refInputFocused || referralCode ? 'rgba(212,175,55,0.45)' : 'rgba(255,255,255,0.10)'}`, boxShadow: refInputFocused || referralCode ? 'inset 0 2px 6px rgba(0,0,0,0.4), 0 0 0 3px rgba(212,175,55,0.08)' : 'inset 0 2px 6px rgba(0,0,0,0.4)' }}>
-                        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.6" className="w-4 h-4 flex-shrink-0 transition-colors duration-200" style={{ stroke: refInputFocused || referralCode ? g : '#4b5563' }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>
+                        style={{ background: 'rgb(31,41,55)', border: `1px solid ${refInputFocused ? 'rgb(236,72,153)' : 'rgb(55,65,81)'}`, transition: 'border-color 150ms' }}>
+                        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.6" className="w-4 h-4 flex-shrink-0 transition-colors duration-200" style={{ stroke: refInputFocused ? 'rgb(236,72,153)' : '#6b7280' }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>
                         <input
                           type="text"
                           value={referralCode}

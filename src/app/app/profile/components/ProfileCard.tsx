@@ -28,6 +28,7 @@ interface ProfileData {
   showX: boolean;
   showDiscord: boolean;
   showTelegram: boolean;
+  showBalance: boolean;
 }
 
 interface SocialData {
@@ -279,7 +280,7 @@ export default function ProfileCard({
           </div>
 
           {/* Badge slots */}
-          <div className="flex items-center gap-1.5 sm:gap-2 py-1 mt-1 flex-wrap">
+          <div className="flex items-center gap-2.5 sm:gap-3 py-1 mt-1 flex-wrap">
             {[1, 2, 3, 4, 5].map((slotNumber) => {
               const badge = getBadgeForSlot(slotNumber);
               return (
@@ -309,16 +310,18 @@ export default function ProfileCard({
           </div>
 
           {/* Stats */}
-          <div className="flex flex-wrap gap-4 text-sm">
-            <div>
-              <span className="text-gray-400">AMY:</span>{' '}
-              <span className="text-white font-semibold">{Number(balance || 0).toLocaleString()}</span>
-            </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            {profile?.showBalance && (
+              <div>
+                <span className="text-gray-400">AMY:</span>{' '}
+                <span className="text-white font-semibold">{Number(balance || 0).toLocaleString()}</span>
+              </div>
+            )}
             <div>
               <span className="text-gray-400">Multiplier:</span>{' '}
               <span className="text-yellow-400 font-semibold">{Number(totalMultiplier || 1).toFixed(1)}x</span>
             </div>
-            <div>
+            <div className="w-full">
               <span className="text-gray-400">Points/hr:</span>{' '}
               <span className="text-green-400 font-semibold">{Number(pointsPerHour || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>

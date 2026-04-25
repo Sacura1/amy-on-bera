@@ -21,6 +21,7 @@ export default function ProfileEditor({
   const [showX, setShowX] = useState(false);
   const [showDiscord, setShowDiscord] = useState(false);
   const [showTelegram, setShowTelegram] = useState(false);
+  const [showBalance, setShowBalance] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarData, setAvatarData] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -44,6 +45,7 @@ export default function ProfileEditor({
           setShowX(data.data.profile.showX ?? false);
           setShowDiscord(data.data.profile.showDiscord ?? false);
           setShowTelegram(data.data.profile.showTelegram ?? false);
+          setShowBalance(data.data.profile.showBalance ?? false);
           setAvatarUrl(data.data.profile.avatarUrl || null);
           setAvatarData(data.data.profile.avatarData || null);
         }
@@ -161,6 +163,7 @@ export default function ProfileEditor({
           showX,
           showDiscord,
           showTelegram,
+          showBalance,
         })
       });
 
@@ -317,9 +320,10 @@ export default function ProfileEditor({
             </p>
             <div className="space-y-2">
               {[
-                { label: 'X (Twitter)', value: showX, setter: setShowX },
-                { label: 'Discord',     value: showDiscord, setter: setShowDiscord },
-                { label: 'Telegram',    value: showTelegram, setter: setShowTelegram },
+                { label: 'X (Twitter)',          value: showX,       setter: setShowX },
+                { label: 'Discord',              value: showDiscord, setter: setShowDiscord },
+                { label: 'Telegram',             value: showTelegram, setter: setShowTelegram },
+                { label: 'Show AMY balance',     value: showBalance, setter: setShowBalance },
               ].map(({ label, value, setter }) => (
                 <label key={label} className="flex items-center gap-3 cursor-pointer select-none">
                   <div
