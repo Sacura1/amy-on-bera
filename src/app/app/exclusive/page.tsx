@@ -1274,7 +1274,7 @@ function PerkCard({
                 style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.25)', color: '#d4af37', opacity: 0.8 }}>
                 ✓ Access Requested
               </button>
-              <p className="text-xs text-center mt-2" style={{ color: 'rgba(212,175,55,0.7)' }}>Request received — we'll contact you soon.</p>
+              <p className="text-xs text-center mt-2" style={{ color: 'rgba(212,175,55,0.7)' }}>Request received — we&apos;ll contact you soon.</p>
             </div>
           ) : onRequest ? (
             <button
