@@ -185,7 +185,7 @@ export default function LandingHeader() {
                 <div className="h-1.5 w-10 rounded-full" style={{ background: 'rgba(255,255,255,0.2)' }} />
               </div>
               <p className="text-[10px] text-gray-400 leading-snug">
-                Connect <Link href="/app" onClick={close} className="font-semibold" style={{ color: '#facc15' }}>the app</Link> to see your score and status.
+                Connect <Link href="/app/profile" onClick={close} className="font-semibold" style={{ color: '#facc15' }}>the app</Link> to see your score and status.
               </p>
             </div>
 

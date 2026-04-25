@@ -1214,18 +1214,10 @@ function ProfilePageContent() {
 
           return (
             <>
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(18,22,32,0.45), rgba(10,14,20,0.55))',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(212,175,55,0.22)',
-              borderRadius: '20px',
-              overflow: 'hidden',
-              boxShadow: '0 0 0 1px rgba(212,175,55,0.06) inset, 0 2px 0 rgba(255,255,255,0.04) inset, 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(212,175,55,0.06)',
-            }}>
+            <div className="bg-gray-900/90 rounded-2xl border border-gray-700/50 overflow-hidden">
 
               {/* ── Header ── */}
-              <div className="relative p-5 sm:p-7" style={{ background: 'linear-gradient(135deg, rgba(18,22,32,0.35) 55%, rgba(28,20,6,0.40))', borderBottom: '1px solid rgba(212,175,55,0.10)' }}>
+              <div className="relative p-5 sm:p-7 border-b border-gray-700/50">
                 <div className="flex items-start gap-3">
                   <div style={{ background: gBg, border: gBorder, borderRadius: '12px', padding: '10px', flexShrink: 0, marginTop: 2 }}>
                     <svg viewBox="0 0 24 24" fill="none" stroke={g} strokeWidth="1.7" className="w-6 h-6">
