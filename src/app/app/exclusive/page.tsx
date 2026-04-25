@@ -756,7 +756,7 @@ function SailrInfoModal({ onClose }: { onClose: () => void }) {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 flex-shrink-0 mt-0.5 text-yellow-400"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/></svg>
             <span><strong className="text-yellow-400">Important:</strong> This is not financial advice. SAIL.r is a yield-generating asset with risks. Always do your own research.</span>
           </div>
-          <a href="https://liquidroyalty.io" target="_blank" rel="noopener noreferrer" className="text-xs text-yellow-400 hover:text-yellow-300 font-semibold whitespace-nowrap transition-colors pl-6 sm:pl-0">
+          <a href="https://www.liquidroyalty.com/invest/sail" target="_blank" rel="noopener noreferrer" className="text-xs text-yellow-400 hover:text-yellow-300 font-semibold whitespace-nowrap transition-colors pl-6 sm:pl-0">
             Learn more about risks →
           </a>
         </div>
@@ -916,7 +916,7 @@ function JnrusdInfoModal({ onClose }: { onClose: () => void }) {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 flex-shrink-0 mt-0.5 text-green-400"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/></svg>
             <span><strong className="text-green-400">Important:</strong> This is not financial advice. jnrUSD is a yield-generating asset with risks. Always do your own research.</span>
           </div>
-          <a href="https://liquidroyalty.io" target="_blank" rel="noopener noreferrer" className="text-xs text-green-400 hover:text-green-300 font-semibold whitespace-nowrap transition-colors pl-6 sm:pl-0">
+          <a href="https://www.liquidroyalty.com/vaults?tranche=junior" target="_blank" rel="noopener noreferrer" className="text-xs text-green-400 hover:text-green-300 font-semibold whitespace-nowrap transition-colors pl-6 sm:pl-0">
             Learn more about risks →
           </a>
         </div>
@@ -1131,9 +1131,9 @@ function VipPartnerInfoModal({ onClose }: { onClose: () => void }) {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: gold }}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" strokeLinecap="round"/></svg>
             <span>VIP Partner Access connects you to opportunities and people that are not available through standard channels.</span>
           </div>
-          <a href="https://amyonbera.com" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold whitespace-nowrap transition-colors pl-6 sm:pl-0" style={{ color: gold }}>
+          {/* <a href="https://amyonbera.com" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold whitespace-nowrap transition-colors pl-6 sm:pl-0" style={{ color: gold }}>
             Learn more about risks →
-          </a>
+          </a> */}
         </div>
       </div>
     </div>
@@ -1152,8 +1152,9 @@ function PerkCard({
   userTier,
   isFull,
   onUnlock,
-  isDisplayOnly,
-  displayOnlyLabel,
+  isRequested,
+  onRequest,
+  requestingLabel,
   onInfo,
   infoAccent,
 }: {
@@ -1168,14 +1169,15 @@ function PerkCard({
   userTier: string | null;
   isFull?: boolean;
   onUnlock?: () => void;
-  isDisplayOnly?: boolean;
-  displayOnlyLabel?: string;
+  isRequested?: boolean;
+  onRequest?: () => void;
+  requestingLabel?: string;
   onInfo?: () => void;
   infoAccent?: string;
 }) {
   const [hovered, setHovered] = useState(false);
   const eligible = tierMeetsMin(userTier, minTier);
-  const locked = !eligible || isDisplayOnly;
+  const locked = !eligible;
 
   const goldBorder = 'linear-gradient(135deg, #d4af37, #f5d76e)';
   const requiresGoldStyle: React.CSSProperties = {
@@ -1260,24 +1262,29 @@ function PerkCard({
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b7280' }}>
               Allocation Full
             </div>
-          ) : isDisplayOnly ? (
-            <button
-              disabled
-              className="w-full py-3 rounded-xl text-sm font-semibold cursor-not-allowed opacity-40"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#aaaaaa',
-              }}
-            >
-              {displayOnlyLabel || 'Deposit'}
-            </button>
           ) : locked ? (
             <div className="w-full py-3 rounded-xl text-center text-sm font-semibold flex items-center justify-center gap-2"
               style={requiresGoldStyle}>
               <span>🔒</span>
               <span>Requires <strong className="capitalize">{minTier}</strong> ({minTier === 'gold' ? '10,000' : '300'} AMY)</span>
             </div>
+          ) : isRequested ? (
+            <div>
+              <button disabled className="w-full py-3 rounded-xl text-sm font-semibold cursor-not-allowed"
+                style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.25)', color: '#d4af37', opacity: 0.8 }}>
+                ✓ Access Requested
+              </button>
+              <p className="text-xs text-center mt-2" style={{ color: 'rgba(212,175,55,0.7)' }}>Request received — we'll contact you soon.</p>
+            </div>
+          ) : onRequest ? (
+            <button
+              onClick={onRequest}
+              disabled={!!requestingLabel}
+              className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200"
+              style={{ background: 'linear-gradient(135deg, #d4af37, #f5d76e)', color: '#1a0e00', fontWeight: 700, opacity: requestingLabel ? 0.7 : 1 }}
+            >
+              {requestingLabel || 'Request Access'}
+            </button>
           ) : (
             <button
               onClick={onUnlock}
@@ -1615,6 +1622,8 @@ export default function ExclusivePage() {
   const [showJnrusdInfo, setShowJnrusdInfo] = useState(false);
   const [showVipInfo, setShowVipInfo] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [vipRequested, setVipRequested] = useState(false);
+  const [vipRequesting, setVipRequesting] = useState(false);
 
   useEffect(() => {
     if (!wallet) return;
@@ -1625,11 +1634,35 @@ export default function ExclusivePage() {
   }, [wallet]);
 
   useEffect(() => {
+    if (!wallet) return;
+    fetch(`${API_BASE_URL}/api/exclusive/vip/status/${wallet}`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setVipRequested(d.requested); })
+      .catch(() => {});
+  }, [wallet]);
+
+  useEffect(() => {
     fetch(`${API_BASE_URL}/api/exclusive/capacity`)
       .then(r => r.json())
       .then(d => { if (d.success) setCapacity(d.data); })
       .catch(() => {});
   }, [refreshKey]);
+
+  const handleVipRequest = async () => {
+    if (!wallet || !userTier || vipRequesting) return;
+    setVipRequesting(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/exclusive/vip/request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wallet, tier: userTier }),
+      });
+      const data = await res.json();
+      if (data.success) setVipRequested(true);
+    } catch { /* silent */ } finally {
+      setVipRequesting(false);
+    }
+  };
 
   const handleSuccess = () => {
     setOpenModal(null);
@@ -1783,14 +1816,15 @@ export default function ExclusivePage() {
             
           />
 
-          {/* Partner Access — display only */}
+          {/* Partner Access */}
           <PerkCard
             minTier="gold"
             title="VIP Partner Access"
             onInfo={() => setShowVipInfo(true)}
             userTier={userTier}
-            isDisplayOnly
-            displayOnlyLabel="Request Access"
+            isRequested={vipRequested}
+            onRequest={handleVipRequest}
+            requestingLabel={vipRequesting ? 'Requesting…' : undefined}
             assetIcon={
               <svg viewBox="0 0 24 24" className="w-9 h-9" style={{ color: '#d4af37' }}>
                 <path d="M12 12L12 5M12 12L20 9M12 12L19 18.5M12 12L4 17M12 5L20 9M4 17L19 18.5"

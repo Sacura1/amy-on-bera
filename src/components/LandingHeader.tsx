@@ -170,11 +170,11 @@ export default function LandingHeader() {
           <button onClick={close} className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-base font-bold">✕</button>
         </div>
 
-        <div className="grid grid-cols-2 content-start gap-[10px] md:gap-[6px] lg:gap-1 p-3 md:px-3 md:py-2 overflow-y-auto flex-1">
+        <div className="grid grid-cols-2 content-start md:content-normal gap-[10px] md:gap-[6px] lg:gap-1 p-3 md:px-3 md:py-2 overflow-y-auto flex-1">
           {TILES.map((tile, i) => {
             if (tile.disabled) {
               return (
-                <div key={i} className="flex items-center gap-2 h-[64px] w-full px-3 rounded-xl transition-all duration-200"
+                <div key={i} className="flex items-center gap-2 min-h-[52px] md:h-full w-full px-3 rounded-xl transition-all duration-200"
                   style={{ ...TILE_STYLE, cursor: 'not-allowed' }}>
                   <div className="flex-shrink-0 w-7 h-7" />
                   <span className="text-[11px] font-semibold leading-tight whitespace-pre-line" />
@@ -183,7 +183,7 @@ export default function LandingHeader() {
             }
             return (
               <Link key={i} href={tile.href!} onClick={close}
-                className="flex items-center gap-2 h-[64px] px-3 rounded-xl transition-all duration-200"
+                className="flex items-center gap-2 min-h-[52px] md:h-full px-3 rounded-xl transition-all duration-200"
                 style={TILE_STYLE}
                 onMouseEnter={e => {
                   const el = e.currentTarget as HTMLAnchorElement;

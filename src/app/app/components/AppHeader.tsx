@@ -373,11 +373,11 @@ export default function AppHeader() {
         </div>
 
         {/* Grid — scrollable */}
-        <div className="grid grid-cols-2 content-start gap-[10px] md:gap-[6px] lg:gap-1 p-3 md:px-3 md:py-2 overflow-y-auto flex-1">
+        <div className="grid grid-cols-2 content-start md:content-normal gap-[10px] md:gap-[6px] lg:gap-1 p-3 md:px-3 md:py-2 overflow-y-auto flex-1">
           {TILES.map((tile, i) => {
             if (tile.disabled) {
               return (
-                <div key={i} className="flex items-center gap-2 h-[64px] w-full px-3 rounded-xl transition-all duration-200"
+                <div key={i} className="flex items-center gap-2 min-h-[52px] md:h-full w-full px-3 rounded-xl transition-all duration-200"
                   style={{
                     background: 'linear-gradient(145deg, rgba(40,45,58,0.92), rgba(20,24,32,0.97))',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.25)',
@@ -394,7 +394,7 @@ export default function AppHeader() {
                 key={i}
                 href={tile.href!}
                 onClick={close}
-                className="flex items-center gap-2 h-[64px] px-3 rounded-xl transition-all duration-200"
+                className="flex items-center gap-2 min-h-[52px] md:h-full px-3 rounded-xl transition-all duration-200"
                 style={{
                   background: 'linear-gradient(145deg, rgba(40,45,58,0.92), rgba(20,24,32,0.97))',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.25)',
