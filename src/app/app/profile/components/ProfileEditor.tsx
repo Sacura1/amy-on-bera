@@ -18,6 +18,9 @@ export default function ProfileEditor({
 }: ProfileEditorProps) {
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
+  const [showX, setShowX] = useState(false);
+  const [showDiscord, setShowDiscord] = useState(false);
+  const [showTelegram, setShowTelegram] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarData, setAvatarData] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -38,6 +41,9 @@ export default function ProfileEditor({
         if (data.success && data.data.profile) {
           setDisplayName(data.data.profile.displayName || '');
           setBio(data.data.profile.bio || '');
+          setShowX(data.data.profile.showX ?? false);
+          setShowDiscord(data.data.profile.showDiscord ?? false);
+          setShowTelegram(data.data.profile.showTelegram ?? false);
           setAvatarUrl(data.data.profile.avatarUrl || null);
           setAvatarData(data.data.profile.avatarData || null);
         }
@@ -151,7 +157,10 @@ export default function ProfileEditor({
         body: JSON.stringify({
           wallet,
           displayName: displayName.trim() || null,
-          bio: bio.trim() || null
+          bio: bio.trim() || null,
+          showX,
+          showDiscord,
+          showTelegram,
         })
       });
 
@@ -296,6 +305,33 @@ export default function ProfileEditor({
             <p className="text-xs text-gray-500 mt-1">
               {bio.length}/140 characters
             </p>
+          </div>
+
+          {/* Socials */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-400 mb-1">
+              Socials
+            </label>
+            <p className="text-xs text-gray-500 mb-3">
+              Choose which social links appear on your profile and shared card.
+            </p>
+            <div className="space-y-2">
+              {[
+                { label: 'X (Twitter)', value: showX, setter: setShowX },
+                { label: 'Discord',     value: showDiscord, setter: setShowDiscord },
+                { label: 'Telegram',    value: showTelegram, setter: setShowTelegram },
+              ].map(({ label, value, setter }) => (
+                <label key={label} className="flex items-center gap-3 cursor-pointer select-none">
+                  <div
+                    onClick={() => setter(v => !v)}
+                    className={`w-9 h-5 rounded-full flex-shrink-0 transition-colors relative ${value ? 'bg-pink-600' : 'bg-gray-700'}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${value ? 'translate-x-4' : 'translate-x-0'}`} />
+                  </div>
+                  <span className="text-sm text-gray-300">{label}</span>
+                </label>
+              ))}
+            </div>
           </div>
 
           {error && (

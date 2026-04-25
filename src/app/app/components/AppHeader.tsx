@@ -36,18 +36,16 @@ const HOLDER_RING: Record<string, string> = {
 
 // ── Icons matching design reference ──────────────────────────────────────────
 
-// Earn — 3 ascending filled bars (growth/yield)
+// Earn — lightning bolt (yield / rewards energy)
 const EarnIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-8 h-8">
-    <rect x="2" y="14" width="5" height="8" rx="1" fill="currentColor"/>
-    <rect x="9.5" y="9" width="5" height="13" rx="1" fill="currentColor"/>
-    <rect x="17" y="4" width="5" height="18" rx="1" fill="currentColor"/>
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10">
+    <path d="M14 1L6 13.5h5.5L10 23l8-12.5h-5.5L14 1z"/>
   </svg>
 );
 
 // Trade — two clean opposing swap arrows
 const TradeIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10">
     <path d="M5 8h14M19 8l-4-4M19 8l-4 4"/>
     <path d="M19 16H5M5 16l4-4M5 16l4 4"/>
   </svg>
@@ -55,7 +53,7 @@ const TradeIcon = () => (
 
 // Portfolio — 3 ascending hollow candlesticks with visible wicks, faded white fill
 const PortfolioIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-8 h-8">
+  <svg viewBox="0 0 24 24" className="w-10 h-10">
     {/* Left candle — smallest, hollow body + wicks */}
     <rect x="2.5" y="16" width="4" height="5" rx="0.5" fill="rgba(255,255,255,0.18)" stroke="currentColor" strokeWidth="1.4"/>
     <line x1="4.5" y1="12.5" x2="4.5" y2="16" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
@@ -73,7 +71,7 @@ const PortfolioIcon = () => (
 
 // Amy Points — star inside a circle
 const AmyPointsIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-8 h-8">
+  <svg viewBox="0 0 24 24" className="w-10 h-10">
     <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5"/>
     <path d="M12 6.8l1.2 3.6h3.8l-3.1 2.2 1.2 3.6-3.1-2.3-3.1 2.3 1.2-3.6-3.1-2.2h3.8z" fill="currentColor"/>
   </svg>
@@ -82,7 +80,7 @@ const AmyPointsIcon = () => (
 // Raffles — 3D gift box with ribbon and bow (stroke style matching gift.jpg)
 const RafflesIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-       strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+       strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10">
     {/* Front face (U-shape — top edge implicit) */}
     <path d="M3 12v10h14V12"/>
     {/* Top face (parallelogram) */}
@@ -106,21 +104,21 @@ const RafflesIcon = () => (
 
 // Leaderboard — trophy cup
 const LeaderboardIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10">
     <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z" />
   </svg>
 );
 
 // Profile — person silhouette
 const ProfileIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10">
     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
   </svg>
 );
 
 // Exclusive Access — TV shape: two antennas, transparent screen top, solid bottom with VIP cutout
 const ExclusiveIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-8 h-8">
+  <svg viewBox="0 0 24 24" className="w-10 h-10">
     {/* Left antenna */}
     <path d="M9.5 5.5L7 2" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
     {/* Right antenna */}
@@ -138,7 +136,7 @@ const ExclusiveIcon = () => (
 
 // Partners — 5-node atom/molecule: large center + 4 outer nodes of varying size
 const PartnersIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-8 h-8">
+  <svg viewBox="0 0 24 24" className="w-10 h-10">
     {/* Connection lines (draw first so nodes sit on top) */}
     <path d="M12 12L12 5M12 12L20 9M12 12L19 18.5M12 12L4 17M12 5L20 9M4 17L19 18.5"
           stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
@@ -359,7 +357,7 @@ export default function AppHeader() {
           {TILES.map((tile, i) => {
             if (tile.disabled) {
               return (
-                <div key={i} className="flex items-center gap-2 min-h-[52px] md:h-full w-full px-3 rounded-xl transition-all duration-200"
+                <div key={i} className="flex items-center gap-2 min-h-[62px] md:h-full w-full px-3 rounded-xl transition-all duration-200"
                   style={{
                     background: 'linear-gradient(145deg, rgba(40,45,58,0.92), rgba(20,24,32,0.97))',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.25)',
@@ -367,7 +365,7 @@ export default function AppHeader() {
                     cursor: 'not-allowed',
                   }}>
                   <div className="flex-shrink-0 w-8 h-8" />
-                  <span className="text-[12.5px] font-semibold leading-tight whitespace-pre-line" />
+                  <span className="text-[13.5px] font-semibold leading-tight whitespace-pre-line" />
                 </div>
               );
             }
@@ -376,7 +374,7 @@ export default function AppHeader() {
                 key={i}
                 href={tile.href!}
                 onClick={close}
-                className="flex items-center gap-2 min-h-[52px] md:h-full px-3 rounded-xl transition-all duration-200"
+                className="flex items-center gap-2 min-h-[62px] md:h-full px-3 rounded-xl transition-all duration-200"
                 style={{
                   background: 'linear-gradient(145deg, rgba(40,45,58,0.92), rgba(20,24,32,0.97))',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.25)',
@@ -396,7 +394,7 @@ export default function AppHeader() {
                 }}
               >
                 <div className="flex-shrink-0" style={{ color: 'rgba(210,218,230,0.88)' }}>{tile.icon}</div>
-                <span className="text-[12.5px] font-semibold leading-tight whitespace-pre-line"
+                <span className="text-[13.5px] font-semibold leading-tight whitespace-pre-line"
                   style={{ color: 'rgba(210,218,230,0.82)' }}>{tile.label}</span>
               </Link>
             );
