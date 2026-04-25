@@ -36,44 +36,26 @@ const HOLDER_RING: Record<string, string> = {
 
 // ── Icons matching design reference ──────────────────────────────────────────
 
-// Earn — two separate coin stacks: left=3 coins, right=4 coins, both solid with black circle on top
+// Earn — 3 ascending filled bars (growth/yield)
 const EarnIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
-    {/* LEFT STACK — 3 coins */}
-    <path d="M1.5 12v9a5 1.5 0 0 0 10 0v-9"/>
-    <ellipse cx="6.5" cy="12" rx="5" ry="1.5"/>
-    <ellipse cx="6.5" cy="15.5" rx="5" ry="1.5" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="0.8"/>
-    <ellipse cx="6.5" cy="19" rx="5" ry="1.5" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="0.8"/>
-    {/* Black circle on top of left stack */}
-    <ellipse cx="6.5" cy="12" rx="2" ry="0.6" fill="rgba(0,0,0,0.7)"/>
-
-    {/* RIGHT STACK — 4 coins (taller) */}
-    <path d="M13.5 8v13a5 1.5 0 0 0 10 0V8"/>
-    <ellipse cx="18.5" cy="8" rx="5" ry="1.5"/>
-    <ellipse cx="18.5" cy="11.5" rx="5" ry="1.5" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="0.8"/>
-    <ellipse cx="18.5" cy="15" rx="5" ry="1.5" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="0.8"/>
-    <ellipse cx="18.5" cy="18.5" rx="5" ry="1.5" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="0.8"/>
-    {/* Black circle on top of right stack */}
-    <ellipse cx="18.5" cy="8" rx="2" ry="0.6" fill="rgba(0,0,0,0.7)"/>
+  <svg viewBox="0 0 24 24" className="w-8 h-8">
+    <rect x="2" y="14" width="5" height="8" rx="1" fill="currentColor"/>
+    <rect x="9.5" y="9" width="5" height="13" rx="1" fill="currentColor"/>
+    <rect x="17" y="4" width="5" height="18" rx="1" fill="currentColor"/>
   </svg>
 );
 
-// Trade — thick circle broken into 4 arc segments, last segment ends with arrowhead
+// Trade — two clean opposing swap arrows
 const TradeIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" className="w-7 h-7">
-    {/* 4 equal arcs forming a broken circle (gaps at 45° diagonals) */}
-    <path d="M14.3 3.3A9 9 0 0 1 20.7 9.7"/>
-    <path d="M20.7 14.3A9 9 0 0 1 14.3 20.7"/>
-    <path d="M9.7 20.7A9 9 0 0 1 3.3 14.3"/>
-    <path d="M3.3 9.7A9 9 0 0 1 9.7 3.3"/>
-    {/* Arrowhead at end of 4th arc — points clockwise (right+up) */}
-    <path d="M9.7 3.3L7.6 1.7M9.7 3.3L8.2 4.3" strokeWidth="2"/>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+    <path d="M5 8h14M19 8l-4-4M19 8l-4 4"/>
+    <path d="M19 16H5M5 16l4-4M5 16l4 4"/>
   </svg>
 );
 
 // Portfolio — 3 ascending hollow candlesticks with visible wicks, faded white fill
 const PortfolioIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-7 h-7">
+  <svg viewBox="0 0 24 24" className="w-8 h-8">
     {/* Left candle — smallest, hollow body + wicks */}
     <rect x="2.5" y="16" width="4" height="5" rx="0.5" fill="rgba(255,255,255,0.18)" stroke="currentColor" strokeWidth="1.4"/>
     <line x1="4.5" y1="12.5" x2="4.5" y2="16" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
@@ -91,7 +73,7 @@ const PortfolioIcon = () => (
 
 // Amy Points — star inside a circle
 const AmyPointsIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-7 h-7">
+  <svg viewBox="0 0 24 24" className="w-8 h-8">
     <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5"/>
     <path d="M12 6.8l1.2 3.6h3.8l-3.1 2.2 1.2 3.6-3.1-2.3-3.1 2.3 1.2-3.6-3.1-2.2h3.8z" fill="currentColor"/>
   </svg>
@@ -100,7 +82,7 @@ const AmyPointsIcon = () => (
 // Raffles — 3D gift box with ribbon and bow (stroke style matching gift.jpg)
 const RafflesIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-       strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+       strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
     {/* Front face (U-shape — top edge implicit) */}
     <path d="M3 12v10h14V12"/>
     {/* Top face (parallelogram) */}
@@ -124,21 +106,21 @@ const RafflesIcon = () => (
 
 // Leaderboard — trophy cup
 const LeaderboardIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
     <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z" />
   </svg>
 );
 
 // Profile — person silhouette
 const ProfileIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
   </svg>
 );
 
 // Exclusive Access — TV shape: two antennas, transparent screen top, solid bottom with VIP cutout
 const ExclusiveIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-7 h-7">
+  <svg viewBox="0 0 24 24" className="w-8 h-8">
     {/* Left antenna */}
     <path d="M9.5 5.5L7 2" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
     {/* Right antenna */}
@@ -156,7 +138,7 @@ const ExclusiveIcon = () => (
 
 // Partners — 5-node atom/molecule: large center + 4 outer nodes of varying size
 const PartnersIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-7 h-7">
+  <svg viewBox="0 0 24 24" className="w-8 h-8">
     {/* Connection lines (draw first so nodes sit on top) */}
     <path d="M12 12L12 5M12 12L20 9M12 12L19 18.5M12 12L4 17M12 5L20 9M4 17L19 18.5"
           stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
@@ -186,7 +168,7 @@ const TILES: Tile[] = [
   { label: 'Earn',                 href: '/app/earn',        icon: <EarnIcon /> },
   { label: 'Trade',                href: '/app/trade',       icon: <TradeIcon /> },
   { label: 'Portfolio',            href: '/app/portfolio',   icon: <PortfolioIcon /> },
-  { label: 'Amy\nPoints',          href: '/app/points',      icon: <AmyPointsIcon /> },
+  { label: 'Amy Points',          href: '/app/points',      icon: <AmyPointsIcon /> },
   { label: 'Raffles',              href: '/app/raffles',     icon: <RafflesIcon /> },
   { label: 'Leaderboard',           href: '/app/leaderboard', icon: <LeaderboardIcon /> },
   { label: 'Profile',              href: '/app/profile',     icon: <ProfileIcon /> },
@@ -249,17 +231,17 @@ export default function AppHeader() {
               transition: 'margin-right 300ms cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
-            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">
+            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">
               PROFILE
             </Link>
-            <Link href="/app/earn" className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">
+            <Link href="/app/earn" onClick={close} className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">
               EARN
             </Link>
-            <Link href="/app/points" className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">
+            <Link href="/app/points" onClick={close} className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">
               AMY POINTS
             </Link>
             <button
-              onClick={() => setIsOpen(true)}
+              onClick={() => setIsOpen(o => !o)}
               className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase"
             >
               MENU
@@ -268,11 +250,11 @@ export default function AppHeader() {
 
           {/* Mobile nav */}
           <div className="flex md:hidden items-center gap-2">
-            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase">
+            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase">
               PROFILE
             </Link>
             <button
-              onClick={() => setIsOpen(true)}
+              onClick={() => setIsOpen(o => !o)}
               className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase"
             >
               MENU
@@ -384,8 +366,8 @@ export default function AppHeader() {
                     border: '1px solid rgba(255,255,255,0.08)',
                     cursor: 'not-allowed',
                   }}>
-                  <div className="flex-shrink-0 w-7 h-7" />
-                  <span className="text-[11px] font-semibold leading-tight whitespace-pre-line" />
+                  <div className="flex-shrink-0 w-8 h-8" />
+                  <span className="text-[12.5px] font-semibold leading-tight whitespace-pre-line" />
                 </div>
               );
             }
@@ -414,7 +396,7 @@ export default function AppHeader() {
                 }}
               >
                 <div className="flex-shrink-0" style={{ color: 'rgba(210,218,230,0.88)' }}>{tile.icon}</div>
-                <span className="text-[11px] font-semibold leading-tight whitespace-pre-line"
+                <span className="text-[12.5px] font-semibold leading-tight whitespace-pre-line"
                   style={{ color: 'rgba(210,218,230,0.82)' }}>{tile.label}</span>
               </Link>
             );
