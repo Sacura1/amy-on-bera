@@ -200,9 +200,9 @@ export default function ProfileEditor({
       />
 
       {/* Modal */}
-      <div className="relative bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-md overflow-hidden">
+      <div className="relative bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-md flex flex-col max-h-[90dvh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-700">
           <h2 className="text-xl font-bold text-white">Edit Profile</h2>
           <button
             onClick={onClose}
@@ -215,7 +215,7 @@ export default function ProfileEditor({
         </div>
 
         {/* Content */}
-        <div className="p-4 space-y-4">
+        <div className="overflow-y-auto flex-1 p-4 space-y-4">
           {/* Avatar Upload */}
           <div>
             <label className="block text-sm font-semibold text-gray-400 mb-2">
@@ -340,7 +340,7 @@ export default function ProfileEditor({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-700 flex gap-3">
+        <div className="flex-shrink-0 p-4 border-t border-gray-700 flex gap-3">
           <button
             onClick={onClose}
             className="flex-1 py-3 rounded-xl border border-gray-600 text-gray-300 font-semibold hover:bg-gray-800 transition-colors"
