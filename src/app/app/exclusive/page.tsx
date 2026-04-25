@@ -789,10 +789,10 @@ function JnrusdInfoModal({ onClose }: { onClose: () => void }) {
         {/* Feature row */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 px-6 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.3)' }}>
           {[
-            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, title: 'Earn Yield', desc: 'Your jnrUSD shares increase in value as the share price rises.' },
-            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>, title: 'No Long-Term Lock', desc: 'Exit any time. 7-day cooldown applies.' },
-            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: 'Additional Rewards', desc: 'BGT rewards are distributed separately.' },
-            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: 'Professionally Managed', desc: 'Amy manages the pooled position and liquidity.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>, title: 'Pooled Access', desc: 'Access jnrUSD through Amy without high minimums or manual onboarding.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>, title: 'No Long-Term Lock', desc: 'Exit anytime with a simple 7-day cooldown.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, title: 'Earn Continuously', desc: 'Your position earns yield over time through vault performance.' },
+            { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>, title: 'Inventory Backed', desc: 'All positions are backed by underlying jnrUSD vault exposure.' },
             { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round"/><circle cx="12" cy="7" r="4"/></svg>, title: 'For Bronze+ Holders', desc: 'Available to users holding 300+ AMY.' },
           ].map(f => (
             <div key={f.title} className="flex flex-col gap-1">
@@ -812,12 +812,12 @@ function JnrusdInfoModal({ onClose }: { onClose: () => void }) {
               <h4 className="text-green-400 font-bold text-base mb-3">How It Works</h4>
               <ol className="space-y-2">
                 {[
-                  'You deposit USDe to access the jnrUSD pool.',
-                  'You receive jnrUSD shares based on the current share price.',
-                  'Your shares represent your portion of the pooled position.',
-                  'The share price increases over time as the strategy earns yield.',
-                  'Your share count stays the same, but its value grows.',
-                  'When you exit, your shares are unwound and returned as USDe after cooldown.',
+                  'You choose an amount of USDe to invest.',
+                  'You confirm the deposit directly from your wallet (approve + confirm).',
+                  'Your USDe is sent to a secure multisig Safe and your jnrUSD position is recorded in Amy.',
+                  'Your position earns yield over time through the underlying vault strategy.',
+                  'You can request an exit at any time, triggering a 7-day cooldown.',
+                  'After the cooldown, your position is unwound and returned to your wallet as USDe.',
                 ].map((step, i) => (
                   <li key={i} className="flex gap-3 items-start text-sm text-gray-300">
                     <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.25)' }}>{i + 1}</span>
@@ -829,12 +829,14 @@ function JnrusdInfoModal({ onClose }: { onClose: () => void }) {
 
             {/* Where Funds Are Held */}
             <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <h4 className="text-green-400 font-bold text-base mb-3">Where Your Funds &amp; jnrUSD Are Held</h4>
-              <div className="grid grid-cols-3 gap-3 mb-4">
+              <h4 className="text-green-400 font-bold text-base mb-1">Where Your Funds &amp; jnrUSD Are Held</h4>
+              <p className="text-gray-500 text-xs mb-3">Custody &amp; Security</p>
+              <div className="grid grid-cols-2 gap-3 mb-4">
                 {[
-                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>, title: 'USDe Buffer', desc: 'Your deposit is held in a managed buffer to support liquidity and withdrawals.' },
-                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, title: 'jnrUSD Pool', desc: 'A pre-funded jnrUSD position managed by Amy to generate yield.' },
-                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/><path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: 'Secure & Controlled', desc: 'Assets are managed in controlled wallets with operational safeguards.' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V6L12 2z" strokeLinejoin="round"/></svg>, title: 'Multisig Safe', desc: 'Your USDe is held in a secure Safe multisig wallet requiring 2-of-3 approvals (Amy, Liquid Royalty, and a trusted third party).' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, title: 'jnrUSD Inventory', desc: 'jnrUSD exposure is held in custody, provided by Liquid Royalty.' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>, title: 'Three-Party Security', desc: 'Multisig is controlled by Amy, Liquid Royalty, and a trusted third party.' },
+                  { icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>, title: 'User-Initiated Deposits', desc: 'All deposits are confirmed via your wallet and recorded onchain.' },
                 ].map(item => (
                   <div key={item.title} className="flex flex-col gap-1.5">
                     <span className="text-green-400">{item.icon}</span>
@@ -845,7 +847,7 @@ function JnrusdInfoModal({ onClose }: { onClose: () => void }) {
               </div>
               <div className="rounded-lg px-4 py-3 text-xs text-gray-400 flex items-start gap-2" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-500"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" strokeLinecap="round"/></svg>
-                <span>Amy tracks your position in jnrUSD shares. You own your portion of the pool.</span>
+                <span>Your position is recorded in Amy and represents your full beneficial ownership of your share of the jnrUSD position. This structure ensures all positions are backed, secured, and fully tracked over time.</span>
               </div>
             </div>
           </div>
@@ -864,10 +866,10 @@ function JnrusdInfoModal({ onClose }: { onClose: () => void }) {
                 </thead>
                 <tbody>
                   {[
-                    { label: 'Current Share Price (1 jnrUSD)', val: '$1.25 USDe' },
+                    { label: 'Current Share Price', val: '$1.25 USDe' },
                     { label: 'Your Deposit', val: '100 USDe' },
-                    { label: 'jnrUSD Shares You Receive', val: '~80.00 jnrUSD shares' },
-                    { label: 'Share Price After Growth', val: '$1.40 USDe' },
+                    { label: 'jnrUSD Shares You Receive', val: '~80.00 shares' },
+                    { label: 'If Share Price Increases to', val: '$1.40 USDe' },
                     { label: 'Your Position Value', val: '~$112.00 USDe', highlight: true },
                     { label: 'Gain (Before Fees)', val: '~$12.00 USDe', highlight: true },
                   ].map((row, i) => (
@@ -880,7 +882,7 @@ function JnrusdInfoModal({ onClose }: { onClose: () => void }) {
               </table>
               <div className="mt-4 rounded-xl px-4 py-3 flex items-center gap-2 text-sm font-bold" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', color: '#22c55e' }}>
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <span>Your shares increase in value as the share price rises.</span>
+                <span>Your shares remain constant, but their value increases over time.</span>
               </div>
             </div>
 
@@ -889,14 +891,14 @@ function JnrusdInfoModal({ onClose }: { onClose: () => void }) {
               <h4 className="text-green-400 font-bold text-base mb-3">Key Details</h4>
               <ul className="space-y-2.5">
                 {[
-                  { label: 'Minimum Deposit', val: '$10 USDe' },
-                  { label: 'Exit Anytime', val: 'Request withdrawal at any time' },
-                  { label: 'Cooldown', val: '7 days from exit request (no earnings from 00:00 UTC next day)' },
-                  { label: 'Payout', val: 'Shares are unwound and returned as USDe after cooldown' },
-                  { label: 'Fees', val: '~8% performance fee on realized yield (only on gains)' },
-                  { label: 'Rewards', val: 'BGT rewards distributed separately' },
-                  { label: 'Quote Validity', val: '120 seconds (based on live share price)' },
-                  { label: 'No Maximum', val: 'No upper deposit limit' },
+                  { label: 'Lock Duration', val: 'No fixed lock (7-day cooldown on exit)' },
+                  { label: 'Rewards', val: 'Accrue continuously via vault performance' },
+                  { label: 'Delivery', val: 'Returned as USDe after cooldown' },
+                  { label: 'No Auto-Sell', val: 'Your position remains active until you exit' },
+                  { label: 'Inventory Limited', val: 'Access depends on available vault capacity' },
+                  { label: 'Fees', val: '~8% performance fee on realized yield' },
+                  { label: 'Rewards (Additional)', val: 'BGT rewards distributed separately' },
+                  { label: 'Confirmation', val: 'You will be asked to approve and confirm in your wallet' },
                 ].map(item => (
                   <li key={item.label} className="flex items-start gap-2 text-sm">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 flex-shrink-0 mt-0.5 text-green-400"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -1701,10 +1703,29 @@ export default function ExclusivePage() {
               </>
             }
             footer={
-              <div className="space-y-1 text-xs">
-                <div className="flex items-center gap-2 text-gray-400"><span>•</span><span>Access without high minimums or manual onboarding</span></div>
-                <div className="flex items-center gap-2 text-gray-400"><span>•</span><span>No long-term lock (7-day exit cooldown)</span></div>
-                <div className="flex items-center gap-2 text-gray-400"><span>•</span><span>Value grows through share price appreciation</span></div>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="w-3.5 h-3.5 flex-shrink-0">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>No long-term lock — exit anytime with 7-day cooldown</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+                  </svg>
+                  <span>Earn yield continuously through vault performance</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <span>Inventory-backed access via multisig Safe</span>
+                </div>
+                <div className="flex items-center gap-1.5 pt-2 mt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span className="text-gray-500">Status:</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black" style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.30)', color: '#d4af37' }}>Launching May</span>
+                </div>
               </div>
             }
           />
