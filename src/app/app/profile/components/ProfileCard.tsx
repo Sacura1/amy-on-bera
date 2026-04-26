@@ -308,23 +308,24 @@ export default function ProfileCard({
 
   const ScoreCard = ({ size }: { size: 'sm' | 'lg' }) => {
     const ringSize = size === 'lg' ? 54 : 58;
+    const gradId = `goldRing-${size}`;
     return (
       <div className={`rounded-xl px-3 w-full flex flex-row items-center gap-2.5 ${size === 'lg' ? 'py-2' : 'py-4'}`} style={{ background: 'rgba(8,12,22,0.9)', border: '1px solid rgba(250,204,21,0.35)' }}>
         <div className="relative flex-shrink-0 flex items-center justify-center" style={{ width: ringSize, height: ringSize }}>
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 48 48" fill="none" style={{ transform: 'rotate(-90deg)' }}>
+            <defs>
+              <linearGradient id={gradId} x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#fbbf24"/><stop offset="1" stopColor="#f59e0b"/>
+              </linearGradient>
+            </defs>
             <circle cx="24" cy="24" r="21" stroke="rgba(250,204,21,0.15)" strokeWidth="3"/>
             <circle
               cx="24" cy="24" r="21"
-              stroke="url(#goldRingDyn)"
+              stroke={`url(#${gradId})`}
               strokeWidth="3"
               strokeLinecap="round"
               strokeDasharray={`${scoreFill} ${scoreCircumference - scoreFill}`}
             />
-            <defs>
-              <linearGradient id="goldRingDyn" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#fbbf24"/><stop offset="1" stopColor="#f59e0b"/>
-              </linearGradient>
-            </defs>
           </svg>
           <svg className="w-4 h-4 text-yellow-400 relative" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
