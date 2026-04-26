@@ -34,6 +34,8 @@ function ProfilePageContent() {
   const [userReferralCode, setUserReferralCode] = useState('');
   const [usedReferralCode, setUsedReferralCode] = useState('');
   const [referralCount, setReferralCount] = useState(0);
+  const [startedReferrals, setStartedReferrals] = useState(0);
+  const [activeReferrals, setActiveReferrals] = useState(0);
   const [referralInputStatus, setReferralInputStatus] = useState('');
   const [refInputFocused, setRefInputFocused] = useState(false);
   const [showNoSocialModal, setShowNoSocialModal] = useState(false);
@@ -160,6 +162,12 @@ function ProfilePageContent() {
           }
           if (referralData.data.referralCount !== undefined) {
             setReferralCount(referralData.data.referralCount);
+          }
+          if (referralData.data.startedReferrals !== undefined) {
+            setStartedReferrals(referralData.data.startedReferrals);
+          }
+          if (referralData.data.activeReferrals !== undefined) {
+            setActiveReferrals(referralData.data.activeReferrals);
           }
         }
       });
@@ -1483,8 +1491,13 @@ function ProfilePageContent() {
                     <div className="flex items-start gap-4">
                       <p className="text-white font-black text-4xl">{referralCount}</p>
                       <div className="flex-1">
-                        <p className="text-gray-300 text-xs">Each started user (wallet + social) earns you <span style={{ color: g }} className="font-bold">+50 pts</span>.</p>
-                        <p className="text-gray-300 text-xs mt-1">Each active user (holding 300+ AMY) earns you <span style={{ color: g }} className="font-bold">+450 pts</span>.</p>
+                        <div className="flex flex-col gap-0.5 mb-2">
+                          <p className="text-gray-300 text-xs">Started Referrals: <span className="text-white font-bold">{startedReferrals}</span></p>
+                          <p className="text-gray-300 text-xs">Active Referrals: <span style={{ color: g }} className="font-bold">{activeReferrals}</span></p>
+                          <p className="text-gray-400 text-xs">Your Referrals: <span className="text-white font-bold">{referralCount}</span></p>
+                        </div>
+                        <p className="text-gray-500 text-[10px]">Started: wallet + social · <span style={{ color: g }}>+50 pts</span></p>
+                        <p className="text-gray-500 text-[10px] mt-0.5">Active: 300+ AMY · <span style={{ color: g }}>+450 pts</span></p>
                       </div>
                       {referralCount === 0 && (
                         <div className="flex flex-col items-center gap-1 text-center flex-shrink-0">

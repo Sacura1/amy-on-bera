@@ -330,7 +330,7 @@ export default function ProfileCard({
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
           </svg>
         </div>
-        <div className="flex flex-col gap-0.5">
+        <div className="flex-1 flex flex-col gap-0.5 items-center text-center -ml-6">
           <span className="text-[10px] font-bold text-yellow-400 tracking-wider uppercase leading-none">Amy Score</span>
           <span className={`font-black text-yellow-400 leading-none ${size === 'lg' ? 'text-3xl' : 'text-3xl'}`}>{amyScore}</span>
           <span className="text-[9px] text-gray-400 tracking-wide leading-none">Monthly onchain score</span>
@@ -340,9 +340,9 @@ export default function ProfileCard({
   };
 
   const QrCard = ({ qrSize }: { qrSize: number }) => (
-    <div className="rounded-xl px-3 pb-1 flex flex-col items-center gap-0.5 w-full" style={{ background: 'rgba(8,12,22,0.9)', border: '1px solid rgba(6,182,212,0.3)' }}>
+    <div className="rounded-xl px-3 pt-1.5 pb-1 flex flex-col items-center gap-0.5 w-full" style={{ background: 'rgba(8,12,22,0.9)', border: '1px solid rgba(6,182,212,0.3)' }}>
       <span className="text-[10px] font-bold text-cyan-400 tracking-[0.2em] uppercase">Join Amy</span>
-      <span className="text-[11px] font-bold text-white text-center leading-tight pb-1">Scan to join my network</span>
+      <span className="text-[11px] font-bold text-white text-center leading-tight pb-1">Scan to get 1,000 AMY points</span>
       {userReferralCode && referralUrl ? (
         <>
           <div className="rounded-md overflow-hidden ring-2 ring-white">
