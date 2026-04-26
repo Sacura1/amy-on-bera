@@ -134,20 +134,38 @@ export default function ProfileCard({
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
-    const { toPng } = await import('html-to-image');
-
+    const { toJpeg } = await import('html-to-image');
     const card = cardRef.current;
 
-    // Clamp width for a more square output — less widescreen when shared
-    const origWidth = card.style.width;
-    const origMaxWidth = card.style.maxWidth;
+    // ── Force desktop layout regardless of device viewport ──────────────
+    // CSS media queries fire on viewport width, not element width, so we must
+    // manually show/hide the desktop vs mobile split elements before capture.
+    const origCardWidth = card.style.width;
+    const origCardMaxWidth = card.style.maxWidth;
+    const origCardPadding = card.style.padding;
     card.style.width = '560px';
     card.style.maxWidth = '560px';
-    // Wait one frame so the browser reflows at the new width
-    await new Promise(r => requestAnimationFrame(r));
+    card.style.padding = '1rem';
 
-    // Apply background via CSS background-image (data URL) — renders behind all content,
-    // no z-index conflict, and background-size:cover behaves correctly for capture.
+    const innerFlex = card.querySelector<HTMLElement>('[data-card-inner]');
+    const origFlexDir = innerFlex?.style.flexDirection ?? '';
+    const origFlexGap = innerFlex?.style.gap ?? '';
+    if (innerFlex) {
+      innerFlex.style.flexDirection = 'row';
+      innerFlex.style.gap = '1rem';
+    }
+
+    const mobileEls = card.querySelectorAll<HTMLElement>('[data-mobile-only]');
+    const desktopEls = card.querySelectorAll<HTMLElement>('[data-desktop-only]');
+    const mobileOrigDisplay: string[] = [];
+    const desktopOrigDisplay: string[] = [];
+    mobileEls.forEach((el, i) => { mobileOrigDisplay[i] = el.style.display; el.style.display = 'none'; });
+    desktopEls.forEach((el, i) => { desktopOrigDisplay[i] = el.style.display; el.style.display = 'flex'; });
+
+    // Two frames so the browser reflows at the forced desktop layout
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    // ── Background ───────────────────────────────────────────────────────
     const origBackground = card.style.background;
     const origBackgroundImage = card.style.backgroundImage;
     const origBackgroundSize = card.style.backgroundSize;
@@ -160,67 +178,60 @@ export default function ProfileCard({
         card.style.backgroundSize = 'cover';
         card.style.backgroundRepeat = 'no-repeat';
         card.style.backgroundPosition = 'center';
-      } catch { /* capture with plain dark bg on failure */ }
+      } catch { /* plain dark bg on failure */ }
     }
 
-    // Temporarily hide capture-ignored elements
-    const ignored = cardRef.current.querySelectorAll('[data-ignore-capture="true"]');
-    ignored.forEach(n => ((n as HTMLElement).style.display = 'none'));
-    const preserved = cardRef.current.querySelectorAll('[data-ignore-capture="preserve"]');
-    preserved.forEach(n => ((n as HTMLElement).style.visibility = 'hidden'));
+    // ── Hide capture-ignored elements ────────────────────────────────────
+    const ignored = card.querySelectorAll<HTMLElement>('[data-ignore-capture="true"]');
+    ignored.forEach(n => (n.style.display = 'none'));
+    const preserved = card.querySelectorAll<HTMLElement>('[data-ignore-capture="preserve"]');
+    preserved.forEach(n => (n.style.visibility = 'hidden'));
 
-    // Temporarily unclip truncated/clamped text
-    const truncated = cardRef.current.querySelectorAll('.truncate');
-    const clamped = cardRef.current.querySelectorAll('.line-clamp-2');
-    truncated.forEach(n => {
-      const el = n as HTMLElement;
-      el.dataset.origOverflow = el.style.overflow;
-      el.style.overflow = 'visible';
-      el.style.textOverflow = 'unset';
-      el.style.whiteSpace = 'normal';
-    });
-    clamped.forEach(n => {
-      const el = n as HTMLElement;
-      el.dataset.origDisplay = el.style.display;
-      el.style.display = 'block';
-      el.style.overflow = 'visible';
-      (el.style as CSSStyleDeclaration & { webkitLineClamp: string }).webkitLineClamp = 'unset';
-    });
+    const truncated = card.querySelectorAll<HTMLElement>('.truncate');
+    const clamped = card.querySelectorAll<HTMLElement>('.line-clamp-2');
+    truncated.forEach(n => { n.dataset.origOverflow = n.style.overflow; n.style.overflow = 'visible'; n.style.textOverflow = 'unset'; n.style.whiteSpace = 'normal'; });
+    clamped.forEach(n => { n.dataset.origDisplay = n.style.display; n.style.display = 'block'; n.style.overflow = 'visible'; (n.style as CSSStyleDeclaration & { webkitLineClamp: string }).webkitLineClamp = 'unset'; });
 
     try {
-      const dataUrl = await toPng(cardRef.current, {
+      const dataUrl = await toJpeg(card, {
         pixelRatio: 2,
+        quality: 0.92,
         backgroundColor: '#111827',
         style: { backdropFilter: 'none' },
       });
 
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = `amy-profile-${xUsername}.png`;
-      a.click();
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isMobile && typeof navigator.share === 'function') {
+        // iOS/Android: use native share sheet so user can Save to Photos
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], `amy-profile-${xUsername}.jpg`, { type: 'image/jpeg' });
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'My Amy Profile' });
+        } else {
+          // Share not supported — fall back to download
+          const a = document.createElement('a'); a.href = dataUrl; a.download = `amy-profile-${xUsername}.jpg`; a.click();
+        }
+      } else {
+        const a = document.createElement('a'); a.href = dataUrl; a.download = `amy-profile-${xUsername}.jpg`; a.click();
+      }
     } finally {
-      // Restore card width and background
-      card.style.width = origWidth;
-      card.style.maxWidth = origMaxWidth;
+      card.style.width = origCardWidth;
+      card.style.maxWidth = origCardMaxWidth;
+      card.style.padding = origCardPadding;
+      if (innerFlex) { innerFlex.style.flexDirection = origFlexDir; innerFlex.style.gap = origFlexGap; }
+      mobileEls.forEach((el, i) => (el.style.display = mobileOrigDisplay[i]));
+      desktopEls.forEach((el, i) => (el.style.display = desktopOrigDisplay[i]));
       card.style.background = origBackground;
       card.style.backgroundImage = origBackgroundImage;
       card.style.backgroundSize = origBackgroundSize;
       card.style.backgroundPosition = origBackgroundPosition;
       card.style.backgroundRepeat = '';
-      ignored.forEach(n => ((n as HTMLElement).style.display = ''));
-      preserved.forEach(n => ((n as HTMLElement).style.visibility = ''));
-      truncated.forEach(n => {
-        const el = n as HTMLElement;
-        el.style.overflow = el.dataset.origOverflow || '';
-        el.style.textOverflow = '';
-        el.style.whiteSpace = '';
-      });
-      clamped.forEach(n => {
-        const el = n as HTMLElement;
-        el.style.display = el.dataset.origDisplay || '';
-        el.style.overflow = '';
-        (el.style as CSSStyleDeclaration & { webkitLineClamp: string }).webkitLineClamp = '';
-      });
+      ignored.forEach(n => (n.style.display = ''));
+      preserved.forEach(n => (n.style.visibility = ''));
+      truncated.forEach(n => { n.style.overflow = n.dataset.origOverflow || ''; n.style.textOverflow = ''; n.style.whiteSpace = ''; });
+      clamped.forEach(n => { n.style.display = n.dataset.origDisplay || ''; n.style.overflow = ''; (n.style as CSSStyleDeclaration & { webkitLineClamp: string }).webkitLineClamp = ''; });
     }
   };
 
@@ -424,7 +435,7 @@ export default function ProfileCard({
       ref={cardRef}
       className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-3 mob:p-4 relative overflow-hidden"
     >
-      <div className="relative flex flex-col mob:flex-row gap-3 mob:gap-4">
+      <div data-card-inner className="relative flex flex-col mob:flex-row gap-3 mob:gap-4">
 
         {/* ── Left column ── */}
         <div className="flex-1 min-w-0 flex flex-col gap-3">
@@ -455,7 +466,7 @@ export default function ProfileCard({
                 <p className="text-gray-400 text-xs mt-1 line-clamp-2">{profile.bio}</p>
               )}
               {/* Badge slots — desktop only, aligned with bio */}
-              <div className="hidden mob:flex flex-wrap items-center gap-2 mt-5">
+              <div data-desktop-only className="hidden mob:flex flex-wrap items-center gap-2 mt-5">
                 {[1, 2, 3, 4, 5].map((slotNumber) => {
                   const badge = getBadgeForSlot(slotNumber);
                   return (
@@ -478,7 +489,7 @@ export default function ProfileCard({
           </div>
 
           {/* Badge slots — mobile only, aligned with avatar left edge */}
-          <div className="flex mob:hidden items-center gap-2">
+          <div data-mobile-only className="flex mob:hidden items-center gap-2">
             {[1, 2, 3, 4, 5].map((slotNumber) => {
               const badge = getBadgeForSlot(slotNumber);
               return (
@@ -501,7 +512,7 @@ export default function ProfileCard({
           {/* Stats card */}
           <div className="rounded-xl overflow-hidden mt-5" style={{ background: 'rgba(8,12,22,0.85)', border: '1px solid rgba(255,255,255,0.06)' }}>
             {/* Desktop: 3 col horizontal */}
-            <div className="hidden mob:flex divide-x divide-white/5">
+            <div data-desktop-only className="hidden mob:flex divide-x divide-white/5">
               {profile?.showBalance && (
                 <div className="flex-1 flex flex-col items-center justify-center gap-1.5 py-5 px-3">
                   <div className="flex items-center gap-1.5">
@@ -527,7 +538,7 @@ export default function ProfileCard({
               </div>
             </div>
             {/* Mobile: vertical rows */}
-            <div className="flex mob:hidden flex-col divide-y divide-white/5">
+            <div data-mobile-only className="flex mob:hidden flex-col divide-y divide-white/5">
               {profile?.showBalance && (
                 <div className="flex items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-2">
@@ -555,7 +566,7 @@ export default function ProfileCard({
           </div>
 
           {/* Mobile: Score + QR cards */}
-          <div className="flex mob:hidden flex-col gap-2">
+          <div data-mobile-only className="flex mob:hidden flex-col gap-2">
             <ScoreCard size="sm" />
             <QrCard qrSize={100} />
             <button onClick={handleDownload} className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-white/10 bg-black/40 hover:bg-white/10 transition-colors text-gray-400 self-end -mt-1" title="Download card" data-ignore-capture="true">
@@ -572,7 +583,7 @@ export default function ProfileCard({
         </div>
 
         {/* ── Right column — desktop only ── */}
-        <div className="hidden mob:flex flex-col gap-2 flex-shrink-0" style={{ width: 245 }}>
+        <div data-desktop-only className="hidden mob:flex flex-col gap-2 flex-shrink-0" style={{ width: 245 }}>
           <div className="flex items-end gap-2">
             <div className="flex-1"><ScoreCard size="lg" /></div>
             <div className="w-7 flex-shrink-0" />
