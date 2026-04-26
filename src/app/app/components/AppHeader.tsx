@@ -447,7 +447,7 @@ export default function AppHeader() {
           {TILES.map((tile, i) => {
             if (tile.disabled) {
               return (
-                <div key={i} className="flex flex-col items-center justify-center gap-1.5 min-h-[52px] md:h-full w-full px-2 py-3 rounded-xl"
+                <div key={i} className="flex flex-col items-center justify-center gap-1.5 aspect-[5/4] md:aspect-auto md:h-full w-full px-2 py-3 rounded-xl"
                   style={{
                     background: 'linear-gradient(145deg, rgba(40,45,58,0.92), rgba(20,24,32,0.97))',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.25)',
@@ -461,7 +461,7 @@ export default function AppHeader() {
                 key={i}
                 href={tile.href!}
                 onClick={close}
-                className="flex flex-col items-center justify-center gap-1 min-h-[52px] md:h-full px-2 py-2 rounded-xl transition-all duration-200"
+                className="flex flex-col items-center justify-center gap-1.5 aspect-[5/4] md:aspect-auto md:h-full px-2 py-3 rounded-xl transition-all duration-200"
                 style={{
                   background: 'linear-gradient(145deg, rgba(40,45,58,0.92), rgba(20,24,32,0.97))',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.25)',

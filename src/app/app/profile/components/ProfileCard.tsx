@@ -136,9 +136,18 @@ export default function ProfileCard({
     if (!cardRef.current) return;
     const { toPng } = await import('html-to-image');
 
+    const card = cardRef.current;
+
+    // Clamp width for a more square output — less widescreen when shared
+    const origWidth = card.style.width;
+    const origMaxWidth = card.style.maxWidth;
+    card.style.width = '560px';
+    card.style.maxWidth = '560px';
+    // Wait one frame so the browser reflows at the new width
+    await new Promise(r => requestAnimationFrame(r));
+
     // Apply background via CSS background-image (data URL) — renders behind all content,
     // no z-index conflict, and background-size:cover behaves correctly for capture.
-    const card = cardRef.current;
     const origBackground = card.style.background;
     const origBackgroundImage = card.style.backgroundImage;
     const origBackgroundSize = card.style.backgroundSize;
@@ -190,7 +199,9 @@ export default function ProfileCard({
       a.download = `amy-profile-${xUsername}.png`;
       a.click();
     } finally {
-      // Restore card background
+      // Restore card width and background
+      card.style.width = origWidth;
+      card.style.maxWidth = origMaxWidth;
       card.style.background = origBackground;
       card.style.backgroundImage = origBackgroundImage;
       card.style.backgroundSize = origBackgroundSize;
