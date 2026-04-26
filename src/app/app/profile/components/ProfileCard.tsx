@@ -29,7 +29,17 @@ interface ProfileData {
   showDiscord: boolean;
   showTelegram: boolean;
   showBalance: boolean;
+  backgroundId: string | null;
 }
+
+export const CARD_BACKGROUNDS: { id: string; path: string; label: string }[] = [
+  { id: 'bg_desktop_1', path: '/bg_desktop_1.jpg', label: 'Background 1' },
+  { id: 'bg_desktop_2', path: '/bg_desktop_2.jpg', label: 'Background 2' },
+  { id: 'bg_desktop_3', path: '/bg_desktop_3.jpg', label: 'Background 3' },
+  { id: 'bg_desktop_4', path: '/bg_desktop_4.jpg', label: 'Background 4' },
+  { id: 'bg_desktop_5', path: '/bg_desktop_5.jpg', label: 'Background 5' },
+  { id: 'bg_desktop_6', path: '/bg_desktop_6.jpg', label: 'Background 6' },
+];
 
 interface SocialData {
   discordUsername: string | null;
@@ -100,18 +110,55 @@ export default function ProfileCard({
   const [activeBadges, setActiveBadges] = useState<BadgeData[]>([]);
   const [socialData, setSocialData] = useState<SocialData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [cardBgId, setCardBgId] = useState<string>('bg_desktop_1');
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !wallet) return;
+    const stored = localStorage.getItem(`amy-card-bg-${wallet.toLowerCase()}`);
+    if (stored) setCardBgId(stored);
+  }, [wallet]);
 
   const referralUrl = userReferralCode
     ? `${typeof window !== 'undefined' ? window.location.origin : 'https://amybera.com'}/app/profile?ref=${userReferralCode}`
     : '';
 
+  const toDataUrl = (url: string): Promise<string> =>
+    fetch(url)
+      .then(r => r.blob())
+      .then(blob => new Promise<string>((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = () => res(reader.result as string);
+        reader.onerror = rej;
+        reader.readAsDataURL(blob);
+      }));
+
   const handleDownload = async () => {
     if (!cardRef.current) return;
     const { toPng } = await import('html-to-image');
 
+    // Apply background via CSS background-image (data URL) — renders behind all content,
+    // no z-index conflict, and background-size:cover behaves correctly for capture.
+    const card = cardRef.current;
+    const origBackground = card.style.background;
+    const origBackgroundImage = card.style.backgroundImage;
+    const origBackgroundSize = card.style.backgroundSize;
+    const origBackgroundPosition = card.style.backgroundPosition;
+    if (cardBg) {
+      try {
+        const bgDataUrl = await toDataUrl(cardBg.path);
+        card.style.background = '';
+        card.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('${bgDataUrl}')`;
+        card.style.backgroundSize = 'cover';
+        card.style.backgroundRepeat = 'no-repeat';
+        card.style.backgroundPosition = 'center';
+      } catch { /* capture with plain dark bg on failure */ }
+    }
+
     // Temporarily hide capture-ignored elements
-    const ignored = cardRef.current.querySelectorAll('[data-ignore-capture]');
+    const ignored = cardRef.current.querySelectorAll('[data-ignore-capture="true"]');
     ignored.forEach(n => ((n as HTMLElement).style.display = 'none'));
+    const preserved = cardRef.current.querySelectorAll('[data-ignore-capture="preserve"]');
+    preserved.forEach(n => ((n as HTMLElement).style.visibility = 'hidden'));
 
     // Temporarily unclip truncated/clamped text
     const truncated = cardRef.current.querySelectorAll('.truncate');
@@ -143,8 +190,14 @@ export default function ProfileCard({
       a.download = `amy-profile-${xUsername}.png`;
       a.click();
     } finally {
-      // Restore everything
+      // Restore card background
+      card.style.background = origBackground;
+      card.style.backgroundImage = origBackgroundImage;
+      card.style.backgroundSize = origBackgroundSize;
+      card.style.backgroundPosition = origBackgroundPosition;
+      card.style.backgroundRepeat = '';
       ignored.forEach(n => ((n as HTMLElement).style.display = ''));
+      preserved.forEach(n => ((n as HTMLElement).style.visibility = ''));
       truncated.forEach(n => {
         const el = n as HTMLElement;
         el.style.overflow = el.dataset.origOverflow || '';
@@ -300,7 +353,7 @@ export default function ProfileCard({
             <span className="text-[8px] text-cyan-400 tracking-widest uppercase pt-1">or use my code</span>
             <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }}/>
           </div>
-          <span className="text-cyan-400 font-mono font-black text-sm tracking-[0.15em]">◆ {userReferralCode} ◆</span>
+          <span className="text-cyan-400 font-mono font-black text-sm tracking-[0.15em] whitespace-nowrap">◆ {userReferralCode} ◆</span>
         </>
       ) : (
         <p className="text-[10px] text-gray-500">No referral code yet</p>
@@ -352,16 +405,21 @@ export default function ProfileCard({
     </div>
   );
 
+  const cardBg = CARD_BACKGROUNDS.find(b => b.id === cardBgId);
+
   return (
-    <div ref={cardRef} className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-3 mob:p-4 relative">
-      <div className="flex flex-col mob:flex-row gap-3 mob:gap-4">
+    <div
+      ref={cardRef}
+      className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-3 mob:p-4 relative overflow-hidden"
+    >
+      <div className="relative flex flex-col mob:flex-row gap-3 mob:gap-4">
 
         {/* ── Left column ── */}
         <div className="flex-1 min-w-0 flex flex-col gap-3">
 
           {/* Avatar + name/bio */}
           <div className="flex gap-3 items-start">
-            <div className="relative flex-shrink-0" data-ignore-capture="true">
+            <div className="relative flex-shrink-0">
               <div className={`w-20 h-20 mob:w-24 mob:h-24 rounded-full border-4 ${HOLDER_RING[tier] ?? 'border-gray-600'} overflow-hidden`}>
                 {getAvatarUrl() ? (
                   <img src={getAvatarUrl()!} alt="Profile" className="w-full h-full object-cover" />
@@ -371,7 +429,7 @@ export default function ProfileCard({
                   </div>
                 )}
               </div>
-              <button onClick={onEditProfile} className="absolute bottom-0 right-0 w-6 h-6 flex items-center justify-center rounded-full border border-white/20 bg-gray-900 hover:bg-gray-700 transition-colors text-gray-300" title="Edit Profile">
+              <button onClick={onEditProfile} data-ignore-capture="true" className="absolute bottom-0 right-0 w-6 h-6 flex items-center justify-center rounded-full border border-white/20 bg-gray-900 hover:bg-gray-700 transition-colors text-gray-300" title="Edit Profile">
                 <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
@@ -509,7 +567,7 @@ export default function ProfileCard({
           </div>
           <div className="flex items-end gap-2">
             <div className="flex-1"><QrCard qrSize={105} /></div>
-            <button onClick={handleDownload} className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-white/10 bg-black/40 hover:bg-white/10 transition-colors text-gray-400" title="Download card" data-ignore-capture="true">
+            <button onClick={handleDownload} className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-white/10 bg-black/40 hover:bg-white/10 transition-colors text-gray-400" title="Download card" data-ignore-capture="preserve">
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>

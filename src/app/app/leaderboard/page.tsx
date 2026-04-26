@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL, MINIMUM_AMY_BALANCE } from '@/lib/constants';
 
 interface LeaderboardEntry {
@@ -99,10 +99,17 @@ interface PointsEntry {
 
 type TabType = 'weekly' | 'points';
 
+const formatPointsAbbrev = (points: number): string => {
+  if (points >= 1_000_000) return `${parseFloat((points / 1_000_000).toFixed(2))}M`;
+  if (points >= 1_000) return `${parseFloat((points / 1_000).toFixed(2))}K`;
+  return points.toLocaleString(undefined, { maximumFractionDigits: 0 });
+};
+
 const WEEKLY_CACHE_KEY = 'amy-weekly-leaderboard';
 const POINTS_CACHE_KEY = 'amy-points-leaderboard';
 const WEEKLY_CACHE_LIMIT = 25;
 const POINTS_CACHE_LIMIT = 25;
+const POINTS_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
 const trimLeaderboardEntries = (entries: EnrichedEntry[]) =>
   entries.slice(0, WEEKLY_CACHE_LIMIT).map(entry => ({
@@ -135,7 +142,8 @@ const safeSessionStorageSet = (key: string, value: unknown) => {
 };
 
 export default function LeaderboardPage() {
-  const [activeTab, setActiveTab] = useState<TabType>('weekly');
+  const [activeTab, setActiveTab] = useState<TabType>('points');
+  const pointsRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [displayEntries, setDisplayEntries] = useState<EnrichedEntry[]>([]);
   const [pointsEntries, setPointsEntries] = useState<PointsEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -166,26 +174,45 @@ export default function LeaderboardPage() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    // Load points leaderboard: check cache TTL, fetch if stale/missing
+    const initPoints = () => {
+      if (typeof window === 'undefined') return;
       const cached = sessionStorage.getItem(POINTS_CACHE_KEY);
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed.entries)) {
+          const age = Date.now() - (parsed.cachedAt || 0);
+          if (age < POINTS_CACHE_TTL_MS && Array.isArray(parsed.entries)) {
             setPointsEntries(parsed.entries);
             setHasCachedPointsLeaderboard(true);
             setIsPointsLoading(false);
+            return; // Cache is fresh, skip fetch
           }
-        } catch {
-          sessionStorage.removeItem(POINTS_CACHE_KEY);
-        }
+        } catch { /* fall through to fetch */ }
+        sessionStorage.removeItem(POINTS_CACHE_KEY);
       }
-    }
+      loadPointsLeaderboard();
+    };
 
     if (activeTab === 'points' && pointsEntries.length === 0) {
-      loadPointsLeaderboard();
+      initPoints();
     }
-  }, [activeTab, pointsEntries.length]);
+
+    // Auto-refresh every 15 minutes while on points tab
+    if (activeTab === 'points') {
+      pointsRefreshRef.current = setInterval(() => {
+        sessionStorage.removeItem(POINTS_CACHE_KEY);
+        loadPointsLeaderboard();
+      }, POINTS_CACHE_TTL_MS);
+    }
+
+    return () => {
+      if (pointsRefreshRef.current) {
+        clearInterval(pointsRefreshRef.current);
+        pointsRefreshRef.current = null;
+      }
+    };
+  }, [activeTab]);
 
   const loadLeaderboard = async () => {
     try {
@@ -325,7 +352,7 @@ export default function LeaderboardPage() {
   const loadPointsLeaderboard = async () => {
     setIsPointsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/points/leaderboard?limit=25`);
+      const response = await fetch(`${API_BASE_URL}/api/points/leaderboard?limit=25`, { cache: 'no-store' });
       const result = await response.json();
 
       if (result.success) {
@@ -371,7 +398,8 @@ export default function LeaderboardPage() {
         setPointsEntries(entriesWithProfiles);
         setHasCachedPointsLeaderboard(true);
         safeSessionStorageSet(POINTS_CACHE_KEY, {
-          entries: trimPointsEntries(entriesWithProfiles)
+          entries: trimPointsEntries(entriesWithProfiles),
+          cachedAt: Date.now()
         });
       }
     } catch (err) {
@@ -627,7 +655,7 @@ export default function LeaderboardPage() {
                             </div>
                           </div>
                           <span className="text-sm md:text-lg font-bold text-yellow-400 flex-shrink-0 mt-1">
-                            {formatPoints(entry.totalPoints)}
+                            {formatPointsAbbrev(entry.totalPoints)}
                           </span>
                         </div>
                       </div>

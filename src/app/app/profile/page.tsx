@@ -26,7 +26,7 @@ function ProfilePageContent() {
   const searchParams = useSearchParams();
   const account = useActiveAccount();
   const { balance, isLoading: balanceLoading, isEligible, walletAddress } = useAmyBalance();
-  const { setBackgroundId, setFilterId } = useCustomization();
+  const { setFilterId } = useCustomization();
 
   const [xConnected, setXConnected] = useState(false);
   const [xUsername, setXUsername] = useState('');
@@ -196,10 +196,6 @@ function ProfilePageContent() {
       safeFetchJson(profileUrl).then((profileData) => {
         if (profileData?.success && profileData.data?.profile) {
           const profile = profileData.data.profile;
-          if (profile.backgroundId) {
-            setCurrentBackground(profile.backgroundId);
-            setBackgroundId(profile.backgroundId);
-          }
           if (profile.filterId) {
             setCurrentFilter(profile.filterId);
             setFilterId(profile.filterId);
@@ -212,7 +208,7 @@ function ProfilePageContent() {
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
-  }, [walletAddress, setBackgroundId, setFilterId]);
+  }, [walletAddress, setFilterId]);
 
   useEffect(() => {
     if (walletAddress) {

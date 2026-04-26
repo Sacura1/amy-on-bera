@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '@/lib/constants';
+import { CARD_BACKGROUNDS } from './ProfileCard';
 
 interface ProfileEditorProps {
   wallet: string;
@@ -22,6 +23,8 @@ export default function ProfileEditor({
   const [showDiscord, setShowDiscord] = useState(false);
   const [showTelegram, setShowTelegram] = useState(false);
   const [showBalance, setShowBalance] = useState(false);
+  const [backgroundId, setBackgroundId] = useState<string>('bg_desktop_1');
+  const [bgOffset, setBgOffset] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarData, setAvatarData] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -46,6 +49,9 @@ export default function ProfileEditor({
           setShowDiscord(data.data.profile.showDiscord ?? false);
           setShowTelegram(data.data.profile.showTelegram ?? false);
           setShowBalance(data.data.profile.showBalance ?? false);
+          // Card background is stored in localStorage, not in the profile DB
+          const storedBg = localStorage.getItem(`amy-card-bg-${wallet.toLowerCase()}`);
+          setBackgroundId(storedBg || 'bg_desktop_1');
           setAvatarUrl(data.data.profile.avatarUrl || null);
           setAvatarData(data.data.profile.avatarData || null);
         }
@@ -170,6 +176,8 @@ export default function ProfileEditor({
       const data = await response.json();
 
       if (data.success) {
+        // Persist card background choice locally (separate from customisation section)
+        localStorage.setItem(`amy-card-bg-${wallet.toLowerCase()}`, backgroundId);
         onProfileUpdated();
         onClose();
       } else {
@@ -308,6 +316,81 @@ export default function ProfileEditor({
             <p className="text-xs text-gray-500 mt-1">
               {bio.length}/140 characters
             </p>
+          </div>
+
+          {/* Card Background */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-400 mb-1">
+              Card Background
+            </label>
+            <p className="text-xs text-gray-500 mb-3">
+              Choose a background image for your profile card.
+            </p>
+            <div className="flex items-center gap-2">
+              {/* Prev arrow */}
+              <button
+                type="button"
+                onClick={() => setBgOffset(o => Math.max(0, o - 1))}
+                disabled={bgOffset === 0}
+                className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg border border-gray-600 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {/* None + 2 visible backgrounds */}
+              <div className="flex flex-1 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBackgroundId('none')}
+                  className={`flex-1 aspect-video rounded-lg border-2 flex items-center justify-center text-xs font-semibold transition-colors ${backgroundId === 'none' ? 'border-pink-500 text-pink-400 bg-gray-700' : 'border-gray-600 text-gray-400 bg-gray-800 hover:border-gray-500'}`}
+                >
+                  None
+                </button>
+                {CARD_BACKGROUNDS.slice(bgOffset, bgOffset + 2).map(bg => (
+                  <button
+                    key={bg.id}
+                    type="button"
+                    onClick={() => setBackgroundId(bg.id)}
+                    className={`flex-1 aspect-video rounded-lg border-2 overflow-hidden transition-colors relative ${backgroundId === bg.id ? 'border-pink-500' : 'border-gray-600 hover:border-gray-400'}`}
+                  >
+                    <img src={bg.path} alt={bg.label} className="w-full h-full object-cover" />
+                    {backgroundId === bg.id && (
+                      <div className="absolute inset-0 bg-pink-500/20 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Next arrow */}
+              <button
+                type="button"
+                onClick={() => setBgOffset(o => Math.min(CARD_BACKGROUNDS.length - 2, o + 1))}
+                disabled={bgOffset >= CARD_BACKGROUNDS.length - 2}
+                className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg border border-gray-600 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Dot indicators */}
+            <div className="flex justify-center gap-1 mt-2">
+              {Array.from({ length: CARD_BACKGROUNDS.length - 1 }).map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setBgOffset(i)}
+                  className={`w-1.5 h-1.5 rounded-full transition-colors ${bgOffset === i ? 'bg-pink-500' : 'bg-gray-600'}`}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Socials */}
