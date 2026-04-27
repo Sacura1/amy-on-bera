@@ -226,6 +226,9 @@ export default function ProfileCard({
       } catch { /* plain dark bg on failure */ }
     }
 
+    const origOverflow = card.style.overflow;
+    card.style.overflow = 'visible';
+
     // ── Hide capture-ignored elements ────────────────────────────────────
     const ignored = card.querySelectorAll<HTMLElement>('[data-ignore-capture="true"]');
     ignored.forEach(n => (n.style.display = 'none'));
@@ -292,6 +295,9 @@ export default function ProfileCard({
       }
     }
 
+    // Wait for fonts so html2canvas measures text with the correct metrics
+    await document.fonts.ready;
+
     try {
       const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(card, {
@@ -301,6 +307,21 @@ export default function ProfileCard({
         backgroundColor: '#111827',
         logging: false,
         imageTimeout: 15000,
+        onclone: (doc) => {
+          // html2canvas can shift heavy numeric glyphs vertically depending on
+          // font metrics; normalize the score line in the cloned export DOM.
+          doc.querySelectorAll<HTMLElement>('[data-score-value]').forEach((el) => {
+            el.style.display = 'block';
+            el.style.lineHeight = '0.9';
+            el.style.marginBottom = '4px';
+            el.style.transform = 'translateY(-2px)';
+          });
+          doc.querySelectorAll<HTMLElement>('[data-score-subtitle]').forEach((el) => {
+            el.style.display = 'block';
+            el.style.lineHeight = '1';
+            el.style.transform = 'translateY(1px)';
+          });
+        },
       });
       const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
 
@@ -338,6 +359,7 @@ export default function ProfileCard({
       clamped.forEach(n => { n.style.display = n.dataset.origDisplay || ''; n.style.overflow = ''; (n.style as CSSStyleDeclaration & { webkitLineClamp: string }).webkitLineClamp = ''; });
       imgEls.forEach((img, i) => { img.src = imgOrigSrcs[i]; });
       statChildren.forEach((el, i) => { el.style.minWidth = statChildOrigMinWidth[i]; el.style.overflow = statChildOrigOverflow[i]; });
+      card.style.overflow = origOverflow;
       // Restore canvas elements
       for (const { canvas, img, parent, next } of canvasSwaps) {
         img.remove();
@@ -444,7 +466,7 @@ export default function ProfileCard({
     const ringSize = size === 'lg' ? 54 : 58;
     const gradId = `goldRing-${size}`;
     return (
-      <div className={`rounded-xl px-3 w-full flex flex-row items-center gap-2.5 ${size === 'lg' ? 'py-2' : 'py-4'}`} style={{ background: 'rgba(8,12,22,0.9)', border: '1px solid rgba(250,204,21,0.35)' }}>
+      <div data-score-card className={`rounded-xl px-3 w-full flex flex-row items-center gap-2.5 ${size === 'lg' ? 'py-2' : 'py-4'}`} style={{ background: 'rgba(8,12,22,0.9)', border: '1px solid rgba(250,204,21,0.35)' }}>
         <div className="relative flex-shrink-0 flex items-center justify-center" style={{ width: ringSize, height: ringSize }}>
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 48 48" fill="none" style={{ transform: 'rotate(-90deg)' }}>
             <defs>
@@ -465,22 +487,28 @@ export default function ProfileCard({
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
           </svg>
         </div>
-        <div className="flex-1 flex flex-col gap-0.5 items-center text-center -ml-6">
+        <div className="flex-1 flex flex-col items-center justify-center text-center -ml-6 gap-0.5">
           <span className="text-[10px] font-bold text-yellow-400 tracking-wider uppercase leading-none">Amy Score</span>
-          <span className={`font-black text-yellow-400 leading-none ${size === 'lg' ? 'text-3xl' : 'text-3xl'}`}>{amyScore}</span>
-          <span className="text-[9px] text-gray-400 tracking-wide leading-none">Monthly onchain score</span>
+          <span
+            data-score-value
+            className={`font-black text-yellow-400 block ${size === 'lg' ? 'text-3xl' : 'text-3xl'}`}
+            style={{ lineHeight: 0.9, marginBottom: 2 }}
+          >
+            {amyScore}
+          </span>
+          <span data-score-subtitle className="text-[9px] text-gray-400 tracking-wide leading-none">Monthly onchain score</span>
         </div>
       </div>
     );
   };
 
   const QrCard = ({ qrSize }: { qrSize: number }) => (
-    <div className="rounded-xl px-3 pt-1.5 pb-1 flex flex-col items-center gap-0.5 w-full" style={{ background: 'rgba(8,12,22,0.9)', border: '1px solid rgba(6,182,212,0.3)' }}>
+    <div data-qr-card className="rounded-xl px-3 pt-1.5 pb-3 flex flex-col items-center gap-0.5 w-full" style={{ background: 'rgba(8,12,22,0.9)', border: '1px solid rgba(6,182,212,0.3)' }}>
       <span className="text-[10px] font-bold text-cyan-400 tracking-[0.2em] uppercase">Join Amy</span>
       <span className="text-[11px] font-bold text-white text-center leading-tight pb-1">Scan to get 1,000 AMY points</span>
       {userReferralCode && referralUrl ? (
         <>
-          <div className="rounded-md overflow-hidden ring-2 ring-white">
+          <div className="rounded-md overflow-hidden border-2 border-white">
             <QRCodeCanvas value={referralUrl} size={qrSize} bgColor="#ffffff" fgColor="#000000" includeMargin={false} />
           </div>
           <div className="flex items-center gap-1.5 w-full">
@@ -504,7 +532,7 @@ export default function ProfileCard({
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
         </svg>
         {profile?.showX && xUsername && (
-          <span className="text-white text-xs">@{xUsername}</span>
+          <span className="text-white text-xs leading-none" style={{ lineHeight: 1 }}>@{xUsername}</span>
         )}
       </div>
       {/* Discord */}
@@ -513,13 +541,13 @@ export default function ProfileCard({
           title={socialData?.discordUsername && socialData.discordUsername !== 'connected' ? `@${socialData.discordUsername}` : 'Discord connected'}>
           <DiscordSvg className="w-3.5 h-3.5 text-[#5865F2] flex-shrink-0" />
           {profile?.showDiscord && (
-            <span className="text-white text-xs">{socialData?.discordUsername && socialData.discordUsername !== 'connected' ? socialData.discordUsername : 'Connected'}</span>
+            <span className="text-white text-xs leading-none" style={{ lineHeight: 1 }}>{socialData?.discordUsername && socialData.discordUsername !== 'connected' ? socialData.discordUsername : 'Connected'}</span>
           )}
         </div>
       ) : (
         <button onClick={onConnectDiscord} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#5865F2]/20 hover:bg-[#5865F2]/30 whitespace-nowrap transition-colors">
           <DiscordSvg className="w-3.5 h-3.5 text-[#5865F2] flex-shrink-0" />
-          <span className="text-gray-400 text-xs">Connect</span>
+          <span className="text-gray-400 text-xs leading-none" style={{ lineHeight: 1 }}>Connect</span>
         </button>
       )}
       {/* Telegram */}
@@ -528,13 +556,13 @@ export default function ProfileCard({
           title={socialData?.telegramUsername && socialData.telegramUsername !== 'connected' ? `@${socialData.telegramUsername}` : 'Telegram connected'}>
           <TelegramSvg className="w-3.5 h-3.5 text-[#0088cc] flex-shrink-0" />
           {profile?.showTelegram && (
-            <span className="text-white text-xs">{socialData?.telegramUsername && socialData.telegramUsername !== 'connected' ? socialData.telegramUsername : 'Connected'}</span>
+            <span className="text-white text-xs leading-none" style={{ lineHeight: 1 }}>{socialData?.telegramUsername && socialData.telegramUsername !== 'connected' ? socialData.telegramUsername : 'Connected'}</span>
           )}
         </div>
       ) : (
         <button onClick={onConnectTelegram} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0088cc]/20 hover:bg-[#0088cc]/30 whitespace-nowrap transition-colors">
           <TelegramSvg className="w-3.5 h-3.5 text-[#0088cc] flex-shrink-0" />
-          <span className="text-gray-400 text-xs">Connect</span>
+          <span className="text-gray-400 text-xs leading-none" style={{ lineHeight: 1 }}>Connect</span>
         </button>
       )}
     </div>
