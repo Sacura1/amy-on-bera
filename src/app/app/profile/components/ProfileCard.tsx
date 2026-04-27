@@ -39,6 +39,7 @@ export const CARD_BACKGROUNDS: { id: string; path: string; label: string }[] = [
   { id: 'bg_desktop_4', path: '/bg_desktop_4.jpg', label: 'Background 4' },
   { id: 'bg_desktop_5', path: '/bg_desktop_5.jpg', label: 'Background 5' },
   { id: 'bg_desktop_6', path: '/bg_desktop_6.jpg', label: 'Background 6' },
+  { id: 'bg_fuzzyholdd', path: '/fuzzyholdd.png', label: 'Fuzzy Hold' },
 ];
 
 interface SocialData {
@@ -73,9 +74,9 @@ interface ProfileCardProps {
 }
 
 const BADGE_RING: Record<string, string> = {
-  bronze: 'ring-2 ring-amber-600 shadow-[0_0_6px_rgba(217,119,6,0.5)]',
-  silver: 'ring-2 ring-slate-300 shadow-[0_0_6px_rgba(203,213,225,0.5)]',
-  gold:   'ring-2 ring-yellow-400 shadow-[0_0_6px_rgba(250,204,21,0.6)]',
+  bronze: 'border-2 border-amber-600',
+  silver: 'border-2 border-slate-300',
+  gold:   'border-2 border-yellow-400',
 };
 
 // Avatar border — keyed by AMY holder tier (bronze/silver/gold/platinum/none)
@@ -346,6 +347,11 @@ export default function ProfileCard({
               label.style.fontSize = '8px';
             }
           });
+          doc.querySelectorAll<HTMLElement>('[data-qr-title]').forEach((el) => {
+            el.style.display = 'block';
+            el.style.position = 'relative';
+            el.style.top = '-5px';
+          });
         },
       });
       const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
@@ -541,8 +547,8 @@ export default function ProfileCard({
 
   const QrCard = ({ qrSize }: { qrSize: number }) => (
     <div data-qr-card className="rounded-xl px-3 pt-1.5 pb-3 flex flex-col items-center gap-0.5 w-full" style={{ background: 'rgba(8,12,22,0.9)', border: '1px solid rgba(6,182,212,0.3)' }}>
-      <span className="text-[10px] font-bold text-cyan-400 tracking-[0.2em] uppercase">Join Amy</span>
-      <span className="text-[11px] font-bold text-white text-center leading-tight pb-1">Scan to get 1,000 AMY points</span>
+      <span data-qr-title className="text-[10px] font-bold text-cyan-400 tracking-[0.2em] uppercase">Join Amy</span>
+      <span className="text-[11px] font-bold text-white text-center leading-tight pb-3">Scan to get 1,000 AMY points</span>
       {userReferralCode && referralUrl ? (
         <>
           <div className="rounded-md overflow-hidden border-2 border-white">

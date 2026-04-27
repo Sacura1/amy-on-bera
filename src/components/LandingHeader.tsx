@@ -6,8 +6,9 @@ import { useState } from 'react';
 const PANEL_W = 350;
 
 const EarnIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-[30px] h-[30px]">
-    <path d="M14 1L6 13.5h5.5L10 23l8-12.5h-5.5L14 1z"/>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[30px] h-[30px]">
+    <polyline points="3 17 9 11 13 15 21 7" />
+    <polyline points="17 7 21 7 21 11" />
   </svg>
 );
 

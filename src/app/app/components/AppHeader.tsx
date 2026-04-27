@@ -64,10 +64,11 @@ const StarIcon = () => (
 
 // ── Icons matching design reference ──────────────────────────────────────────
 
-// Earn — lightning bolt (yield / rewards energy)
+// Earn — sharp trending-up line with arrowhead
 const EarnIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-[30px] h-[30px]">
-    <path d="M14 1L6 13.5h5.5L10 23l8-12.5h-5.5L14 1z"/>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[30px] h-[30px]">
+    <polyline points="3 17 9 11 13 15 21 7" />
+    <polyline points="17 7 21 7 21 11" />
   </svg>
 );
 
@@ -217,6 +218,12 @@ export default function AppHeader() {
   const close = () => setIsOpen(false);
 
   useEffect(() => {
+    const openMenu = () => setIsOpen(true);
+    window.addEventListener('amy-open-menu', openMenu);
+    return () => window.removeEventListener('amy-open-menu', openMenu);
+  }, []);
+
+  useEffect(() => {
     const wa = account?.address;
     if (!wa) { setAvatarUrl(null); setHolderTier('none'); return; }
     fetch(`${API_BASE_URL}/api/profile/${wa}`)
@@ -242,7 +249,7 @@ export default function AppHeader() {
   return (
     <>
       {/* ── Header ── */}
-      <header className="container mx-auto px-4 py-4 md:py-3">
+      <header className="container mx-auto px-4 py-4 md:py-3 landscape:py-2">
         <nav className="flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="text-3xl md:text-4xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
@@ -251,7 +258,7 @@ export default function AppHeader() {
 
           {/* Desktop nav — shifts left in sync with panel */}
           <div
-            className="hidden md:flex items-center gap-4"
+            className="hidden md:flex landscape:flex items-center gap-4"
             style={{
               marginRight: isOpen ? PANEL_W : 0,
               transition: 'margin-right 300ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -275,7 +282,7 @@ export default function AppHeader() {
           </div>
 
           {/* Mobile nav */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex md:hidden landscape:hidden items-center gap-2">
             <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase">
               PROFILE
             </Link>

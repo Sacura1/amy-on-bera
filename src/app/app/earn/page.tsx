@@ -1110,14 +1110,13 @@ export default function EarnPage() {
           )}
         </div>
 
-        {/* Back to Home */}
         <div className="text-center mt-12">
-          <Link
-            href="/"
-            className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase inline-block"
+          <button
+            onClick={() => window.dispatchEvent(new Event('amy-open-menu'))}
+            className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase"
           >
-            BACK TO HOME
-          </Link>
+            MENU
+          </button>
         </div>
       </div>
     </div>
