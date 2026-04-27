@@ -192,13 +192,33 @@ export default function ProfileCard({
     truncated.forEach(n => { n.dataset.origOverflow = n.style.overflow; n.style.overflow = 'visible'; n.style.textOverflow = 'unset'; n.style.whiteSpace = 'normal'; });
     clamped.forEach(n => { n.dataset.origDisplay = n.style.display; n.style.display = 'block'; n.style.overflow = 'visible'; (n.style as CSSStyleDeclaration & { webkitLineClamp: string }).webkitLineClamp = 'unset'; });
 
+    // ── Pre-fetch all <img> srcs to data URLs ────────────────────────────
+    // html-to-image on iOS/mobile can't reliably fetch cross-origin images
+    // during capture (avatar, badge icons). Pre-inlining them guarantees they
+    // appear correctly regardless of CORS or timing constraints.
+    const imgEls = Array.from(card.querySelectorAll<HTMLImageElement>('img'));
+    const imgOrigSrcs = imgEls.map(img => img.src);
+    await Promise.all(imgEls.map(async (img) => {
+      if (!img.src || img.src.startsWith('data:')) return;
+      try {
+        img.src = await toDataUrl(img.src);
+        // Wait for the new src to be decoded
+        await img.decode().catch(() => {});
+      } catch { /* keep original src — will degrade gracefully */ }
+    }));
+
+    const captureOpts = {
+      pixelRatio: 2,
+      quality: 0.92,
+      backgroundColor: '#111827',
+      style: { backdropFilter: 'none' },
+    };
+
     try {
-      const dataUrl = await toJpeg(card, {
-        pixelRatio: 2,
-        quality: 0.92,
-        backgroundColor: '#111827',
-        style: { backdropFilter: 'none' },
-      });
+      // First call primes html-to-image's internal font/asset cache on iOS;
+      // second call is the actual capture that comes out correctly.
+      await toJpeg(card, captureOpts).catch(() => {});
+      const dataUrl = await toJpeg(card, captureOpts);
 
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
@@ -232,6 +252,7 @@ export default function ProfileCard({
       preserved.forEach(n => (n.style.visibility = ''));
       truncated.forEach(n => { n.style.overflow = n.dataset.origOverflow || ''; n.style.textOverflow = ''; n.style.whiteSpace = ''; });
       clamped.forEach(n => { n.style.display = n.dataset.origDisplay || ''; n.style.overflow = ''; (n.style as CSSStyleDeclaration & { webkitLineClamp: string }).webkitLineClamp = ''; });
+      imgEls.forEach((img, i) => { img.src = imgOrigSrcs[i]; });
     }
   };
 
