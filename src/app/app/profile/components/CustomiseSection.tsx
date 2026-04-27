@@ -228,7 +228,7 @@ export default function CustomiseSection({
         <div className="flex items-center gap-3">
           <h2 className="text-base font-bold text-yellow-400">Customise</h2>
           <span className="text-sm text-gray-400">
-            ({userPoints.toLocaleString()} pts)
+            ({new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 2 }).format(userPoints)} pts)
           </span>
         </div>
         <svg

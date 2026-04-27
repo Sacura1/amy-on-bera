@@ -1498,7 +1498,6 @@ function ProfilePageContent() {
                         <div className="flex flex-col gap-0.5 mb-2">
                           <p className="text-gray-300 text-xs">Started Referrals: <span className="text-white font-bold">{startedReferrals}</span></p>
                           <p className="text-gray-300 text-xs">Active Referrals: <span style={{ color: g }} className="font-bold">{activeReferrals}</span></p>
-                          <p className="text-gray-400 text-xs">Your Referrals: <span className="text-white font-bold">{referralCount}</span></p>
                         </div>
                         <p className="text-gray-500 text-[10px]">Started: wallet + social · <span style={{ color: g }}>+50 pts</span></p>
                         <p className="text-gray-500 text-[10px] mt-0.5">Active: 300+ AMY · <span style={{ color: g }}>+450 pts</span></p>

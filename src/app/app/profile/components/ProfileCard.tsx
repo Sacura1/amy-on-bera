@@ -132,10 +132,37 @@ export default function ProfileCard({
         reader.readAsDataURL(blob);
       }));
 
+  // Converts an image URL to a data URL using an off-screen canvas.
+  // Works for images that have CORS headers; returns null if tainted/failed.
+  const imgToDataUrlViaCanvas = (src: string): Promise<string | null> =>
+    new Promise(resolve => {
+      const tmp = new Image();
+      tmp.crossOrigin = 'anonymous';
+      tmp.onload = () => {
+        try {
+          const c = document.createElement('canvas');
+          c.width = tmp.naturalWidth || tmp.width;
+          c.height = tmp.naturalHeight || tmp.height;
+          c.getContext('2d')!.drawImage(tmp, 0, 0);
+          resolve(c.toDataURL('image/png'));
+        } catch { resolve(null); }
+      };
+      tmp.onerror = () => resolve(null);
+      tmp.src = src;
+    });
+
   const handleDownload = async () => {
     if (!cardRef.current) return;
     const { toJpeg } = await import('html-to-image');
     const card = cardRef.current;
+
+    // Route cross-origin URLs through a same-origin proxy so iOS Safari can
+    // draw them to canvas without hitting CORS restrictions.
+    const toProxyUrl = (src: string) => {
+      if (!src || src.startsWith('data:') || src.startsWith('blob:')) return src;
+      if (src.startsWith('/') || src.startsWith(window.location.origin)) return src;
+      return `/api/image-proxy?url=${encodeURIComponent(src)}`;
+    };
 
     // ── Force desktop layout regardless of device viewport ──────────────
     // CSS media queries fire on viewport width, not element width, so we must
@@ -162,6 +189,24 @@ export default function ProfileCard({
     mobileEls.forEach((el, i) => { mobileOrigDisplay[i] = el.style.display; el.style.display = 'none'; });
     desktopEls.forEach((el, i) => { desktopOrigDisplay[i] = el.style.display; el.style.display = 'flex'; });
 
+    // Constrain stat columns so they can shrink inside the 560px layout.
+    // flex-1 children without min-width:0 can't shrink below their text content
+    // width, which makes the row overflow when AMY Balance is shown.
+    const desktopStats = card.querySelector<HTMLElement>('[data-desktop-stats]');
+    const statChildren: HTMLElement[] = [];
+    const statChildOrigMinWidth: string[] = [];
+    const statChildOrigOverflow: string[] = [];
+    if (desktopStats) {
+      Array.from(desktopStats.children).forEach((child, i) => {
+        const el = child as HTMLElement;
+        statChildren.push(el);
+        statChildOrigMinWidth[i] = el.style.minWidth;
+        statChildOrigOverflow[i] = el.style.overflow;
+        el.style.minWidth = '0';
+        el.style.overflow = 'hidden';
+      });
+    }
+
     // Two frames so the browser reflows at the forced desktop layout
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
@@ -172,7 +217,11 @@ export default function ProfileCard({
     const origBackgroundPosition = card.style.backgroundPosition;
     if (cardBg) {
       try {
-        const bgDataUrl = await toDataUrl(cardBg.path);
+        // Route through proxy so iOS can draw it to canvas without CORS issues
+        const bgProxied = toProxyUrl(window.location.origin + cardBg.path);
+        const bgDataUrl =
+          (await imgToDataUrlViaCanvas(bgProxied)) ??
+          (await toDataUrl(cardBg.path));
         card.style.background = '';
         card.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('${bgDataUrl}')`;
         card.style.backgroundSize = 'cover';
@@ -192,26 +241,56 @@ export default function ProfileCard({
     truncated.forEach(n => { n.dataset.origOverflow = n.style.overflow; n.style.overflow = 'visible'; n.style.textOverflow = 'unset'; n.style.whiteSpace = 'normal'; });
     clamped.forEach(n => { n.dataset.origDisplay = n.style.display; n.style.display = 'block'; n.style.overflow = 'visible'; (n.style as CSSStyleDeclaration & { webkitLineClamp: string }).webkitLineClamp = 'unset'; });
 
-    // ── Pre-fetch all <img> srcs to data URLs ────────────────────────────
-    // html-to-image on iOS/mobile can't reliably fetch cross-origin images
-    // during capture (avatar, badge icons). Pre-inlining them guarantees they
-    // appear correctly regardless of CORS or timing constraints.
+    // ── Replace <canvas> elements with <img> snapshots ───────────────────
+    // html-to-image can't reliably capture <canvas> on iOS Safari (QR code
+    // renders as blank). Snapshot each canvas to a data URL and swap to <img>.
+    type CanvasSwap = { canvas: HTMLCanvasElement; img: HTMLImageElement; parent: Node; next: Node | null };
+    const canvasSwaps: CanvasSwap[] = [];
+    for (const canvas of Array.from(card.querySelectorAll<HTMLCanvasElement>('canvas'))) {
+      try {
+        const dataUrl = canvas.toDataURL('image/png');
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.style.display = 'block';
+        img.style.width = canvas.style.width || `${canvas.offsetWidth}px`;
+        img.style.height = canvas.style.height || `${canvas.offsetHeight}px`;
+        const parent = canvas.parentNode!;
+        const next = canvas.nextSibling;
+        parent.replaceChild(img, canvas);
+        canvasSwaps.push({ canvas, img, parent, next });
+      } catch { /* tainted canvas — leave it */ }
+    }
+
+    // ── Inline all <img> srcs as data URLs ───────────────────────────────
+    // iOS Safari blocks cross-origin fetch AND canvas.drawImage for images
+    // that weren't loaded with crossOrigin='anonymous'. Route through the
+    // same-origin proxy so canvas conversion always succeeds.
     const imgEls = Array.from(card.querySelectorAll<HTMLImageElement>('img'));
     const imgOrigSrcs = imgEls.map(img => img.src);
-    await Promise.all(imgEls.map(async (img) => {
-      if (!img.src || img.src.startsWith('data:')) return;
-      try {
-        img.src = await toDataUrl(img.src);
-        // Wait for the new src to be decoded
+    for (const img of imgEls) {
+      if (!img.src || img.src.startsWith('data:') || img.src.startsWith('blob:')) continue;
+      const proxied = toProxyUrl(img.src);
+      // Canvas-draw via proxy (same-origin, always works)
+      const canvasData = await imgToDataUrlViaCanvas(proxied);
+      if (canvasData) {
+        img.src = canvasData;
         await img.decode().catch(() => {});
-      } catch { /* keep original src — will degrade gracefully */ }
-    }));
+        continue;
+      }
+      // Fallback: direct fetch (same-origin or already CORS-enabled)
+      try {
+        const fetchData = await toDataUrl(proxied);
+        img.src = fetchData;
+        await img.decode().catch(() => {});
+      } catch { /* keep original src */ }
+    }
 
     const captureOpts = {
       pixelRatio: 2,
       quality: 0.92,
       backgroundColor: '#111827',
       style: { backdropFilter: 'none' },
+      cacheBust: true,
     };
 
     try {
@@ -253,6 +332,13 @@ export default function ProfileCard({
       truncated.forEach(n => { n.style.overflow = n.dataset.origOverflow || ''; n.style.textOverflow = ''; n.style.whiteSpace = ''; });
       clamped.forEach(n => { n.style.display = n.dataset.origDisplay || ''; n.style.overflow = ''; (n.style as CSSStyleDeclaration & { webkitLineClamp: string }).webkitLineClamp = ''; });
       imgEls.forEach((img, i) => { img.src = imgOrigSrcs[i]; });
+      statChildren.forEach((el, i) => { el.style.minWidth = statChildOrigMinWidth[i]; el.style.overflow = statChildOrigOverflow[i]; });
+      // Restore canvas elements
+      for (const { canvas, img, parent, next } of canvasSwaps) {
+        img.remove();
+        if (next && next.parentNode === parent) parent.insertBefore(canvas, next);
+        else parent.appendChild(canvas);
+      }
     }
   };
 
@@ -533,7 +619,7 @@ export default function ProfileCard({
           {/* Stats card */}
           <div className="rounded-xl overflow-hidden mt-5" style={{ background: 'rgba(8,12,22,0.85)', border: '1px solid rgba(255,255,255,0.06)' }}>
             {/* Desktop: 3 col horizontal */}
-            <div data-desktop-only className="hidden mob:flex divide-x divide-white/5">
+            <div data-desktop-only data-desktop-stats className="hidden mob:flex divide-x divide-white/5">
               {profile?.showBalance && (
                 <div className="flex-1 flex flex-col items-center justify-center gap-1.5 py-5 px-3">
                   <div className="flex items-center gap-1.5">
@@ -607,11 +693,11 @@ export default function ProfileCard({
         <div data-desktop-only className="hidden mob:flex flex-col gap-2 flex-shrink-0" style={{ width: 245 }}>
           <div className="flex items-end gap-2">
             <div className="flex-1"><ScoreCard size="lg" /></div>
-            <div className="w-7 flex-shrink-0" />
+            <div className="w-7 flex-shrink-0" data-ignore-capture="true" />
           </div>
           <div className="flex items-end gap-2">
             <div className="flex-1"><QrCard qrSize={105} /></div>
-            <button onClick={handleDownload} className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-white/10 bg-black/40 hover:bg-white/10 transition-colors text-gray-400" title="Download card" data-ignore-capture="preserve">
+            <button onClick={handleDownload} className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-white/10 bg-black/40 hover:bg-white/10 transition-colors text-gray-400" title="Download card" data-ignore-capture="true">
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
