@@ -314,12 +314,27 @@ export default function ProfileCard({
             el.style.display = 'block';
             el.style.lineHeight = '0.9';
             el.style.marginBottom = '4px';
-            el.style.transform = 'translateY(-2px)';
+            el.style.transform = 'translateY(-4px)';
           });
           doc.querySelectorAll<HTMLElement>('[data-score-subtitle]').forEach((el) => {
             el.style.display = 'block';
             el.style.lineHeight = '1';
-            el.style.transform = 'translateY(1px)';
+            el.style.transform = 'translateY(-2px)';
+          });
+          doc.querySelectorAll<HTMLElement>('[data-social-label]').forEach((el) => {
+            el.style.display = 'inline-block';
+            el.style.lineHeight = '1';
+            el.style.transform = 'translateY(-6px)';
+          });
+          doc.querySelectorAll<HTMLElement>('[data-stat-header]').forEach((row) => {
+            const icon = row.querySelector<HTMLElement>('svg');
+            const label = row.querySelector<HTMLElement>('span');
+            if (icon) icon.style.transform = 'translateY(1px)';
+            if (label) {
+              label.style.display = 'inline-block';
+              label.style.lineHeight = '1';
+              label.style.transform = 'translateY(-2px)';
+            }
           });
         },
       });
@@ -370,6 +385,15 @@ export default function ProfileCard({
   };
 
   const { discordConnected, telegramConnected, emailConnected } = socialConnections || {};
+  const isIOS =
+    typeof navigator !== 'undefined' &&
+    /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const socialTextStyle = {
+    lineHeight: 1,
+    display: 'inline-flex',
+    alignItems: 'center',
+    transform: isIOS ? 'translateY(-1px)' : 'none',
+  } as const;
 
     useEffect(() => {
       if (!wallet) return;
@@ -532,7 +556,7 @@ export default function ProfileCard({
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
         </svg>
         {profile?.showX && xUsername && (
-          <span className="text-white text-xs leading-none" style={{ lineHeight: 1 }}>@{xUsername}</span>
+          <span data-social-label className="text-white text-xs leading-none" style={socialTextStyle}>@{xUsername}</span>
         )}
       </div>
       {/* Discord */}
@@ -541,13 +565,13 @@ export default function ProfileCard({
           title={socialData?.discordUsername && socialData.discordUsername !== 'connected' ? `@${socialData.discordUsername}` : 'Discord connected'}>
           <DiscordSvg className="w-3.5 h-3.5 text-[#5865F2] flex-shrink-0" />
           {profile?.showDiscord && (
-            <span className="text-white text-xs leading-none" style={{ lineHeight: 1 }}>{socialData?.discordUsername && socialData.discordUsername !== 'connected' ? socialData.discordUsername : 'Connected'}</span>
+            <span data-social-label className="text-white text-xs leading-none" style={socialTextStyle}>{socialData?.discordUsername && socialData.discordUsername !== 'connected' ? socialData.discordUsername : 'Connected'}</span>
           )}
         </div>
       ) : (
         <button onClick={onConnectDiscord} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#5865F2]/20 hover:bg-[#5865F2]/30 whitespace-nowrap transition-colors">
           <DiscordSvg className="w-3.5 h-3.5 text-[#5865F2] flex-shrink-0" />
-          <span className="text-gray-400 text-xs leading-none" style={{ lineHeight: 1 }}>Connect</span>
+          <span data-social-label className="text-gray-400 text-xs leading-none" style={socialTextStyle}>Connect</span>
         </button>
       )}
       {/* Telegram */}
@@ -556,13 +580,13 @@ export default function ProfileCard({
           title={socialData?.telegramUsername && socialData.telegramUsername !== 'connected' ? `@${socialData.telegramUsername}` : 'Telegram connected'}>
           <TelegramSvg className="w-3.5 h-3.5 text-[#0088cc] flex-shrink-0" />
           {profile?.showTelegram && (
-            <span className="text-white text-xs leading-none" style={{ lineHeight: 1 }}>{socialData?.telegramUsername && socialData.telegramUsername !== 'connected' ? socialData.telegramUsername : 'Connected'}</span>
+            <span data-social-label className="text-white text-xs leading-none" style={socialTextStyle}>{socialData?.telegramUsername && socialData.telegramUsername !== 'connected' ? socialData.telegramUsername : 'Connected'}</span>
           )}
         </div>
       ) : (
         <button onClick={onConnectTelegram} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0088cc]/20 hover:bg-[#0088cc]/30 whitespace-nowrap transition-colors">
           <TelegramSvg className="w-3.5 h-3.5 text-[#0088cc] flex-shrink-0" />
-          <span className="text-gray-400 text-xs leading-none" style={{ lineHeight: 1 }}>Connect</span>
+          <span data-social-label className="text-gray-400 text-xs leading-none" style={socialTextStyle}>Connect</span>
         </button>
       )}
     </div>
@@ -663,14 +687,14 @@ export default function ProfileCard({
                 </div>
               )}
               <div className="flex-1 flex flex-col items-center justify-center gap-1.5 py-5 px-3">
-                <div className="flex items-center gap-1.5">
+                <div data-stat-header className="flex items-center gap-1.5">
                   <svg className="w-4 h-4 text-yellow-400" viewBox="0 0 24 24" fill="currentColor"><path d="M14 1L6 13.5h5.5L10 23l8-12.5h-5.5L14 1z"/></svg>
                   <span className="text-[9px] font-semibold tracking-widest text-gray-400 uppercase">Multiplier</span>
                 </div>
                 <span className="text-yellow-400 font-bold text-lg">{Number(totalMultiplier || 1).toFixed(1)}x</span>
               </div>
               <div className="flex-1 flex flex-col items-center justify-center gap-1.5 py-5 px-3">
-                <div className="flex items-center gap-1.5">
+                <div data-stat-header className="flex items-center gap-1.5">
                   <svg className="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
                   <span className="text-[9px] font-semibold tracking-widest text-gray-400 uppercase">Points/hr</span>
                 </div>
@@ -689,14 +713,14 @@ export default function ProfileCard({
                 </div>
               )}
               <div className="flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-2">
+                <div data-stat-header className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-yellow-400" viewBox="0 0 24 24" fill="currentColor"><path d="M14 1L6 13.5h5.5L10 23l8-12.5h-5.5L14 1z"/></svg>
                   <span className="text-[9px] font-semibold tracking-widest text-gray-400 uppercase">Multiplier</span>
                 </div>
                 <span className="text-yellow-400 font-bold text-base">{Number(totalMultiplier || 1).toFixed(1)}x</span>
               </div>
               <div className="flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-2">
+                <div data-stat-header className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
                   <span className="text-[9px] font-semibold tracking-widest text-gray-400 uppercase">Points/hr</span>
                 </div>
