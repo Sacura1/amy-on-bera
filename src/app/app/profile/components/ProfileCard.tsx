@@ -229,6 +229,13 @@ export default function ProfileCard({
     const origOverflow = card.style.overflow;
     card.style.overflow = 'visible';
 
+    // ── Narrow right column so badge row has enough width ─────────────────
+    // At 560px card width the left name column is only ~159px, but 5 × w-8
+    // badges need 192px. Shrinking the right column to 205px frees 40px.
+    const rightCol = card.querySelector<HTMLElement>('[data-right-col]');
+    const origRightColWidth = rightCol?.style.width ?? '';
+    if (rightCol) rightCol.style.width = '205px';
+
     // ── Hide capture-ignored elements ────────────────────────────────────
     const ignored = card.querySelectorAll<HTMLElement>('[data-ignore-capture="true"]');
     ignored.forEach(n => (n.style.display = 'none'));
@@ -378,6 +385,7 @@ export default function ProfileCard({
       imgEls.forEach((img, i) => { img.src = imgOrigSrcs[i]; });
       statChildren.forEach((el, i) => { el.style.minWidth = statChildOrigMinWidth[i]; el.style.overflow = statChildOrigOverflow[i]; });
       card.style.overflow = origOverflow;
+      if (rightCol) rightCol.style.width = origRightColWidth;
       // Restore canvas elements
       for (const { canvas, img, parent, next } of canvasSwaps) {
         img.remove();
@@ -752,7 +760,7 @@ export default function ProfileCard({
         </div>
 
         {/* ── Right column — desktop only ── */}
-        <div data-desktop-only className="hidden mob:flex flex-col gap-2 flex-shrink-0" style={{ width: 245 }}>
+        <div data-desktop-only data-right-col className="hidden mob:flex flex-col gap-2 flex-shrink-0" style={{ width: 245 }}>
           <div className="flex items-end gap-2">
             <div className="flex-1"><ScoreCard size="lg" /></div>
             <div className="w-7 flex-shrink-0" data-ignore-capture="true" />
