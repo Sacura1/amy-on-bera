@@ -122,6 +122,14 @@ export default function ProfileCard({
     ? `${typeof window !== 'undefined' ? window.location.origin : 'https://amybera.com'}/app/profile?ref=${userReferralCode}`
     : '';
 
+  // Route external image URLs through the same-origin proxy so iOS Safari can
+  // capture them. data: / blob: / relative paths pass through unchanged.
+  const proxySrc = (src: string | null | undefined): string | undefined => {
+    if (!src) return undefined;
+    if (src.startsWith('data:') || src.startsWith('blob:') || src.startsWith('/')) return src;
+    return `/api/image-proxy?url=${encodeURIComponent(src)}`;
+  };
+
   const toDataUrl = (url: string): Promise<string> =>
     fetch(url)
       .then(r => r.blob())
@@ -155,14 +163,6 @@ export default function ProfileCard({
     if (!cardRef.current) return;
     const { toJpeg } = await import('html-to-image');
     const card = cardRef.current;
-
-    // Route cross-origin URLs through a same-origin proxy so iOS Safari can
-    // draw them to canvas without hitting CORS restrictions.
-    const toProxyUrl = (src: string) => {
-      if (!src || src.startsWith('data:') || src.startsWith('blob:')) return src;
-      if (src.startsWith('/') || src.startsWith(window.location.origin)) return src;
-      return `/api/image-proxy?url=${encodeURIComponent(src)}`;
-    };
 
     // ── Force desktop layout regardless of device viewport ──────────────
     // CSS media queries fire on viewport width, not element width, so we must
@@ -217,11 +217,8 @@ export default function ProfileCard({
     const origBackgroundPosition = card.style.backgroundPosition;
     if (cardBg) {
       try {
-        // Route through proxy so iOS can draw it to canvas without CORS issues
-        const bgProxied = toProxyUrl(window.location.origin + cardBg.path);
-        const bgDataUrl =
-          (await imgToDataUrlViaCanvas(bgProxied)) ??
-          (await toDataUrl(cardBg.path));
+        // cardBg.path is a local /public file — same-origin fetch always works.
+        const bgDataUrl = await toDataUrl(cardBg.path);
         card.style.background = '';
         card.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('${bgDataUrl}')`;
         card.style.backgroundSize = 'cover';
@@ -261,28 +258,39 @@ export default function ProfileCard({
       } catch { /* tainted canvas — leave it */ }
     }
 
-    // ── Inline all <img> srcs as data URLs ───────────────────────────────
-    // iOS Safari blocks cross-origin fetch AND canvas.drawImage for images
-    // that weren't loaded with crossOrigin='anonymous'. Route through the
-    // same-origin proxy so canvas conversion always succeeds.
+    // ── Convert all <img> elements to data: URLs before capture ─────────
+    // Strategy: badge/avatar images are already loaded in the DOM via the
+    // same-origin proxy with crossOrigin='anonymous', so we can draw them
+    // directly from the existing element — zero extra network requests on iOS.
+    // For any image that wasn't loaded through the proxy (e.g. newly added),
+    // we fall back to fetching via proxy → canvas.
     const imgEls = Array.from(card.querySelectorAll<HTMLImageElement>('img'));
     const imgOrigSrcs = imgEls.map(img => img.src);
     for (const img of imgEls) {
       if (!img.src || img.src.startsWith('data:') || img.src.startsWith('blob:')) continue;
-      const proxied = toProxyUrl(img.src);
-      // Canvas-draw via proxy (same-origin, always works)
+      // Fast path: draw the already-rendered element (works because crossOrigin
+      // was set when these images were first loaded via proxySrc in JSX).
+      try {
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth || img.offsetWidth || 64;
+        c.height = img.naturalHeight || img.offsetHeight || 64;
+        c.getContext('2d')!.drawImage(img, 0, 0);
+        img.src = c.toDataURL('image/png');
+        await img.decode().catch(() => {});
+        continue;
+      } catch { /* fall through to proxy fetch */ }
+      // Slow path: proxy fetch → canvas (for images not pre-loaded via proxySrc)
+      const proxied = img.src.startsWith('/') ? img.src : `/api/image-proxy?url=${encodeURIComponent(img.src)}`;
       const canvasData = await imgToDataUrlViaCanvas(proxied);
       if (canvasData) {
         img.src = canvasData;
         await img.decode().catch(() => {});
-        continue;
+      } else {
+        try {
+          img.src = await toDataUrl(proxied);
+          await img.decode().catch(() => {});
+        } catch { /* keep original */ }
       }
-      // Fallback: direct fetch (same-origin or already CORS-enabled)
-      try {
-        const fetchData = await toDataUrl(proxied);
-        img.src = fetchData;
-        await img.decode().catch(() => {});
-      } catch { /* keep original src */ }
     }
 
     const captureOpts = {
@@ -552,7 +560,7 @@ export default function ProfileCard({
             <div className="relative flex-shrink-0">
               <div className={`w-20 h-20 mob:w-24 mob:h-24 rounded-full border-4 ${HOLDER_RING[tier] ?? 'border-gray-600'} overflow-hidden`}>
                 {getAvatarUrl() ? (
-                  <img src={getAvatarUrl()!} alt="Profile" className="w-full h-full object-cover" />
+                  <img src={proxySrc(getAvatarUrl()) ?? getAvatarUrl()!} crossOrigin="anonymous" alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-gray-700 flex items-center justify-center">
                     <span className="text-3xl">🐻</span>
@@ -579,7 +587,7 @@ export default function ProfileCard({
                   return (
                     <div key={slotNumber} className={`w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden ${badge ? `bg-white ${badgeRing(badge)}` : 'border-2 border-gray-600/50 bg-gray-800/50 border-dashed'}`}>
                       {badge ? (
-                        <img src={badge.badge_image} alt={badge.badge_title} className="w-full h-full object-cover rounded-full" />
+                        <img src={proxySrc(badge.badge_image) ?? badge.badge_image} crossOrigin="anonymous" alt={badge.badge_title} className="w-full h-full object-cover rounded-full" />
                       ) : (
                         <span className="text-[10px] text-gray-600">{slotNumber}</span>
                       )}
