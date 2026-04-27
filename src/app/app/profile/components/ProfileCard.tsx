@@ -161,7 +161,6 @@ export default function ProfileCard({
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
-    const { toJpeg } = await import('html-to-image');
     const card = cardRef.current;
 
     // ── Force desktop layout regardless of device viewport ──────────────
@@ -293,19 +292,17 @@ export default function ProfileCard({
       }
     }
 
-    const captureOpts = {
-      pixelRatio: 2,
-      quality: 0.92,
-      backgroundColor: '#111827',
-      style: { backdropFilter: 'none' },
-      cacheBust: true,
-    };
-
     try {
-      // First call primes html-to-image's internal font/asset cache on iOS;
-      // second call is the actual capture that comes out correctly.
-      await toJpeg(card, captureOpts).catch(() => {});
-      const dataUrl = await toJpeg(card, captureOpts);
+      const { default: html2canvas } = await import('html2canvas');
+      const canvas = await html2canvas(card, {
+        useCORS: true,
+        allowTaint: false,
+        scale: 2,
+        backgroundColor: '#111827',
+        logging: false,
+        imageTimeout: 15000,
+      });
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
 
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
