@@ -660,7 +660,7 @@ export default function ProfileCard({
           </div>
 
           {/* Badge slots — desktop/tablet, aligned from avatar left edge */}
-          <div data-badge-row data-desktop-only className="hidden mob:flex flex-nowrap items-center gap-1.5 max-w-full">
+          <div data-badge-row data-desktop-only className="hidden mob:flex flex-nowrap items-center gap-1.5 max-w-full ml-1">
             {[1, 2, 3, 4, 5].map((slotNumber) => {
               const badge = getBadgeForSlot(slotNumber);
               return (
