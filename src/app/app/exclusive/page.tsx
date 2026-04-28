@@ -1383,7 +1383,7 @@ function PositionsDashboard({ wallet, refreshTrigger, sharePrice }: { wallet: st
   const fmtDate = (d: string) => new Date(d).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <div className="mt-10 max-w-6xl mx-auto px-4 pb-20">
+    <div className="mt-10 max-w-6xl mx-auto px-4 pb-4">
       <div style={{ background: 'rgba(13,18,26,0.97)', border: '1px solid rgba(212,175,55,0.22)', borderRadius: '20px', boxShadow: '0 0 60px rgba(212,175,55,0.05), 0 24px 64px rgba(0,0,0,0.6)' }} className="p-4 sm:p-6">
 
         {/* Header */}
@@ -1880,7 +1880,7 @@ export default function ExclusivePage() {
       </div>
 
       {/* Menu Button */}
-      <div className="text-center mt-8 md:mt-12 pb-4">
+      <div className="text-center mt-2 md:mt-6 pb-4">
         <button
           onClick={() => window.dispatchEvent(new Event('amy-open-menu'))}
           className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase"

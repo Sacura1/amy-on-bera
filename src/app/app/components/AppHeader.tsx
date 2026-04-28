@@ -258,7 +258,7 @@ export default function AppHeader() {
 
           {/* Desktop nav — shifts left in sync with panel */}
           <div
-            className="hidden md:flex landscape:flex items-center gap-4"
+            className="hidden md:flex items-center gap-4"
             style={{
               marginRight: isOpen ? PANEL_W : 0,
               transition: 'margin-right 300ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -282,13 +282,13 @@ export default function AppHeader() {
           </div>
 
           {/* Mobile nav */}
-          <div className="flex md:hidden landscape:hidden items-center gap-2">
-            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase">
+          <div className="flex md:hidden items-center gap-2 landscape:gap-1.5 landscape:ml-3">
+            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-3 landscape:py-1.5 rounded-full text-sm landscape:text-xs font-bold uppercase">
               PROFILE
             </Link>
             <button
               onClick={() => setIsOpen(o => !o)}
-              className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase"
+              className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-3 landscape:py-1.5 rounded-full text-sm landscape:text-xs font-bold uppercase"
             >
               MENU
             </button>

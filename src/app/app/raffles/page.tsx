@@ -189,16 +189,16 @@ export default function RafflesPage() {
         <section className="px-5 landscape:px-12 md:px-0">
           <RaffleHistory history={history} wallet={wallet} />
         </section>
+      </div>
 
-        {/* Menu Button */}
-        <div className="text-center mt-8 md:mt-12 pb-4">
-          <button
-            onClick={() => window.dispatchEvent(new Event('amy-open-menu'))}
-            className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase"
-          >
-            MENU
-          </button>
-        </div>
+      {/* Menu Button — outside space-y container so margin isn't overridden */}
+      <div className="text-center mt-12 md:mt-16 pb-8">
+        <button
+          onClick={() => window.dispatchEvent(new Event('amy-open-menu'))}
+          className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase"
+        >
+          MENU
+        </button>
       </div>
 
       {/* Ticket Modal */}
