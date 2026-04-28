@@ -41,8 +41,8 @@
 @layer components {
   /* Mobile landscape button styles - applied via JS detection */
   .mobile-landscape-btn {
-    padding: 6px 12px !important;
-    font-size: 10px !important;
+    padding: 8px 16px !important;
+    font-size: 12px !important;
     border-width: 2px !important;
     box-shadow: 0 2px 0 #8B008B, 0 3px 6px rgba(0, 0, 0, 0.3) !important;
     transform: none !important;
