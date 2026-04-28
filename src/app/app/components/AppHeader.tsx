@@ -252,33 +252,33 @@ export default function AppHeader() {
   return (
     <>
       {/* ── Header ── */}
-      <header className="container mx-auto px-4 py-4 md:py-3 landscape:py-2">
+      <header className="container mx-auto px-4 py-4 md:py-3 landscape:py-1">
         <nav className="flex justify-between items-center">
           {/* Logo */}
-          <Link href="/" className="text-3xl md:text-4xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
+          <Link href="/" className="text-3xl md:text-4xl landscape:text-2xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
             AMY
           </Link>
 
           {/* Desktop nav — shifts left in sync with panel */}
           <div
-            className="hidden md:flex items-center gap-4"
+            className="hidden md:flex items-center gap-4 landscape:gap-2"
             style={{
               marginRight: isOpen ? PANEL_W : 0,
               transition: 'margin-right 300ms cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
-            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">
+            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase">
               PROFILE
             </Link>
-            <Link href="/app/earn" onClick={close} className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">
+            <Link href="/app/earn" onClick={close} className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase">
               EARN
             </Link>
-            <Link href="/app/points" onClick={close} className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">
+            <Link href="/app/points" onClick={close} className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase">
               AMY POINTS
             </Link>
             <button
               onClick={() => setIsOpen(o => !o)}
-              className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase"
+              className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase"
             >
               MENU
             </button>
@@ -299,7 +299,7 @@ export default function AppHeader() {
         </nav>
 
         {/* Wallet connect */}
-        <div className="mt-4">
+        <div className="mt-4 landscape:mt-1">
           <ConnectButton
             client={client}
             chain={berachain}

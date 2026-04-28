@@ -130,25 +130,25 @@ export default function LandingHeader() {
 
   return (
     <>
-      <header className="container mx-auto px-4 py-4 md:py-3">
+      <header className="container mx-auto px-4 py-4 md:py-3 landscape:py-1">
         <nav className="flex justify-between items-center">
-          <Link href="/" className="text-3xl md:text-4xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
+          <Link href="/" className="text-3xl md:text-4xl landscape:text-2xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
             AMY
           </Link>
 
           <div
-            className="hidden md:flex items-center gap-4"
+            className="hidden md:flex items-center gap-4 landscape:gap-2"
             style={{ marginRight: isOpen ? PANEL_W : 0, transition: 'margin-right 300ms cubic-bezier(0.4,0,0.2,1)' }}
           >
-            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">PROFILE</Link>
-            <Link href="/app/earn" className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">EARN</Link>
-            <Link href="/app/points" className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">AMY POINTS</Link>
-            <button onClick={() => setIsOpen(true)} className="btn-samy btn-samy-enhanced text-white px-8 py-3 rounded-full text-xl font-bold uppercase">MENU</button>
+            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase">PROFILE</Link>
+            <Link href="/app/earn" className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase">EARN</Link>
+            <Link href="/app/points" className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase">AMY POINTS</Link>
+            <button onClick={() => setIsOpen(true)} className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase">MENU</button>
           </div>
 
-          <div className="flex md:hidden items-center gap-2">
-            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase">PROFILE</Link>
-            <button onClick={() => setIsOpen(true)} className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase">MENU</button>
+          <div className="flex md:hidden items-center gap-2 landscape:gap-1">
+            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2.5 landscape:py-1 landscape:text-[11px] rounded-full text-sm font-bold uppercase">PROFILE</Link>
+            <button onClick={() => setIsOpen(true)} className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2.5 landscape:py-1 landscape:text-[11px] rounded-full text-sm font-bold uppercase">MENU</button>
           </div>
         </nav>
       </header>
