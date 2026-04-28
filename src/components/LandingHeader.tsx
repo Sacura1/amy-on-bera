@@ -147,8 +147,8 @@ export default function LandingHeader() {
           </div>
 
           <div className="flex md:hidden items-center gap-2 landscape:gap-1">
-            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2.5 landscape:py-1 landscape:text-[11px] rounded-full text-sm font-bold uppercase">PROFILE</Link>
-            <button onClick={() => setIsOpen(true)} className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2.5 landscape:py-1 landscape:text-[11px] rounded-full text-sm font-bold uppercase">MENU</button>
+            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2 landscape:py-1 landscape:text-[10px] rounded-full text-sm font-bold uppercase">PROFILE</Link>
+            <button onClick={() => setIsOpen(true)} className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2 landscape:py-1 landscape:text-[10px] rounded-full text-sm font-bold uppercase">MENU</button>
           </div>
         </nav>
       </header>

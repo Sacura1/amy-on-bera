@@ -210,9 +210,6 @@ const TILES: Tile[] = [
 
 export default function AppHeader() {
   const account = useActiveAccount();
-  const isIOS =
-    typeof navigator !== 'undefined' &&
-    /iPad|iPhone|iPod/.test(navigator.userAgent);
   const [isOpen, setIsOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [holderTier, setHolderTier] = useState('none');
@@ -285,13 +282,13 @@ export default function AppHeader() {
           </div>
 
           {/* Mobile nav */}
-          <div className={`flex md:hidden items-center gap-2 landscape:gap-1 ${isIOS ? 'landscape:ml-4' : 'landscape:ml-3'}`}>
-            <Link href="/app/profile" onClick={close} className={`btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full landscape:rounded-[999px] text-sm font-bold uppercase ${isIOS ? 'landscape:px-2 landscape:py-0.5 landscape:text-[10px]' : 'landscape:px-2.5 landscape:py-1 landscape:text-[11px]'}`}>
+          <div className="flex md:hidden items-center gap-2 landscape:gap-1">
+            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2 landscape:py-1 landscape:text-[10px] rounded-full text-sm font-bold uppercase">
               PROFILE
             </Link>
             <button
               onClick={() => setIsOpen(o => !o)}
-              className={`btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full landscape:rounded-[999px] text-sm font-bold uppercase ${isIOS ? 'landscape:px-2 landscape:py-0.5 landscape:text-[10px]' : 'landscape:px-2.5 landscape:py-1 landscape:text-[11px]'}`}
+              className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2 landscape:py-1 landscape:text-[10px] rounded-full text-sm font-bold uppercase"
             >
               MENU
             </button>
