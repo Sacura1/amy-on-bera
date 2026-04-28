@@ -273,9 +273,9 @@ export default function AppHeader() {
 
             {/* Desktop nav — shifts left in sync with panel */}
             <div
-              className={`${isMobileLandscape ? 'flex' : 'hidden md:flex'} items-center gap-4`}
+              className={`${isMobileLandscape ? 'flex justify-center w-full' : 'hidden md:flex'} items-center gap-4`}
               style={{
-                marginRight: isOpen ? PANEL_W : 0,
+                marginRight: isMobileLandscape ? 0 : (isOpen ? PANEL_W : 0),
                 transition: 'margin-right 300ms cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
