@@ -162,16 +162,10 @@ export default function LandingHeader() {
             <button onClick={() => setIsOpen(true)} className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">MENU</button>
           </div>
 
-          {/* Mobile nav - shown in mobile landscape (2 buttons: PROFILE, MENU) */}
-          <div className={`${isMobileLandscape ? 'flex justify-center w-full' : 'flex md:hidden'} items-center gap-2`}>
+          {/* Mobile nav (2 buttons on mobile + mobile landscape) */}
+          <div className={`${isMobileLandscape ? 'flex' : 'flex md:hidden'} items-center gap-2`}>
             <Link href="/app/profile" className={`btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>PROFILE</Link>
             <button onClick={() => setIsOpen(true)} className={`btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>MENU</button>
-          </div>
-
-          {/* Mobile nav - shown in mobile landscape (2 buttons: PROFILE, MENU) */}
-          <div className={`${isMobileLandscape ? 'flex' : 'flex md:hidden'} items-center gap-2 landscape:gap-1`}>
-            <Link href="/app/profile" className={`btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2 landscape:py-1 landscape:text-[10px] rounded-full text-sm font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>PROFILE</Link>
-            <button onClick={() => setIsOpen(true)} className={`btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2 landscape:py-1 landscape:text-[10px] rounded-full text-sm font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>MENU</button>
           </div>
         </nav>
       </header>
