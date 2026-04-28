@@ -263,22 +263,22 @@ export default function AppHeader() {
 
   return (
     <>
-      {/* ── Header ── */}
-      <header className="container mx-auto px-4 py-4 md:py-3 landscape:py-1">
+       {/* ── Header ── */}
+       <header className={`container mx-auto px-4 py-4 md:py-3 landscape:py-1 ${isMobileLandscape ? 'mobile-landscape-header' : ''}`}>
         <nav className="flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="text-3xl md:text-4xl landscape:text-2xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
             AMY
           </Link>
 
-          {/* Desktop nav — shifts left in sync with panel */}
-          <div
-            className="hidden md:flex items-center gap-4"
-            style={{
-              marginRight: isOpen ? PANEL_W : 0,
-              transition: 'margin-right 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
-          >
+            {/* Desktop nav — shifts left in sync with panel */}
+            <div
+              className={`${isMobileLandscape ? 'flex' : 'hidden md:flex'} items-center gap-4`}
+              style={{
+                marginRight: isOpen ? PANEL_W : 0,
+                transition: 'margin-right 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            >
             <Link href="/app/profile" onClick={close} className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>
               PROFILE
             </Link>
@@ -296,14 +296,14 @@ export default function AppHeader() {
             </button>
           </div>
 
-          {/* Mobile nav */}
-          <div className="flex md:hidden items-center gap-2 landscape:gap-1">
-            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2 landscape:py-1 landscape:text-[10px] rounded-full text-sm font-bold uppercase">
+            {/* Mobile nav - hidden in mobile landscape since we show all buttons in desktop nav */}
+            <div className={`${isMobileLandscape ? 'hidden' : 'flex md:hidden'} items-center gap-2`}>
+            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase">
               PROFILE
             </Link>
             <button
               onClick={() => setIsOpen(o => !o)}
-              className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2 landscape:py-1 landscape:text-[10px] rounded-full text-sm font-bold uppercase"
+              className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase"
             >
               MENU
             </button>

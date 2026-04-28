@@ -39,13 +39,17 @@
 }
 
 @layer components {
-  /* Mobile landscape button styles - applied via JS detection */
+  /* Mobile landscape header styles - applied via JS detection */
+  .mobile-landscape-header {
+    padding-top: 8px !important;
+  }
   .mobile-landscape-btn {
-    padding: 8px 16px !important;
+    padding: 10px 20px !important;
     font-size: 12px !important;
     border-width: 2px !important;
     box-shadow: 0 2px 0 #8B008B, 0 3px 6px rgba(0, 0, 0, 0.3) !important;
     transform: none !important;
+    min-width: 90px !important;
   }
   .mobile-landscape-btn:hover {
     transform: translateY(1px) !important;
