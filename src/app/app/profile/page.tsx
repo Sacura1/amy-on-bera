@@ -52,6 +52,7 @@ function ProfilePageContent() {
   const [telegramConnected, setTelegramConnected] = useState(false);
   const [telegramUsername, setTelegramUsername] = useState<string | null>(null);
   const [emailConnected, setEmailConnected] = useState(false);
+  const hasAnySocialConnected = xConnected || discordConnected || telegramConnected;
 
   // Customization states
   const [currentBackground, setCurrentBackground] = useState('bg_default');
@@ -1180,7 +1181,7 @@ function ProfilePageContent() {
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Profile Card */}
-        {xConnected && (
+        {hasAnySocialConnected && (
           <ProfileCard
             key={profileKey}
             wallet={walletAddress || ''}
