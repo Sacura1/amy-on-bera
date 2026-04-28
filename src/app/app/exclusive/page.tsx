@@ -1879,6 +1879,16 @@ export default function ExclusivePage() {
         {wallet && <PositionsDashboard wallet={wallet} refreshTrigger={refreshKey} sharePrice={sharePrice} />}
       </div>
 
+      {/* Menu Button */}
+      <div className="text-center mt-8 md:mt-12 pb-4">
+        <button
+          onClick={() => window.dispatchEvent(new Event('amy-open-menu'))}
+          className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase"
+        >
+          MENU
+        </button>
+      </div>
+
       {/* Modals */}
       {openModal === 'jnrusd' && wallet && (
         <JnrusdModal
