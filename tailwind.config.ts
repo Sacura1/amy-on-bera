@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-import type { PluginAPI } from "tailwindcss/types/config";
 
 const config: Config = {
   content: [
@@ -19,11 +18,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [
-    function({ addVariant }: PluginAPI) {
-      // Mobile landscape: landscape orientation with max-height (typical mobile landscape)
-      addVariant('landscape', '@media (orientation: landscape) and (max-height: 500px)');
-    }
-  ],
+  plugins: [],
 };
 export default config;

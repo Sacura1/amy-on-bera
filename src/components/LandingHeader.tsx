@@ -126,6 +126,21 @@ const TILE_STYLE = {
 
 export default function LandingHeader() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobileLandscape, setIsMobileLandscape] = useState(false);
+
+  useEffect(() => {
+    const checkOrientation = () => {
+      // Mobile landscape: landscape mode + smal height (typical mobile)
+      setIsMobileLandscape(window.innerWidth > window.innerHeight && window.innerHeight <= 500);
+    };
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
   const close = () => setIsOpen(false);
 
   return (
@@ -140,10 +155,10 @@ export default function LandingHeader() {
             className="hidden md:flex items-center gap-4 landscape:gap-2"
             style={{ marginRight: isOpen ? PANEL_W : 0, transition: 'margin-right 300ms cubic-bezier(0.4,0,0.2,1)' }}
           >
-            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">PROFILE</Link>
-            <Link href="/app/earn" className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">EARN</Link>
-            <Link href="/app/points" className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">AMY POINTS</Link>
-            <button onClick={() => setIsOpen(true)} className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">MENU</button>
+            <Link href="/app/profile" className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>PROFILE</Link>
+            <Link href="/app/earn" className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>EARN</Link>
+            <Link href="/app/points" className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>AMY POINTS</Link>
+            <button onClick={() => setIsOpen(true)} className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>MENU</button>
           </div>
 
           <div className="flex md:hidden items-center gap-2 landscape:gap-1">

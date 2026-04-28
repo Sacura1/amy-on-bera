@@ -211,6 +211,21 @@ const TILES: Tile[] = [
 export default function AppHeader() {
   const account = useActiveAccount();
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobileLandscape, setIsMobileLandscape] = useState(false);
+
+  useEffect(() => {
+    const checkOrientation = () => {
+      // Mobile landscape: landscape mode + smal height (typical mobile)
+      setIsMobileLandscape(window.innerWidth > window.innerHeight && window.innerHeight <= 500);
+    };
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [holderTier, setHolderTier] = useState('none');
   const [amyScore, setAmyScore] = useState(0);
@@ -264,18 +279,18 @@ export default function AppHeader() {
               transition: 'margin-right 300ms cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
-            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">
+            <Link href="/app/profile" onClick={close} className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>
               PROFILE
             </Link>
-            <Link href="/app/earn" onClick={close} className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">
+            <Link href="/app/earn" onClick={close} className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>
               EARN
             </Link>
-            <Link href="/app/points" onClick={close} className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">
+            <Link href="/app/points" onClick={close} className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>
               AMY POINTS
             </Link>
             <button
               onClick={() => setIsOpen(o => !o)}
-              className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase"
+              className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}
             >
               MENU
             </button>
@@ -296,7 +311,7 @@ export default function AppHeader() {
         </nav>
 
         {/* Wallet connect */}
-        <div className="mt-4 landscape:mt-1 landscape:scale-75 landscape:origin-left">
+        <div className={`mt-4 ${isMobileLandscape ? 'scale-75 origin-left' : ''}`}>
           <ConnectButton
             client={client}
             chain={berachain}
