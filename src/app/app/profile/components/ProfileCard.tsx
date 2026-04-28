@@ -656,27 +656,28 @@ export default function ProfileCard({
               {profile?.bio && (
                 <p className="text-gray-400 text-xs mt-1 line-clamp-2">{profile.bio}</p>
               )}
-              {/* Badge slots — desktop only, aligned with bio */}
-              <div data-badge-row data-desktop-only className="hidden mob:flex flex-nowrap items-center gap-1.5 mt-3 max-w-full pr-1">
-                {[1, 2, 3, 4, 5].map((slotNumber) => {
-                  const badge = getBadgeForSlot(slotNumber);
-                  return (
-                    <div key={slotNumber} className={`w-8 h-8 md:w-[42px] md:h-[42px] flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden ${badge ? `bg-white ${badgeRing(badge)}` : 'border-2 border-gray-600/50 bg-gray-800/50 border-dashed'}`}>
-                      {badge ? (
-                        <img src={proxySrc(badge.badge_image) ?? badge.badge_image} crossOrigin="anonymous" alt={badge.badge_title} className="w-full h-full object-cover rounded-full" />
-                      ) : (
-                        <span className="text-[10px] text-gray-600">{slotNumber}</span>
-                      )}
-                    </div>
-                  );
-                })}
-                <button onClick={onEditBadges} className="w-8 h-8 md:w-[42px] md:h-[42px] flex-shrink-0 rounded-full border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors" title="Edit Badges" data-ignore-capture="true">
-                  <svg className="w-3.5 h-3.5 md:w-[17px] md:h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                </button>
-              </div>
             </div>
+          </div>
+
+          {/* Badge slots — desktop/tablet, aligned from avatar left edge */}
+          <div data-badge-row data-desktop-only className="hidden mob:flex flex-nowrap items-center gap-1.5 max-w-full">
+            {[1, 2, 3, 4, 5].map((slotNumber) => {
+              const badge = getBadgeForSlot(slotNumber);
+              return (
+                <div key={slotNumber} className={`w-8 h-8 md:w-[42px] md:h-[42px] flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden ${badge ? `bg-white ${badgeRing(badge)}` : 'border-2 border-gray-600/50 bg-gray-800/50 border-dashed'}`}>
+                  {badge ? (
+                    <img src={proxySrc(badge.badge_image) ?? badge.badge_image} crossOrigin="anonymous" alt={badge.badge_title} className="w-full h-full object-cover rounded-full" />
+                  ) : (
+                    <span className="text-[10px] text-gray-600">{slotNumber}</span>
+                  )}
+                </div>
+              );
+            })}
+            <button onClick={onEditBadges} className="w-8 h-8 md:w-[42px] md:h-[42px] flex-shrink-0 rounded-full border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors" title="Edit Badges" data-ignore-capture="true">
+              <svg className="w-3.5 h-3.5 md:w-[17px] md:h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
           </div>
 
           {/* Badge slots — mobile only, aligned with avatar left edge */}
