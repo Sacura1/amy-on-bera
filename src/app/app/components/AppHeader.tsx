@@ -271,11 +271,11 @@ export default function AppHeader() {
             AMY
           </Link>
 
-            {/* Desktop nav — shifts left in sync with panel */}
+            {/* Desktop nav — hidden in mobile landscape (show mobile nav instead for 2 buttons) */}
             <div
-              className={`${isMobileLandscape ? 'flex justify-center w-full' : 'hidden md:flex'} items-center gap-4`}
+              className={`${isMobileLandscape ? 'hidden' : 'hidden md:flex'} items-center gap-4`}
               style={{
-                marginRight: isMobileLandscape ? 0 : (isOpen ? PANEL_W : 0),
+                marginRight: isOpen ? PANEL_W : 0,
                 transition: 'margin-right 300ms cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
@@ -296,8 +296,8 @@ export default function AppHeader() {
             </button>
           </div>
 
-            {/* Mobile nav - hidden in mobile landscape since we show all buttons in desktop nav */}
-            <div className={`${isMobileLandscape ? 'hidden' : 'flex md:hidden'} items-center gap-2`}>
+            {/* Mobile nav - shown in mobile landscape (2 buttons: PROFILE, MENU) */}
+            <div className={`${isMobileLandscape ? 'flex' : 'flex md:hidden'} items-center gap-2`}>
             <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase">
               PROFILE
             </Link>

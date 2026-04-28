@@ -260,6 +260,15 @@ function ProfilePageContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, walletAddress]);
 
+  // Duplicate warning modal state
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [duplicateInfo, setDuplicateInfo] = useState<{
+    platform: string;
+    username: string;
+    existingWallet: string;
+    newWallet: string;
+  } | null>(null);
+
   // Handle OAuth callback (X, Discord, Telegram)
   useEffect(() => {
     const xConnectedParam = searchParams.get('x_connected');
@@ -269,6 +278,7 @@ function ProfilePageContent() {
     const discordUsernameParam = searchParams.get('discord_username');
     const telegramUsernameParam = searchParams.get('telegram_username');
     const walletParam = searchParams.get('wallet');
+    const duplicateOfParam = searchParams.get('duplicate_of');
     const errorParam = searchParams.get('error');
 
     if (errorParam) {
@@ -278,6 +288,18 @@ function ProfilePageContent() {
 
     // Handle X/Twitter OAuth callback
     if (xConnectedParam === 'true' && usernameParam && walletParam) {
+      // Check if this is a duplicate connection
+      if (duplicateOfParam) {
+        setDuplicateInfo({
+          platform: 'X (Twitter)',
+          username: usernameParam,
+          existingWallet: duplicateOfParam,
+          newWallet: walletParam
+        });
+        setShowDuplicateWarning(true);
+        return;
+      }
+
       setXConnected(true);
       setXUsername(usernameParam);
 
@@ -302,12 +324,36 @@ function ProfilePageContent() {
 
     // Handle Discord OAuth callback
     if (discordConnectedParam === 'true' && discordUsernameParam) {
+      // Check if this is a duplicate connection
+      if (duplicateOfParam) {
+        setDuplicateInfo({
+          platform: 'Discord',
+          username: discordUsernameParam,
+          existingWallet: duplicateOfParam,
+          newWallet: walletParam || walletAddress || ''
+        });
+        setShowDuplicateWarning(true);
+        return;
+      }
+
       setDiscordConnected(true);
       setDiscordUsername(discordUsernameParam);
     }
 
     // Handle Telegram OAuth callback
     if (telegramConnectedParam === 'true' && telegramUsernameParam) {
+      // Check if this is a duplicate connection
+      if (duplicateOfParam) {
+        setDuplicateInfo({
+          platform: 'Telegram',
+          username: telegramUsernameParam,
+          existingWallet: duplicateOfParam,
+          newWallet: walletParam || walletAddress || ''
+        });
+        setShowDuplicateWarning(true);
+        return;
+      }
+
       setTelegramConnected(true);
       setTelegramUsername(telegramUsernameParam);
     }
@@ -2281,6 +2327,81 @@ function ProfilePageContent() {
           MENU
         </button>
       </div>
+
+      {/* Duplicate Social Account Warning Modal */}
+      {showDuplicateWarning && duplicateInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+          <div className="bg-gray-900 rounded-2xl border border-yellow-500/50 p-6 max-w-md w-full">
+            <div className="text-center mb-4">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Account Already Connected</h3>
+              <p className="text-gray-300 mb-1">
+                This <span className="font-semibold text-yellow-400">{duplicateInfo.platform}</span> account
+              </p>
+              <p className="text-gray-300 mb-1">
+                (<span className="font-mono text-yellow-400">@{duplicateInfo.username}</span>)
+              </p>
+              <p className="text-gray-400 text-sm mt-3 mb-1">
+                is already connected to another wallet:
+              </p>
+              <p className="text-gray-300 font-mono text-sm mb-4">
+                {duplicateInfo.existingWallet.slice(0, 6)}...{duplicateInfo.existingWallet.slice(-4)}
+              </p>
+              <p className="text-gray-300 text-sm">
+                Connecting it will <span className="font-semibold text-yellow-400">unlink it from the other wallet</span> and link it to your current wallet.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDuplicateWarning(false);
+                  // Redirect back without connecting
+                  window.history.replaceState({}, '', '/app/profile');
+                }}
+                className="flex-1 py-3 rounded-full border-2 border-gray-600 text-gray-300 font-bold hover:bg-gray-800 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowDuplicateWarning(false);
+                  // Proceed with connection (backend already handles unlinking)
+                  if (duplicateInfo.platform === 'X (Twitter)') {
+                    setXConnected(true);
+                    setXUsername(duplicateInfo.username);
+                    // Save to backend
+                    fetch(`${API_BASE_URL}/api/oauth/save`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        wallet: duplicateInfo.newWallet,
+                        xUsername: duplicateInfo.username,
+                        amyBalance: balance
+                      }),
+                    }).catch(err => console.error('Error saving user:', err));
+                  } else if (duplicateInfo.platform === 'Discord') {
+                    setDiscordConnected(true);
+                    setDiscordUsername(duplicateInfo.username);
+                  } else if (duplicateInfo.platform === 'Telegram') {
+                    setTelegramConnected(true);
+                    setTelegramUsername(duplicateInfo.username);
+                  }
+                  // Clear URL params
+                  window.history.replaceState({}, '', '/app/profile');
+                }}
+                className="flex-1 py-3 rounded-full bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold hover:from-pink-600 hover:to-pink-700 transition-colors"
+              >
+                Connect Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

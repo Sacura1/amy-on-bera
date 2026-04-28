@@ -151,17 +151,25 @@ export default function LandingHeader() {
             AMY
           </Link>
 
-           <div
-             className={`${isMobileLandscape ? 'flex justify-center w-full' : 'hidden md:flex'} items-center gap-4 landscape:gap-2`}
-             style={{ marginRight: isMobileLandscape ? 0 : (isOpen ? PANEL_W : 0), transition: 'margin-right 300ms cubic-bezier(0.4,0,0.2,1)' }}
-           >
-            <Link href="/app/profile" className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>PROFILE</Link>
-            <Link href="/app/earn" className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>EARN</Link>
-            <Link href="/app/points" className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>AMY POINTS</Link>
-            <button onClick={() => setIsOpen(true)} className={`btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>MENU</button>
+          {/* Desktop nav — hidden in mobile landscape (show mobile nav instead for 2 buttons) */}
+          <div
+            className={`${isMobileLandscape ? 'hidden' : 'hidden md:flex'} items-center gap-4 landscape:gap-2`}
+            style={{ marginRight: isOpen ? PANEL_W : 0, transition: 'margin-right 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+          >
+            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">PROFILE</Link>
+            <Link href="/app/earn" className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">EARN</Link>
+            <Link href="/app/points" className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">AMY POINTS</Link>
+            <button onClick={() => setIsOpen(true)} className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">MENU</button>
           </div>
 
-          <div className={`${isMobileLandscape ? 'hidden' : 'flex md:hidden'} items-center gap-2 landscape:gap-1`}>
+          {/* Mobile nav - shown in mobile landscape (2 buttons: PROFILE, MENU) */}
+          <div className={`${isMobileLandscape ? 'flex justify-center w-full' : 'flex md:hidden'} items-center gap-2`}>
+            <Link href="/app/profile" className={`btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>PROFILE</Link>
+            <button onClick={() => setIsOpen(true)} className={`btn-samy btn-samy-enhanced text-white px-4 py-2 rounded-full text-sm font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>MENU</button>
+          </div>
+
+          {/* Mobile nav - shown in mobile landscape (2 buttons: PROFILE, MENU) */}
+          <div className={`${isMobileLandscape ? 'flex' : 'flex md:hidden'} items-center gap-2 landscape:gap-1`}>
             <Link href="/app/profile" className={`btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2 landscape:py-1 landscape:text-[10px] rounded-full text-sm font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>PROFILE</Link>
             <button onClick={() => setIsOpen(true)} className={`btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2 landscape:py-1 landscape:text-[10px] rounded-full text-sm font-bold uppercase ${isMobileLandscape ? 'mobile-landscape-btn' : ''}`}>MENU</button>
           </div>
