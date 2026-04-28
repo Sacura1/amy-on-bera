@@ -649,11 +649,11 @@ export default function ProfileCard({
                 <p className="text-gray-400 text-xs mt-1 line-clamp-2">{profile.bio}</p>
               )}
               {/* Badge slots — desktop only, aligned with bio */}
-              <div data-desktop-only className="hidden mob:flex flex-nowrap items-center gap-2 mt-5">
+              <div data-desktop-only className="hidden mob:flex flex-nowrap items-center gap-1.5 mt-3 max-w-full overflow-x-auto pr-1">
                 {[1, 2, 3, 4, 5].map((slotNumber) => {
                   const badge = getBadgeForSlot(slotNumber);
                   return (
-                    <div key={slotNumber} className={`w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden ${badge ? `bg-white ${badgeRing(badge)}` : 'border-2 border-gray-600/50 bg-gray-800/50 border-dashed'}`}>
+                    <div key={slotNumber} className={`w-8 h-8 landscape:w-7 landscape:h-7 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden ${badge ? `bg-white ${badgeRing(badge)}` : 'border-2 border-gray-600/50 bg-gray-800/50 border-dashed'}`}>
                       {badge ? (
                         <img src={proxySrc(badge.badge_image) ?? badge.badge_image} crossOrigin="anonymous" alt={badge.badge_title} className="w-full h-full object-cover rounded-full" />
                       ) : (
@@ -662,8 +662,8 @@ export default function ProfileCard({
                     </div>
                   );
                 })}
-                <button onClick={onEditBadges} className="w-8 h-8 flex-shrink-0 rounded-full border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors" title="Edit Badges" data-ignore-capture="true">
-                  <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button onClick={onEditBadges} className="w-8 h-8 landscape:w-7 landscape:h-7 flex-shrink-0 rounded-full border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors" title="Edit Badges" data-ignore-capture="true">
+                  <svg className="w-3.5 h-3.5 landscape:w-3 landscape:h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                 </button>
@@ -766,7 +766,7 @@ export default function ProfileCard({
         </div>
 
         {/* ── Right column — desktop only ── */}
-        <div data-desktop-only data-right-col className="hidden mob:flex flex-col gap-2 flex-shrink-0" style={{ width: 245 }}>
+        <div data-desktop-only data-right-col className="hidden mob:flex flex-col gap-2 flex-shrink-0 w-[245px] landscape:w-[220px]">
           <div className="flex items-end gap-2">
             <div className="flex-1"><ScoreCard size="lg" /></div>
             <div className="w-7 flex-shrink-0" data-ignore-capture="true" />

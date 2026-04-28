@@ -282,13 +282,13 @@ export default function AppHeader() {
           </div>
 
           {/* Mobile nav */}
-          <div className="flex md:hidden items-center gap-2 landscape:gap-1.5 landscape:ml-3">
-            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-3 landscape:py-1.5 rounded-full text-sm landscape:text-xs font-bold uppercase">
+          <div className="flex md:hidden items-center gap-2 landscape:gap-1 landscape:ml-3">
+            <Link href="/app/profile" onClick={close} className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2.5 landscape:py-1 rounded-full landscape:rounded-[999px] text-sm landscape:text-[11px] font-bold uppercase">
               PROFILE
             </Link>
             <button
               onClick={() => setIsOpen(o => !o)}
-              className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-3 landscape:py-1.5 rounded-full text-sm landscape:text-xs font-bold uppercase"
+              className="btn-samy btn-samy-enhanced text-white px-4 py-2 landscape:px-2.5 landscape:py-1 rounded-full landscape:rounded-[999px] text-sm landscape:text-[11px] font-bold uppercase"
             >
               MENU
             </button>
