@@ -126,8 +126,17 @@ function ProfilePageContent() {
       const data = await response.json();
 
       if (data.verified && data.data) {
-        setXConnected(true);
-        setXUsername(data.data.xUsername || '');
+        const rawUsername = data.data.xUsername;
+        const normalizedUsername =
+          typeof rawUsername === 'string' && rawUsername.trim() && rawUsername.trim().toLowerCase() !== 'null'
+            ? rawUsername.trim()
+            : '';
+
+        setXConnected(!!normalizedUsername);
+        setXUsername(normalizedUsername);
+      } else {
+        setXConnected(false);
+        setXUsername('');
       }
     } catch (error) {
       console.error('Error checking X status:', error);
