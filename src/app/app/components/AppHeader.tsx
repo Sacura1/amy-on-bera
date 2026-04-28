@@ -296,7 +296,7 @@ export default function AppHeader() {
         </nav>
 
         {/* Wallet connect */}
-        <div className="mt-4 landscape:mt-1">
+        <div className="mt-4 landscape:mt-1 landscape:scale-75 landscape:origin-left">
           <ConnectButton
             client={client}
             chain={berachain}

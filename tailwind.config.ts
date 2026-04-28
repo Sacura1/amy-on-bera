@@ -18,6 +18,11 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addVariant }) {
+      // Mobile landscape: landscape orientation with max-height (typical mobile landscape)
+      addVariant('landscape', '@media (orientation: landscape) and (max-height: 500px)');
+    }
+  ],
 };
 export default config;
