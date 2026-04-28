@@ -140,10 +140,10 @@ export default function LandingHeader() {
             className="hidden md:flex items-center gap-4 landscape:gap-2"
             style={{ marginRight: isOpen ? PANEL_W : 0, transition: 'margin-right 300ms cubic-bezier(0.4,0,0.2,1)' }}
           >
-            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase">PROFILE</Link>
-            <Link href="/app/earn" className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase">EARN</Link>
-            <Link href="/app/points" className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase">AMY POINTS</Link>
-            <button onClick={() => setIsOpen(true)} className="btn-samy btn-samy-enhanced text-white px-8 py-3 landscape:px-4 landscape:py-1.5 rounded-full text-xl landscape:text-sm font-bold uppercase">MENU</button>
+            <Link href="/app/profile" className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">PROFILE</Link>
+            <Link href="/app/earn" className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">EARN</Link>
+            <Link href="/app/points" className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">AMY POINTS</Link>
+            <button onClick={() => setIsOpen(true)} className="btn-samy btn-samy-enhanced text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-bold uppercase">MENU</button>
           </div>
 
           <div className="flex md:hidden items-center gap-2 landscape:gap-1">
