@@ -114,7 +114,12 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
   // Close filter menu on outside click
   useEffect(() => {
     if (!showFilterMenu) return;
-    const close = () => setShowFilterMenu(false);
+    const close = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.filter-dropdown')) {
+        setShowFilterMenu(false);
+      }
+    };
     document.addEventListener('click', close);
     return () => document.removeEventListener('click', close);
   }, [showFilterMenu]);
@@ -202,9 +207,9 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
   const clearFilters = () => setSelectedCategories([]);
 
   const hasActiveFilters = selectedCategories.length > 0;
-
-  // Always pin these three; merge with whatever else is in loaded history
-  const PINNED_CATEGORIES = ['DAILY_EARN', 'DAILY_CHECKIN', 'PARTNER_REWARD'];
+  
+  // Always pin these; merge with whatever else is in loaded history
+  const PINNED_CATEGORIES = ['DAILY_EARN', 'DAILY_CHECKIN', 'PARTNER_REWARD', 'COSMETIC_BACKGROUND_BUY'];
   const availableCategories = Array.from(
     new Set([...PINNED_CATEGORIES, ...history.map(getCategoryKey)])
   ).filter((key) => key in CATEGORY_DISPLAY).sort((a, b) => {
@@ -267,7 +272,7 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
 
               {/* Filter dropdown */}
               {showFilterMenu && (
-                <div className="absolute right-0 mt-2 w-60 bg-gray-800 rounded-xl border border-gray-700 shadow-xl z-50 overflow-hidden">
+                <div className="filter-dropdown absolute right-0 mt-2 w-60 bg-gray-800 rounded-xl border border-gray-700 shadow-xl z-50 overflow-hidden">
                   <div className="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
                     <span className="text-sm font-semibold text-white">Filter by category</span>
                     {hasActiveFilters && (

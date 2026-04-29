@@ -1,10 +1,8 @@
 // API Configuration
-// In development, use the proxy to avoid CORS issues
-// In production, call the Railway API directly
-const isDev = process.env.NODE_ENV === 'development';
-export const API_BASE_URL = isDev
-  ? '/api/proxy'
-  : (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://amy-production-fd10.up.railway.app');
+// Always use the proxy to handle admin key injection server-side
+// In development, proxy goes to localhost:3001
+// In production, proxy goes to Railway backend
+export const API_BASE_URL = '/api/proxy';
 
 // Direct backend URL for OAuth (bypasses proxy - OAuth needs browser redirects)
 export const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://amy-production-fd10.up.railway.app';
