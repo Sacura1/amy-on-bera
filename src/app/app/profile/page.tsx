@@ -630,7 +630,7 @@ function ProfilePageContent() {
       const input = bonusUsername.trim().replace(/^@/, '');
       const isWallet = /^0x[a-f0-9]{40}$/i.test(input);
 
-      const body = {
+      const body: { points: number; reason: string; wallet?: string; xUsername?: string } = {
         points: points,
         reason: bonusReason.trim() || 'admin_bonus'
       };
