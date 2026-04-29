@@ -64,7 +64,7 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  const fetchHistory = useCallback(async ({ page = 0, append = false } = {}) => {
+  const fetchHistory = useCallback(async ({ page = 0, append = false, category = null }: { page?: number; append?: boolean; category?: string | null } = {}) => {
     if (!walletAddress) return;
 
     if (append) {
@@ -75,11 +75,33 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/points/history/${walletAddress}?limit=${HISTORY_PAGE_SIZE}&offset=${page * HISTORY_PAGE_SIZE}`);
+      // Build URL with category filter if provided
+      let url = `${API_BASE_URL}/api/points/history/${walletAddress}?limit=${HISTORY_PAGE_SIZE}&offset=${page * HISTORY_PAGE_SIZE}`;
+      if (category) {
+        url += `&category=${category}`;
+      }
+
+      const response = await fetch(url);
       const data = await response.json();
 
       if (data.success && data.data) {
-        setHistory((prev) => (append ? [...prev, ...data.data] : data.data));
+        setHistory((prev) => {
+          const newEntries = append ? [...prev, ...data.data] : data.data;
+          
+          // Only deduplicate client-side if NOT using server-side category filter
+          if (category) {
+            return newEntries; // Server already filtered, no dedup needed
+          }
+          
+          // Deduplicate by createdAt + pointsEarned + reason (unique key)
+          const seen = new Set();
+          return newEntries.filter((entry: HistoryEntry) => {
+            const key = `${entry.createdAt}_${entry.pointsEarned}_${entry.reason}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+        });
         setHasMoreHistory(data.data.length === HISTORY_PAGE_SIZE);
         setHistoryPage(page);
       } else {
@@ -141,22 +163,27 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
   };
 
   const getDisplayCategory = (entry: HistoryEntry): string => {
+    // Use CATEGORY_DISPLAY lookup if we have a valid category key
     if (entry.category && CATEGORY_DISPLAY[entry.category]) {
       return CATEGORY_DISPLAY[entry.category];
     }
     // Fallback for legacy entries without category
     if (entry.reason?.startsWith('purchase_')) {
-      if (entry.reason.includes('bg_')) return 'Background Purchase';
-      if (entry.reason.includes('filter_')) return 'Filter Purchase';
+      if (entry.reason.includes('bg_')) return CATEGORY_DISPLAY.COSMETIC_BACKGROUND_BUY;
+      if (entry.reason.includes('filter_')) return CATEGORY_DISPLAY.COSMETIC_FILTER_BUY;
       return 'Purchase';
     }
-    if (entry.reason === 'admin_bonus') return 'Amy Point Giveaway';
-    if (entry.reason === 'hourly_earning') return 'Points Earned (This Hour)';
+    if (entry.reason === 'admin_bonus') return CATEGORY_DISPLAY.GIVEAWAY;
+    if (entry.reason === 'hourly_earning') return CATEGORY_DISPLAY.DAILY_EARN;
+    if (entry.reason === 'Partner Recognition Rewards') return CATEGORY_DISPLAY.PARTNER_REWARD;
     return entry.reason || 'Points Update';
   };
 
   const getCategoryKey = (entry: HistoryEntry): string => {
+    // If backend provided a category key, use it directly
     if (entry.category) return entry.category;
+    
+    // Fallback: map reason string to category key
     if (entry.reason?.startsWith('purchase_')) {
       if (entry.reason.includes('bg_')) return 'COSMETIC_BACKGROUND_BUY';
       if (entry.reason.includes('filter_')) return 'COSMETIC_FILTER_BUY';
@@ -164,6 +191,7 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
     if (entry.reason === 'admin_bonus') return 'GIVEAWAY';
     if (entry.reason === 'hourly_earning') return 'DAILY_EARN';
     if (entry.reason === 'Partner Recognition Rewards') return 'PARTNER_REWARD';
+    if (entry.reason === 'daily_checkin') return 'DAILY_CHECKIN';
     return entry.reason || 'OTHER';
   };
 
@@ -199,9 +227,23 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
   };
 
   const toggleCategory = (key: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]
-    );
+    setSelectedCategories((prev) => {
+      const newCategories = prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key];
+      
+      // If no filters or single category, refetch from server with appropriate filter
+      if (newCategories.length === 0) {
+        // All filters cleared, fetch all history
+        fetchHistory({ page: 0, append: false });
+      } else if (newCategories.length === 1) {
+        // Single category - use server-side filtering
+        fetchHistory({ page: 0, append: false, category: newCategories[0] });
+      } else {
+        // Multiple categories - fetch all history, client-side filter will handle it
+        fetchHistory({ page: 0, append: false });
+      }
+      
+      return newCategories;
+    });
   };
 
   const clearFilters = () => setSelectedCategories([]);
