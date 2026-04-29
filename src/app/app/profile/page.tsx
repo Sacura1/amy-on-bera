@@ -613,7 +613,7 @@ function ProfilePageContent() {
   const awardBonusPoints = async () => {
     if (!walletAddress || !isAdmin) return;
     if (!bonusUsername.trim() || !bonusPoints.trim()) {
-      setBonusStatus('Please enter X username and points amount');
+      setBonusStatus('Please enter X username or wallet address and points amount');
       return;
     }
 
@@ -627,8 +627,19 @@ function ProfilePageContent() {
     setBonusStatus('');
 
     try {
-      // Clean the username (remove @ if present)
-      const cleanUsername = bonusUsername.trim().replace(/^@/, '');
+      const input = bonusUsername.trim().replace(/^@/, '');
+      const isWallet = /^0x[a-f0-9]{40}$/i.test(input);
+
+      const body = {
+        points: points,
+        reason: bonusReason.trim() || 'admin_bonus'
+      };
+
+      if (isWallet) {
+        body.wallet = input;
+      } else {
+        body.xUsername = input;
+      }
 
       const response = await fetch(`${API_BASE_URL}/api/points/add-bonus`, {
         method: 'POST',
@@ -636,16 +647,13 @@ function ProfilePageContent() {
           'Content-Type': 'application/json',
           'x-wallet-address': walletAddress.toString(),
         },
-        body: JSON.stringify({
-          xUsername: cleanUsername,
-          points: points,
-          reason: bonusReason.trim() || 'admin_bonus'
-        }),
+        body: JSON.stringify(body),
       });
       const data = await response.json();
 
       if (data.success) {
-        setBonusStatus(`Successfully awarded ${points} points to @${cleanUsername}!`);
+        const identifier = isWallet ? input.slice(0, 6) + '...' + input.slice(-4) : `@${input}`;
+        setBonusStatus(`Successfully awarded ${points} points to ${identifier}!`);
         setBonusUsername('');
         setBonusPoints('');
         setBonusReason('');
@@ -1685,18 +1693,18 @@ function ProfilePageContent() {
                   Award Bonus Points
                 </h4>
                 <p className="text-xs text-gray-400">
-                  Give bonus points to a user by their X username
+                  Give bonus points to a user by their X username or wallet address
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">X Username</label>
+                  <label className="text-xs text-gray-400 mb-1 block">X Username or Wallet</label>
                   <input
                     type="text"
                     value={bonusUsername}
                     onChange={(e) => setBonusUsername(e.target.value)}
-                    placeholder="@username"
+                    placeholder="@username or 0x..."
                     className="w-full px-4 py-2.5 rounded-xl bg-black/50 border-2 border-gray-600 text-white text-sm focus:border-yellow-400 focus:outline-none transition-all placeholder-gray-500"
                   />
                 </div>

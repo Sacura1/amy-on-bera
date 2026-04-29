@@ -264,10 +264,10 @@ export default function AppHeader() {
   return (
     <>
        {/* ── Header ── */}
-       <header className={`container mx-auto px-4 py-4 md:py-3 landscape:py-1 ${isMobileLandscape ? 'mobile-landscape-header' : ''}`}>
+       <header className={`container mx-auto px-4 py-4 md:pt-6 md:pb-3 ${isMobileLandscape ? 'mobile-landscape-header' : ''}`}>
         <nav className="flex justify-between items-center">
           {/* Logo */}
-          <Link href="/" className="text-3xl md:text-4xl landscape:text-2xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
+          <Link href="/" className="text-3xl md:text-5xl font-black text-shadow-strong" style={{ color: '#FFD700' }}>
             AMY
           </Link>
 

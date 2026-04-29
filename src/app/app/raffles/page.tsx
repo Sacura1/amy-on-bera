@@ -171,7 +171,7 @@ export default function RafflesPage() {
   return (
     <div>
       {/* Prize Carousel */}
-      <div className="w-full mt-[4vh] md:max-w-[1440px] md:mx-auto md:mt-0">
+      <div className="w-full mt-[7vh] md:max-w-[1440px] md:mx-auto md:mt-5">
         <PrizeCarousel
           raffles={raffles}
           onSelectRaffle={(raffle) => setSelectedRaffle(raffle)}

@@ -31,7 +31,7 @@ const CATEGORY_DISPLAY: Record<string, string> = {
   COSMETIC_FILTER_BUY: 'Filter Purchase',
   RAFFLE_ENTRY: 'Raffle Entry',
   REFERRAL_INITIAL: 'Referral Bonus',
-  PARTNER_REWARD: 'Partner Reward',
+  PARTNER_REWARD: 'Partner Recognition Reward',
   DAILY_CHECKIN: 'Daily Check-in',
 };
 
@@ -158,6 +158,7 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
     }
     if (entry.reason === 'admin_bonus') return 'GIVEAWAY';
     if (entry.reason === 'hourly_earning') return 'DAILY_EARN';
+    if (entry.reason === 'Partner Recognition Rewards') return 'PARTNER_REWARD';
     return entry.reason || 'OTHER';
   };
 
@@ -232,7 +233,7 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
       {/* Collapsible Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-800/50 transition-colors"
+        className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-800/50 transition-colors ${isExpanded ? 'rounded-t-2xl' : 'rounded-2xl'}`}
       >
         <h2 className="text-base font-bold text-yellow-400">Points History</h2>
         <div className="flex items-center gap-2">
@@ -285,7 +286,10 @@ export default function PointsHistory({ walletAddress }: PointsHistoryProps) {
                       return (
                         <button
                           key={key}
-                          onClick={() => toggleCategory(key)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleCategory(key);
+                          }}
                           className="w-full flex items-center gap-2 py-2 px-2 hover:bg-gray-700/50 rounded transition-colors"
                         >
                           <div className={`w-4 h-4 rounded border-2 flex-shrink-0 flex items-center justify-center ${
