@@ -455,7 +455,7 @@ function ProfilePageContent() {
       const response = await fetch(`${API_BASE_URL}/api/referral/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet: walletAddress }),
+        body: JSON.stringify({ wallet: walletAddress, xUsername: xUsername || undefined }),
       });
       const data = await response.json();
       if (data.success && data.referralCode) {
@@ -1318,9 +1318,24 @@ function ProfilePageContent() {
                       </div>
                       <p className="text-gray-400 text-xs mb-3">Share this code or link – every person who signs up with it boosts your points.</p>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <div className="font-mono font-black text-xl tracking-widest text-white px-4 py-2 rounded-lg" style={{ background: 'rgba(0,0,0,0.4)', border: gBorder }}>{userReferralCode || '—'}</div>
-                        <button onClick={() => copyToClipboard(userReferralCode, 'code-1')} className="px-3 py-2 text-xs font-semibold rounded-lg transition-colors" style={{ background: copiedKey === 'code-1' ? 'rgba(34,197,94,0.2)' : 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: copiedKey === 'code-1' ? '1px solid rgba(34,197,94,0.5)' : '1px solid rgba(255,255,255,0.10)', color: copiedKey === 'code-1' ? '#4ade80' : 'white', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>{copiedKey === 'code-1' ? '✓ Copied!' : 'Copy Code'}</button>
-                        <button onClick={() => copyToClipboard(`${window.location.origin}/app/profile?ref=${userReferralCode}`, 'link-1')} className="px-3 py-2 text-xs font-semibold rounded-lg transition-colors" style={{ background: copiedKey === 'link-1' ? 'rgba(34,197,94,0.2)' : 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: copiedKey === 'link-1' ? '1px solid rgba(34,197,94,0.5)' : '1px solid rgba(255,255,255,0.10)', color: copiedKey === 'link-1' ? '#4ade80' : 'white', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>{copiedKey === 'link-1' ? '✓ Copied!' : 'Copy Link'}</button>
+                        {userReferralCode ? (
+                          <>
+                            <div className="font-mono font-black text-xl tracking-widest text-white px-4 py-2 rounded-lg" style={{ background: 'rgba(0,0,0,0.4)', border: gBorder }}>{userReferralCode}</div>
+                            <button onClick={() => copyToClipboard(userReferralCode, 'code-1')} className="px-3 py-2 text-xs font-semibold rounded-lg transition-colors" style={{ background: copiedKey === 'code-1' ? 'rgba(34,197,94,0.2)' : 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: copiedKey === 'code-1' ? '1px solid rgba(34,197,94,0.5)' : '1px solid rgba(255,255,255,0.10)', color: copiedKey === 'code-1' ? '#4ade80' : 'white', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>{copiedKey === 'code-1' ? '✓ Copied!' : 'Copy Code'}</button>
+                            <button onClick={() => copyToClipboard(`${window.location.origin}/app/profile?ref=${userReferralCode}`, 'link-1')} className="px-3 py-2 text-xs font-semibold rounded-lg transition-colors" style={{ background: copiedKey === 'link-1' ? 'rgba(34,197,94,0.2)' : 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: copiedKey === 'link-1' ? '1px solid rgba(34,197,94,0.5)' : '1px solid rgba(255,255,255,0.10)', color: copiedKey === 'link-1' ? '#4ade80' : 'white', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>{copiedKey === 'link-1' ? '✓ Copied!' : 'Copy Link'}</button>
+                          </>
+                        ) : hasAnySocialConnected ? (
+                          <button
+                            onClick={generateReferralCode}
+                            disabled={isGeneratingCode}
+                            className="px-5 py-2.5 rounded-lg text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-50"
+                            style={{ background: `linear-gradient(135deg, ${g}, #b8960c)`, color: '#0a0e14', boxShadow: `0 4px 14px rgba(212,175,55,0.35)` }}
+                          >
+                            {isGeneratingCode ? 'Generating...' : 'Generate My Code'}
+                          </button>
+                        ) : (
+                          <p className="text-xs text-gray-500">Connect X, Discord, or Telegram to generate your code.</p>
+                        )}
                       </div>
                     </div>
                     {/* Code entered confirmation */}
@@ -1365,9 +1380,24 @@ function ProfilePageContent() {
                       </div>
                       <p className="text-gray-400 text-xs mb-3">Share this code or link – every person who signs up with it boosts your points.</p>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <div className="font-mono font-black text-xl tracking-widest text-white px-4 py-2 rounded-lg" style={{ background: 'rgba(0,0,0,0.4)', border: gBorder }}>{userReferralCode || '—'}</div>
-                        <button onClick={() => copyToClipboard(userReferralCode, 'code-1')} className="px-3 py-2 text-xs font-semibold rounded-lg transition-colors" style={{ background: copiedKey === 'code-1' ? 'rgba(34,197,94,0.2)' : 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: copiedKey === 'code-1' ? '1px solid rgba(34,197,94,0.5)' : '1px solid rgba(255,255,255,0.10)', color: copiedKey === 'code-1' ? '#4ade80' : 'white', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>{copiedKey === 'code-1' ? '✓ Copied!' : 'Copy Code'}</button>
-                        <button onClick={() => copyToClipboard(`${window.location.origin}/app/profile?ref=${userReferralCode}`, 'link-1')} className="px-3 py-2 text-xs font-semibold rounded-lg transition-colors" style={{ background: copiedKey === 'link-1' ? 'rgba(34,197,94,0.2)' : 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: copiedKey === 'link-1' ? '1px solid rgba(34,197,94,0.5)' : '1px solid rgba(255,255,255,0.10)', color: copiedKey === 'link-1' ? '#4ade80' : 'white', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>{copiedKey === 'link-1' ? '✓ Copied!' : 'Copy Link'}</button>
+                        {userReferralCode ? (
+                          <>
+                            <div className="font-mono font-black text-xl tracking-widest text-white px-4 py-2 rounded-lg" style={{ background: 'rgba(0,0,0,0.4)', border: gBorder }}>{userReferralCode}</div>
+                            <button onClick={() => copyToClipboard(userReferralCode, 'code-1')} className="px-3 py-2 text-xs font-semibold rounded-lg transition-colors" style={{ background: copiedKey === 'code-1' ? 'rgba(34,197,94,0.2)' : 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: copiedKey === 'code-1' ? '1px solid rgba(34,197,94,0.5)' : '1px solid rgba(255,255,255,0.10)', color: copiedKey === 'code-1' ? '#4ade80' : 'white', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>{copiedKey === 'code-1' ? '✓ Copied!' : 'Copy Code'}</button>
+                            <button onClick={() => copyToClipboard(`${window.location.origin}/app/profile?ref=${userReferralCode}`, 'link-1')} className="px-3 py-2 text-xs font-semibold rounded-lg transition-colors" style={{ background: copiedKey === 'link-1' ? 'rgba(34,197,94,0.2)' : 'linear-gradient(145deg, rgba(48,54,68,0.9), rgba(28,32,44,0.95))', border: copiedKey === 'link-1' ? '1px solid rgba(34,197,94,0.5)' : '1px solid rgba(255,255,255,0.10)', color: copiedKey === 'link-1' ? '#4ade80' : 'white', boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)' }}>{copiedKey === 'link-1' ? '✓ Copied!' : 'Copy Link'}</button>
+                          </>
+                        ) : hasAnySocialConnected ? (
+                          <button
+                            onClick={generateReferralCode}
+                            disabled={isGeneratingCode}
+                            className="px-5 py-2.5 rounded-lg text-sm font-black tracking-widest transition-all duration-200 disabled:opacity-50"
+                            style={{ background: `linear-gradient(135deg, ${g}, #b8960c)`, color: '#0a0e14', boxShadow: `0 4px 14px rgba(212,175,55,0.35)` }}
+                          >
+                            {isGeneratingCode ? 'Generating...' : 'Generate My Code'}
+                          </button>
+                        ) : (
+                          <p className="text-xs text-gray-500">Connect X, Discord, or Telegram to generate your code.</p>
+                        )}
                       </div>
                     </div>
                   </>
