@@ -30,6 +30,7 @@ interface ProfileData {
   showTelegram: boolean;
   showBalance: boolean;
   backgroundId: string | null;
+  cardBackgroundId?: string | null;
 }
 
 export const CARD_BACKGROUNDS: { id: string; path: string; label: string }[] = [
@@ -55,6 +56,17 @@ interface SocialConnections {
   emailConnected?: boolean;
 }
 
+type ProfileCardCacheEntry = {
+  profile: ProfileData | null;
+  equippedBadges: EquippedBadge[];
+  activeBadges: BadgeData[];
+  socialData: SocialData | null;
+  cachedAt: number;
+};
+
+const PROFILE_CARD_CACHE_TTL_MS = 5 * 60 * 1000;
+const profileCardCache = new Map<string, ProfileCardCacheEntry>();
+
 interface ProfileCardProps {
   wallet: string;
   xUsername: string;
@@ -71,6 +83,9 @@ interface ProfileCardProps {
   onConnectTelegram: () => void;
   onConnectEmail: () => void;
   socialConnections: SocialConnections;
+  readOnly?: boolean;
+  exportPreview?: boolean;
+  cardBackgroundId?: string | null;
 }
 
 const BADGE_RING: Record<string, string> = {
@@ -103,7 +118,10 @@ export default function ProfileCard({
   onConnectDiscord,
   onConnectTelegram,
   onConnectEmail,
-  socialConnections
+  socialConnections,
+  readOnly = false,
+  exportPreview = false,
+  cardBackgroundId
 }: ProfileCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -111,13 +129,17 @@ export default function ProfileCard({
   const [activeBadges, setActiveBadges] = useState<BadgeData[]>([]);
   const [socialData, setSocialData] = useState<SocialData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [cardBgId, setCardBgId] = useState<string>('bg_desktop_1');
+  const [cardBgId, setCardBgId] = useState<string>(cardBackgroundId || 'bg_desktop_1');
 
   useEffect(() => {
+    if (cardBackgroundId) {
+      setCardBgId(cardBackgroundId);
+      return;
+    }
     if (typeof window === 'undefined' || !wallet) return;
     const stored = localStorage.getItem(`amy-card-bg-${wallet.toLowerCase()}`);
     if (stored) setCardBgId(stored);
-  }, [wallet]);
+  }, [wallet, cardBackgroundId]);
 
   const referralUrl = userReferralCode
     ? `${typeof window !== 'undefined' ? window.location.origin : 'https://amybera.com'}/app/profile?ref=${userReferralCode}`
@@ -423,18 +445,65 @@ export default function ProfileCard({
     useEffect(() => {
       if (!wallet) return;
       let cancelled = false;
+      const cacheKey = wallet.toLowerCase();
+      const cached = profileCardCache.get(cacheKey);
+      if (cached && Date.now() - cached.cachedAt < PROFILE_CARD_CACHE_TTL_MS) {
+        setProfile(cached.profile);
+        setEquippedBadges(cached.equippedBadges);
+        setActiveBadges(cached.activeBadges);
+        setSocialData(cached.socialData);
+        if (cached.profile?.cardBackgroundId) setCardBgId(cached.profile.cardBackgroundId);
+        setIsLoading(false);
+        return () => {
+          cancelled = true;
+        };
+      }
 
-      const fetchProfile = async () => {
+      const fetchProfileCardData = async () => {
         setIsLoading(true);
         try {
-          const profileRes = await fetch(`${API_BASE_URL}/api/profile/${wallet}`);
+          const [profileRes, badgesRes] = await Promise.all([
+            fetch(`${API_BASE_URL}/api/profile/${wallet}`),
+            fetch(`${API_BASE_URL}/api/badges/${wallet}/active`),
+          ]);
           const profileData = await profileRes.json();
+          const badgesData = await badgesRes.json();
           if (profileData.success) {
-            setProfile(profileData.data.profile);
-            setEquippedBadges(profileData.data.badges?.equipped || []);
-            if (profileData.data.social) {
-              setSocialData(profileData.data.social);
+            const fetchedProfile = profileData.data.profile;
+            const fetchedEquippedBadges = profileData.data.badges?.equipped || [];
+            const fetchedSocialData = profileData.data.social || null;
+            const fetchedActiveBadges = badgesData.success
+              ? badgesData.data.filter((b: BadgeData) => b.is_active)
+              : [];
+
+            setProfile(fetchedProfile);
+            const storedBg = !readOnly && typeof window !== 'undefined'
+              ? localStorage.getItem(`amy-card-bg-${wallet.toLowerCase()}`)
+              : null;
+            const backendBg = fetchedProfile?.cardBackgroundId;
+            const effectiveBg = backendBg || storedBg;
+            if (effectiveBg) {
+              setCardBgId(effectiveBg);
             }
+            if (backendBg) {
+              localStorage.setItem(`amy-card-bg-${wallet.toLowerCase()}`, backendBg);
+            } else if (storedBg) {
+              fetch(`${API_BASE_URL}/api/profile/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ wallet, cardBackgroundId: storedBg }),
+              }).catch(() => {});
+            }
+            setEquippedBadges(fetchedEquippedBadges);
+            setSocialData(fetchedSocialData);
+            setActiveBadges(fetchedActiveBadges);
+            profileCardCache.set(cacheKey, {
+              profile: effectiveBg ? { ...fetchedProfile, cardBackgroundId: effectiveBg } : fetchedProfile,
+              equippedBadges: fetchedEquippedBadges,
+              activeBadges: fetchedActiveBadges,
+              socialData: fetchedSocialData,
+              cachedAt: Date.now(),
+            });
           }
         } catch (error) {
           console.error('Error fetching profile data:', error);
@@ -443,25 +512,12 @@ export default function ProfileCard({
         }
       };
 
-      const fetchActiveBadges = async () => {
-        try {
-          const res  = await fetch(`${API_BASE_URL}/api/badges/${wallet}/active`);
-          const data = await res.json();
-          if (data.success) {
-            setActiveBadges(data.data.filter((b: BadgeData) => b.is_active));
-          }
-        } catch (error) {
-          console.error('Error fetching active badges:', error);
-        }
-      };
-
-      fetchProfile();
-      fetchActiveBadges();
+      fetchProfileCardData();
 
       return () => {
         cancelled = true;
       };
-    }, [wallet]);
+    }, [wallet, readOnly]);
 
   const getBadgeForSlot = (slotNumber: number): BadgeData | null => {
     const equipped = equippedBadges.find(b => b.slotNumber === slotNumber);
@@ -487,6 +543,40 @@ export default function ProfileCard({
   };
 
   if (isLoading) {
+    if (exportPreview) {
+      return (
+        <div
+          className="w-[560px] max-w-[560px] rounded-2xl border border-gray-700/50 bg-gray-900 p-4"
+          style={{
+            backgroundImage: "linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)),url('/bg_desktop_1.jpg')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="relative flex gap-4">
+            <div className="flex-1 min-w-0 flex flex-col gap-3">
+              <div className="flex gap-3 items-start">
+                <div className="w-24 h-24 rounded-full bg-white/10 animate-pulse" />
+                <div className="flex-1 pt-2 space-y-3">
+                  <div className="h-5 w-40 rounded bg-white/10 animate-pulse" />
+                  <div className="h-3 w-full rounded bg-white/10 animate-pulse" />
+                  <div className="h-3 w-3/4 rounded bg-white/10 animate-pulse" />
+                </div>
+              </div>
+              <div className="ml-2 flex gap-2">
+                {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-[42px] w-[42px] rounded-full bg-white/10 animate-pulse" />)}
+              </div>
+              <div className="mt-5 h-[94px] rounded-xl bg-black/40 animate-pulse" />
+              <div className="mt-auto h-8 w-64 rounded-lg bg-white/10 animate-pulse" />
+            </div>
+            <div className="w-[205px] flex-shrink-0 flex flex-col gap-2">
+              <div className="h-[74px] rounded-xl bg-black/40 animate-pulse" />
+              <div className="h-[192px] rounded-xl bg-black/40 animate-pulse" />
+            </div>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-6">
         <div className="flex justify-center py-8">
@@ -595,7 +685,7 @@ export default function ProfileCard({
             <span data-social-label className="text-white text-xs leading-none" style={socialTextStyle}>{socialData?.discordUsername && socialData.discordUsername !== 'connected' ? socialData.discordUsername : 'Connected'}</span>
           )}
         </div>
-      ) : (
+      ) : readOnly ? null : (
         <button onClick={onConnectDiscord} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#5865F2]/20 hover:bg-[#5865F2]/30 whitespace-nowrap transition-colors">
           <DiscordSvg className="w-3.5 h-3.5 text-[#5865F2] flex-shrink-0" />
           <span data-social-label className="text-gray-400 text-xs leading-none" style={socialTextStyle}>Connect</span>
@@ -610,7 +700,7 @@ export default function ProfileCard({
             <span data-social-label className="text-white text-xs leading-none" style={socialTextStyle}>{socialData?.telegramUsername && socialData.telegramUsername !== 'connected' ? socialData.telegramUsername : 'Connected'}</span>
           )}
         </div>
-      ) : (
+      ) : readOnly ? null : (
         <button onClick={onConnectTelegram} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0088cc]/20 hover:bg-[#0088cc]/30 whitespace-nowrap transition-colors">
           <TelegramSvg className="w-3.5 h-3.5 text-[#0088cc] flex-shrink-0" />
           <span data-social-label className="text-gray-400 text-xs leading-none" style={socialTextStyle}>Connect</span>
@@ -620,13 +710,31 @@ export default function ProfileCard({
   );
 
   const cardBg = CARD_BACKGROUNDS.find(b => b.id === cardBgId);
+  const exportBackgroundStyle = exportPreview && cardBg
+    ? {
+        width: '560px',
+        maxWidth: '560px',
+        padding: '1rem',
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('${cardBg.path}')`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        overflow: 'visible',
+      }
+    : undefined;
+  const exportInnerStyle = exportPreview
+    ? { flexDirection: 'row' as const, gap: '1rem' }
+    : undefined;
+  const desktopOnlyStyle = exportPreview ? { display: 'flex' } : undefined;
+  const mobileOnlyStyle = exportPreview ? { display: 'none' } : undefined;
 
   return (
     <div
       ref={cardRef}
       className="bg-gray-900/80 rounded-2xl border border-gray-700/50 p-3 mob:p-4 relative overflow-hidden"
+      style={exportBackgroundStyle}
     >
-      <div data-card-inner className="relative flex flex-col mob:flex-row gap-3 mob:gap-4">
+      <div data-card-inner className="relative flex flex-col mob:flex-row gap-3 mob:gap-4" style={exportInnerStyle}>
 
         {/* ── Left column ── */}
         <div className="flex-1 min-w-0 flex flex-col gap-3">
@@ -643,11 +751,13 @@ export default function ProfileCard({
                   </div>
                 )}
               </div>
-              <button onClick={onEditProfile} data-ignore-capture="true" className="absolute bottom-0 right-0 w-6 h-6 flex items-center justify-center rounded-full border border-white/20 bg-gray-900 hover:bg-gray-700 transition-colors text-gray-300" title="Edit Profile">
-                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
+              {!readOnly && (
+                <button onClick={onEditProfile} data-ignore-capture="true" className="absolute bottom-0 right-0 w-6 h-6 flex items-center justify-center rounded-full border border-white/20 bg-gray-900 hover:bg-gray-700 transition-colors text-gray-300" title="Edit Profile">
+                  <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              )}
             </div>
             <div className="min-w-0 flex-1 pt-1">
               <h2 className="text-lg mob:text-xl font-bold text-white truncate">
@@ -660,7 +770,7 @@ export default function ProfileCard({
           </div>
 
           {/* Badge slots — desktop/tablet, aligned from avatar left edge */}
-          <div data-badge-row data-desktop-only className="hidden mob:flex flex-nowrap items-center gap-1.5 max-w-full ml-2">
+          <div data-badge-row data-desktop-only className="hidden mob:flex flex-nowrap items-center gap-1.5 max-w-full ml-2" style={desktopOnlyStyle}>
             {[1, 2, 3, 4, 5].map((slotNumber) => {
               const badge = getBadgeForSlot(slotNumber);
               return (
@@ -673,15 +783,17 @@ export default function ProfileCard({
                 </div>
               );
             })}
-            <button onClick={onEditBadges} className="w-8 h-8 md:w-[42px] md:h-[42px] flex-shrink-0 rounded-full border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors" title="Edit Badges" data-ignore-capture="true">
-              <svg className="w-3.5 h-3.5 md:w-[17px] md:h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
+            {!readOnly && (
+              <button onClick={onEditBadges} className="w-8 h-8 md:w-[42px] md:h-[42px] flex-shrink-0 rounded-full border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors" title="Edit Badges" data-ignore-capture="true">
+                <svg className="w-3.5 h-3.5 md:w-[17px] md:h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Badge slots — mobile only, aligned with avatar left edge */}
-          <div data-mobile-only className="flex mob:hidden items-center gap-2">
+          <div data-mobile-only className="flex mob:hidden items-center gap-2" style={mobileOnlyStyle}>
             {[1, 2, 3, 4, 5].map((slotNumber) => {
               const badge = getBadgeForSlot(slotNumber);
               return (
@@ -694,17 +806,19 @@ export default function ProfileCard({
                 </div>
               );
             })}
-            <button onClick={onEditBadges} className="w-7 h-7 flex-shrink-0 rounded-full border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors" title="Edit Badges" data-ignore-capture="true">
-              <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
+            {!readOnly && (
+              <button onClick={onEditBadges} className="w-7 h-7 flex-shrink-0 rounded-full border-2 border-dashed border-gray-600 hover:border-pink-500 flex items-center justify-center transition-colors" title="Edit Badges" data-ignore-capture="true">
+                <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Stats card */}
           <div className="rounded-xl overflow-hidden mt-5" style={{ background: 'rgba(8,12,22,0.85)', border: '1px solid rgba(255,255,255,0.06)' }}>
             {/* Desktop: 3 col horizontal */}
-            <div data-desktop-only data-desktop-stats className="hidden mob:flex divide-x divide-white/5">
+            <div data-desktop-only data-desktop-stats className="hidden mob:flex divide-x divide-white/5" style={desktopOnlyStyle}>
               {profile?.showBalance && (
                 <div className="flex-1 flex flex-col items-center justify-center gap-1.5 py-5 px-3">
                   <div data-stat-header className="flex items-center gap-1.5">
@@ -730,7 +844,7 @@ export default function ProfileCard({
               </div>
             </div>
             {/* Mobile: vertical rows */}
-            <div data-mobile-only className="flex mob:hidden flex-col divide-y divide-white/5">
+            <div data-mobile-only className="flex mob:hidden flex-col divide-y divide-white/5" style={mobileOnlyStyle}>
               {profile?.showBalance && (
                 <div className="flex items-center justify-between px-4 py-3">
                 <div data-stat-header className="flex items-center gap-2">
@@ -758,14 +872,16 @@ export default function ProfileCard({
           </div>
 
           {/* Mobile: Score + QR cards */}
-          <div data-mobile-only className="flex mob:hidden flex-col gap-2">
+          <div data-mobile-only className="flex mob:hidden flex-col gap-2" style={mobileOnlyStyle}>
             <ScoreCard size="sm" />
             <QrCard qrSize={100} />
-            <button onClick={handleDownload} className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-white/10 bg-black/40 hover:bg-white/10 transition-colors text-gray-400 self-end -mt-1" title="Download card" data-ignore-capture="true">
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-            </button>
+            {!readOnly && (
+              <button onClick={handleDownload} className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-white/10 bg-black/40 hover:bg-white/10 transition-colors text-gray-400 self-end -mt-1" title="Download card" data-ignore-capture="true">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Socials */}
@@ -775,18 +891,20 @@ export default function ProfileCard({
         </div>
 
         {/* ── Right column — desktop only ── */}
-        <div data-desktop-only data-right-col className="hidden mob:flex flex-col gap-2 flex-shrink-0 w-[245px] landscape:w-[220px]">
+        <div data-desktop-only data-right-col className="hidden mob:flex flex-col gap-2 flex-shrink-0 w-[245px] landscape:w-[220px]" style={exportPreview ? { display: 'flex', width: readOnly ? '205px' : '245px' } : undefined}>
           <div className="flex items-end gap-2">
             <div className="flex-1"><ScoreCard size="lg" /></div>
-            <div className="w-7 flex-shrink-0" data-ignore-capture="true" />
+            {!readOnly && <div className="w-7 flex-shrink-0" data-ignore-capture="true" />}
           </div>
           <div className="flex items-end gap-2">
             <div className="flex-1"><QrCard qrSize={105} /></div>
-            <button onClick={handleDownload} className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-white/10 bg-black/40 hover:bg-white/10 transition-colors text-gray-400" title="Download card" data-ignore-capture="true">
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-            </button>
+            {!readOnly && (
+              <button onClick={handleDownload} className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-white/10 bg-black/40 hover:bg-white/10 transition-colors text-gray-400" title="Download card" data-ignore-capture="true">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
 

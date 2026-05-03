@@ -1386,7 +1386,7 @@ Multiplier adjusts automatically as your position value changes.`}
               name="Ember"
               title="Legacy"
               image="/image/ember.png"
-              description="Earned during the Ember referral season. Multipliers activate after 03 May 2026. This badge is permanent for eligible participants."
+              description="Earned during the Ember referral season. Multipliers activate after 24th May 2026. This badge is permanent for eligible participants."
               multipliers={[
                 { requirement: 'Level 1', multiplier: 'TBC' },
                 { requirement: 'Level 2', multiplier: 'TBC' },
@@ -1418,9 +1418,9 @@ Multiplier adjusts automatically as your position value changes.`}
               image="/image/conviction_monthly.png"
               description="Assigned monthly based on your Amy Score (holdings & onchain activity across Web3). Your activity this month determines your badge for next month. Once assigned, it stays active for the entire month."
               multipliers={[
-                { requirement: 'Level 1', multiplier: 'x3' },
-                { requirement: 'Level 2', multiplier: 'x5' },
-                { requirement: 'Level 3', multiplier: 'x10' },
+                { requirement: 'Amy Score 35-54', multiplier: '3x' },
+                { requirement: 'Amy Score 55-74 ', multiplier: '5x' },
+                { requirement: 'Amy Score 75+', multiplier: '10x' },
               ]}
               isActive={!!onchainConviction}
               currentMultiplier={onchainConviction ? `${onchainConviction.multiplier}x` : undefined}

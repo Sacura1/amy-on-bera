@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL, MINIMUM_AMY_BALANCE } from '@/lib/constants';
+import ProfileCard from '@/app/app/profile/components/ProfileCard';
 
 interface LeaderboardEntry {
   position: number;
@@ -114,6 +115,7 @@ const POINTS_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const trimLeaderboardEntries = (entries: EnrichedEntry[]) =>
   entries.slice(0, WEEKLY_CACHE_LIMIT).map(entry => ({
     xUsername: entry.xUsername,
+    walletAddress: entry.walletAddress,
     amyBalance: entry.amyBalance,
     verified: entry.verified,
     eligible: entry.eligible,
@@ -141,6 +143,191 @@ const safeSessionStorageSet = (key: string, value: unknown) => {
   }
 };
 
+type SelectedProfile = {
+  wallet: string;
+  xUsername: string;
+};
+
+type LeaderboardProfileData = {
+  balance: number;
+  tier: string;
+  totalMultiplier: number;
+  pointsPerHour: number;
+  amyScore: number;
+  referralCode: string;
+  cardBackgroundId: string | null;
+  socialConnections: {
+    xConnected?: boolean;
+    discordConnected?: boolean;
+    telegramConnected?: boolean;
+    emailConnected?: boolean;
+  };
+};
+
+const PROFILE_MODAL_CACHE_TTL_MS = 5 * 60 * 1000;
+const profileModalCache = new Map<string, { data: LeaderboardProfileData; cachedAt: number }>();
+
+function LeaderboardProfileModal({
+  selected,
+  onClose,
+}: {
+  selected: SelectedProfile | null;
+  onClose: () => void;
+}) {
+  const [profileData, setProfileData] = useState<LeaderboardProfileData | null>(null);
+  const [viewportWidth, setViewportWidth] = useState(560);
+
+  useEffect(() => {
+    const updateViewportWidth = () => setViewportWidth(window.innerWidth);
+    updateViewportWidth();
+    window.addEventListener('resize', updateViewportWidth);
+    return () => window.removeEventListener('resize', updateViewportWidth);
+  }, []);
+
+  useEffect(() => {
+    if (!selected) return;
+    let cancelled = false;
+
+    const loadProfile = async () => {
+      const cacheKey = selected.wallet.toLowerCase();
+      const cached = profileModalCache.get(cacheKey);
+      if (cached && Date.now() - cached.cachedAt < PROFILE_MODAL_CACHE_TTL_MS) {
+        setProfileData(cached.data);
+        return;
+      }
+
+      const fallbackData: LeaderboardProfileData = {
+        balance: 0,
+        tier: 'none',
+        totalMultiplier: 1,
+        pointsPerHour: 0,
+        amyScore: 0,
+        referralCode: '',
+        cardBackgroundId: null,
+        socialConnections: {
+          xConnected: !!selected.xUsername,
+        },
+      };
+      setProfileData(fallbackData);
+
+      const safeJson = async (url: string) => {
+        try {
+          const res = await fetch(url, { cache: 'no-store' });
+          return await res.json();
+        } catch {
+          return null;
+        }
+      };
+
+      const [profileRes, pointsRes, referralRes, scoreRes] = await Promise.all([
+        safeJson(`${API_BASE_URL}/api/profile/${selected.wallet}`),
+        safeJson(`${API_BASE_URL}/api/points/${selected.wallet}`),
+        safeJson(`${API_BASE_URL}/api/referral/${selected.wallet}`),
+        safeJson(`${API_BASE_URL}/api/amy-score/${selected.wallet}`),
+      ]);
+
+      if (cancelled) return;
+
+      const profile = profileRes?.data?.profile || {};
+      const social = profileRes?.data?.social || {};
+      const points = pointsRes?.data || {};
+
+      const loadedData: LeaderboardProfileData = {
+        balance: Number(points.lastAmyBalance || points.last_amy_balance || 0),
+        tier: points.currentTier || 'none',
+        totalMultiplier: Number(points.totalMultiplier || 1),
+        pointsPerHour: Number(points.effectivePointsPerHour || points.pointsPerHour || 0),
+        amyScore: Number(scoreRes?.score || 0),
+        referralCode: referralRes?.data?.referralCode || '',
+        cardBackgroundId: profile.cardBackgroundId || null,
+        socialConnections: {
+          xConnected: !!selected.xUsername,
+          discordConnected: !!social.discordUsername,
+          telegramConnected: !!social.telegramUsername,
+          emailConnected: !!social.email,
+        },
+      };
+
+      profileModalCache.set(cacheKey, { data: loadedData, cachedAt: Date.now() });
+      setProfileData(loadedData);
+    };
+
+    loadProfile();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [selected, onClose]);
+
+  if (!selected) return null;
+
+  const cardScale = Math.min(1, Math.max(0.48, (viewportWidth - 56) / 560));
+  const scaledCardWidth = 560 * cardScale;
+  const scaledCardHeight = 335 * cardScale;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-6"
+      onClick={onClose}
+    >
+      <div
+        className="relative max-h-[90dvh] max-w-[calc(100vw-16px)] overflow-x-hidden overflow-y-auto rounded-2xl border border-gray-600/70 bg-gray-800 p-3 shadow-2xl min-[430px]:p-4 md:p-6"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute -right-1 top-0 z-10 w-6 h-6 md:right-0 md:w-8 md:h-8 flex items-center justify-center rounded-full border border-white/15 bg-black/70 text-white hover:bg-black transition-colors"
+        >
+          <svg className="w-3.5 h-3.5 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div style={{ width: scaledCardWidth, height: scaledCardHeight }}>
+        <div
+          className="origin-top-left w-[560px]"
+          style={{ transform: `scale(${cardScale})` }}
+        >
+          {profileData ? (
+            <ProfileCard
+              wallet={selected.wallet}
+              xUsername={selected.xUsername}
+              balance={profileData.balance}
+              tier={profileData.tier}
+              totalMultiplier={profileData.totalMultiplier}
+              pointsPerHour={profileData.pointsPerHour}
+              amyScore={profileData.amyScore}
+              userReferralCode={profileData.referralCode}
+              onEditProfile={() => {}}
+              onEditBadges={() => {}}
+              onConnectX={() => {}}
+              onConnectDiscord={() => {}}
+              onConnectTelegram={() => {}}
+              onConnectEmail={() => {}}
+              socialConnections={profileData.socialConnections}
+              readOnly
+              exportPreview
+              cardBackgroundId={profileData.cardBackgroundId}
+            />
+          ) : (
+            <div className="w-[560px] rounded-2xl border border-gray-700/50 bg-gray-900 p-10 flex justify-center">
+              <div className="loading-spinner w-8 h-8" />
+            </div>
+          )}
+        </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function LeaderboardPage() {
   const [activeTab, setActiveTab] = useState<TabType>('points');
   const pointsRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -152,6 +339,7 @@ export default function LeaderboardPage() {
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [hasCachedLeaderboard, setHasCachedLeaderboard] = useState(false);
   const [hasCachedPointsLeaderboard, setHasCachedPointsLeaderboard] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<SelectedProfile | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -561,7 +749,16 @@ export default function LeaderboardPage() {
                     return (
                       <div
                         key={`${entry.xUsername}-${index}`}
-                        className="leaderboard-row"
+                        role="button"
+                        tabIndex={entry.walletAddress ? 0 : -1}
+                        onClick={() => entry.walletAddress && setSelectedProfile({ wallet: entry.walletAddress, xUsername: entry.xUsername })}
+                        onKeyDown={(event) => {
+                          if (entry.walletAddress && (event.key === 'Enter' || event.key === ' ')) {
+                            event.preventDefault();
+                            setSelectedProfile({ wallet: entry.walletAddress, xUsername: entry.xUsername });
+                          }
+                        }}
+                        className={`leaderboard-row ${entry.walletAddress ? 'cursor-pointer hover:border-yellow-400/40' : ''}`}
                         style={{ animationDelay: `${Math.min(index * 0.1, 0.5)}s` }}
                       >
                         <div className="flex items-center justify-between gap-2 md:gap-4">
@@ -577,14 +774,9 @@ export default function LeaderboardPage() {
                                 useXProfile={true}
                               />
                             </div>
-                            <a
-                              href={`https://x.com/${entry.xUsername}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm md:text-lg font-bold text-yellow-400 hover:text-yellow-300 transition-colors truncate"
-                            >
+                            <span className="text-sm md:text-lg font-bold text-yellow-400 transition-colors truncate">
                               @{entry.xUsername}
-                            </a>
+                            </span>
                           </div>
                           {/* Mindshare score if available */}
                           {entry.mindshareScore != null && typeof entry.mindshareScore === 'number' && !isNaN(entry.mindshareScore) && (
@@ -627,7 +819,16 @@ export default function LeaderboardPage() {
                     return (
                       <div
                         key={`${entry.wallet}-${index}`}
-                        className="leaderboard-row"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setSelectedProfile({ wallet: entry.wallet, xUsername: entry.xUsername || displayName })}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            setSelectedProfile({ wallet: entry.wallet, xUsername: entry.xUsername || displayName });
+                          }
+                        }}
+                        className="leaderboard-row cursor-pointer hover:border-yellow-400/40"
                         style={{ animationDelay: `${Math.min(index * 0.1, 0.5)}s` }}
                       >
                         <div className="flex items-start justify-between gap-2 md:gap-4">
@@ -677,6 +878,7 @@ export default function LeaderboardPage() {
           </button>
         </div>
       </div>
+      <LeaderboardProfileModal selected={selectedProfile} onClose={() => setSelectedProfile(null)} />
     </div>
   );
 }

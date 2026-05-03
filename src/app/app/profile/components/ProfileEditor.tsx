@@ -49,9 +49,20 @@ export default function ProfileEditor({
           setShowDiscord(data.data.profile.showDiscord ?? false);
           setShowTelegram(data.data.profile.showTelegram ?? false);
           setShowBalance(data.data.profile.showBalance ?? false);
-          // Card background is stored in localStorage, not in the profile DB
+          // Card background is separate from the app background/customization.
           const storedBg = localStorage.getItem(`amy-card-bg-${wallet.toLowerCase()}`);
-          setBackgroundId(storedBg || 'bg_desktop_1');
+          const backendBg = data.data.profile.cardBackgroundId;
+          const effectiveBg = backendBg || storedBg || 'bg_desktop_1';
+          setBackgroundId(effectiveBg);
+          if (backendBg) {
+            localStorage.setItem(`amy-card-bg-${wallet.toLowerCase()}`, backendBg);
+          } else if (storedBg) {
+            fetch(`${API_BASE_URL}/api/profile/update`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ wallet, cardBackgroundId: storedBg }),
+            }).catch(() => {});
+          }
           setAvatarUrl(data.data.profile.avatarUrl || null);
           setAvatarData(data.data.profile.avatarData || null);
         }
@@ -170,6 +181,7 @@ export default function ProfileEditor({
           showDiscord,
           showTelegram,
           showBalance,
+          cardBackgroundId: backgroundId,
         })
       });
 
