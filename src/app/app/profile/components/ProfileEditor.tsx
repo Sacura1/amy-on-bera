@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '@/lib/constants';
-import { CARD_BACKGROUNDS } from './ProfileCard';
+import { CARD_BACKGROUNDS, invalidateProfileCardCache } from './ProfileCard';
 
 interface ProfileEditorProps {
   wallet: string;
@@ -190,6 +190,7 @@ export default function ProfileEditor({
       if (data.success) {
         // Persist card background choice locally (separate from customisation section)
         localStorage.setItem(`amy-card-bg-${wallet.toLowerCase()}`, backgroundId);
+        invalidateProfileCardCache(wallet);
         onProfileUpdated();
         onClose();
       } else {

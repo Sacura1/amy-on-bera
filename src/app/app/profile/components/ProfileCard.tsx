@@ -67,6 +67,11 @@ type ProfileCardCacheEntry = {
 const PROFILE_CARD_CACHE_TTL_MS = 5 * 60 * 1000;
 const profileCardCache = new Map<string, ProfileCardCacheEntry>();
 
+export const invalidateProfileCardCache = (wallet: string) => {
+  if (!wallet) return;
+  profileCardCache.delete(wallet.toLowerCase());
+};
+
 interface ProfileCardProps {
   wallet: string;
   xUsername: string;
@@ -452,7 +457,8 @@ export default function ProfileCard({
         setEquippedBadges(cached.equippedBadges);
         setActiveBadges(cached.activeBadges);
         setSocialData(cached.socialData);
-        if (cached.profile?.cardBackgroundId) setCardBgId(cached.profile.cardBackgroundId);
+        const cachedBg = cardBackgroundId || cached.profile?.cardBackgroundId;
+        if (cachedBg) setCardBgId(cachedBg);
         setIsLoading(false);
         return () => {
           cancelled = true;
@@ -481,7 +487,7 @@ export default function ProfileCard({
               ? localStorage.getItem(`amy-card-bg-${wallet.toLowerCase()}`)
               : null;
             const backendBg = fetchedProfile?.cardBackgroundId;
-            const effectiveBg = backendBg || storedBg;
+            const effectiveBg = cardBackgroundId || backendBg || storedBg;
             if (effectiveBg) {
               setCardBgId(effectiveBg);
             }
@@ -517,7 +523,7 @@ export default function ProfileCard({
       return () => {
         cancelled = true;
       };
-    }, [wallet, readOnly]);
+    }, [wallet, readOnly, cardBackgroundId]);
 
   const getBadgeForSlot = (slotNumber: number): BadgeData | null => {
     const equipped = equippedBadges.find(b => b.slotNumber === slotNumber);

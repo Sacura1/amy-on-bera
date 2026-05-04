@@ -273,7 +273,7 @@ function LeaderboardProfileModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 md:p-6"
       onClick={onClose}
     >
       <div
