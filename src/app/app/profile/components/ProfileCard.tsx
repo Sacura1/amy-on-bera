@@ -548,13 +548,17 @@ export default function ProfileCard({
     return null;
   };
 
+  const cardBg = CARD_BACKGROUNDS.find(b => b.id === cardBgId);
+
   if (isLoading) {
     if (exportPreview) {
       return (
         <div
           className="w-[560px] max-w-[560px] rounded-2xl border border-gray-700/50 bg-gray-900 p-4"
           style={{
-            backgroundImage: "linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)),url('/bg_desktop_1.jpg')",
+            backgroundImage: cardBg
+              ? `linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)),url('${cardBg.path}')`
+              : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -715,7 +719,6 @@ export default function ProfileCard({
     </div>
   );
 
-  const cardBg = CARD_BACKGROUNDS.find(b => b.id === cardBgId);
   const exportBackgroundStyle = exportPreview && cardBg
     ? {
         width: '560px',
